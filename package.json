@@ -16,6 +16,7 @@
     "test": "npm run test --workspaces --if-present",
     "test:api": "npm run test --workspace=@apps/api",
     "test:web": "npm run test --workspace=@apps/web",
+    "test:e2e": "npm run test:e2e --workspace=@apps/api",
     "prisma:generate": "npm run prisma:generate --workspace=@apps/api",
     "prisma:migrate": "npm run prisma:migrate --workspace=@apps/api",
     "admin:create": "npm run admin:create --workspace=@apps/api"

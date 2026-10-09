@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
+import { useWorkspace } from '@/lib/workspace-context';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -16,6 +17,14 @@ import {
   ExternalLink,
   CheckCircle2,
   RefreshCw,
+  Building2,
+  Users,
+  UserPlus,
+  Settings,
+  PlusCircle,
+  Crown,
+  Briefcase,
+  Clock,
 } from 'lucide-react';
 import Link from 'next/link';
 import { ROUTES } from '@/lib/constants';
@@ -29,6 +38,7 @@ interface HealthData {
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const { currentWorkspace, workspaces, isLoadingWorkspaces } = useWorkspace();
   const [healthData, setHealthData] = useState<HealthData | null>(null);
   const [isCheckingHealth, setIsCheckingHealth] = useState(false);
 
@@ -48,6 +58,21 @@ export default function DashboardPage() {
     checkReadiness();
   }, []);
 
+  const getWorkspaceRoleBadge = (role?: string | null) => {
+    switch (role) {
+      case 'OWNER':
+        return <Badge variant="purple">WORKSPACE OWNER</Badge>;
+      case 'ADMIN':
+        return <Badge variant="default">WORKSPACE ADMIN</Badge>;
+      case 'EDITOR':
+        return <Badge variant="outline">WORKSPACE EDITOR</Badge>;
+      case 'VIEWER':
+        return <Badge variant="outline">WORKSPACE VIEWER</Badge>;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-8 animate-fadeIn">
       {/* Top Welcome Section */}
@@ -62,7 +87,7 @@ export default function DashboardPage() {
             </Badge>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            OmniSocial AI Platform Foundation — Stage 1 System Overview
+            OmniSocial AI Platform — Multi-Tenant Business Workspaces
           </p>
         </div>
 
@@ -88,18 +113,119 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Stage 1 Foundation Verification Card */}
-      <Card className="border-indigo-100 bg-gradient-to-r from-indigo-50/40 via-white to-slate-50">
+      {/* Stage 2 Active Workspace Section */}
+      {!isLoadingWorkspaces && (!currentWorkspace || workspaces.length === 0) ? (
+        /* Empty State: Prompt to create first workspace */
+        <Card className="border-indigo-200 bg-gradient-to-r from-indigo-50/70 via-white to-slate-50 border-2">
+          <CardContent className="p-8 text-center flex flex-col items-center justify-center space-y-4">
+            <div className="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-200">
+              <Building2 className="w-7 h-7" />
+            </div>
+            <div className="space-y-1.5 max-w-md">
+              <h3 className="text-lg font-bold text-slate-900">Create Your First Workspace</h3>
+              <p className="text-xs text-slate-600">
+                Workspaces provide isolated environments for your company, team members, social
+                accounts, and campaigns. You will become the primary OWNER of your new workspace.
+              </p>
+            </div>
+            <Link href={ROUTES.WORKSPACE_ONBOARDING}>
+              <Button leftIcon={<PlusCircle className="w-4 h-4" />}>
+                Start Workspace Onboarding
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      ) : currentWorkspace ? (
+        /* Active Workspace Overview */
+        <Card className="border-indigo-100 bg-gradient-to-r from-indigo-50/50 via-white to-slate-50">
+          <CardHeader>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                  {currentWorkspace.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <CardTitle className="text-base">{currentWorkspace.name}</CardTitle>
+                    <Badge variant="outline">@{currentWorkspace.slug}</Badge>
+                    {getWorkspaceRoleBadge(currentWorkspace.currentUserRole)}
+                  </div>
+                  <CardDescription className="text-xs">
+                    {currentWorkspace.description || 'OmniSocial AI Managed Business Workspace'}
+                  </CardDescription>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Link href={ROUTES.SETTINGS_WORKSPACE}>
+                  <Button variant="outline" size="sm" leftIcon={<Settings className="w-3.5 h-3.5" />}>
+                    Settings
+                  </Button>
+                </Link>
+                <Link href={ROUTES.SETTINGS_MEMBERS}>
+                  <Button variant="outline" size="sm" leftIcon={<Users className="w-3.5 h-3.5" />}>
+                    Team
+                  </Button>
+                </Link>
+                {(currentWorkspace.currentUserRole === 'OWNER' ||
+                  currentWorkspace.currentUserRole === 'ADMIN') && (
+                  <Link href={ROUTES.SETTINGS_INVITATIONS}>
+                    <Button size="sm" leftIcon={<UserPlus className="w-3.5 h-3.5" />}>
+                      Invite
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
+              <div className="p-3 rounded-lg bg-white border border-slate-200/80 text-xs">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+                  Industry Focus
+                </span>
+                <span className="font-semibold text-slate-800 flex items-center gap-1.5 mt-1">
+                  <Briefcase className="w-3.5 h-3.5 text-indigo-500" />
+                  {currentWorkspace.industry || 'General Business'}
+                </span>
+              </div>
+
+              <div className="p-3 rounded-lg bg-white border border-slate-200/80 text-xs">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+                  Scheduling Timezone
+                </span>
+                <span className="font-semibold text-slate-800 flex items-center gap-1.5 mt-1">
+                  <Clock className="w-3.5 h-3.5 text-indigo-500" />
+                  {currentWorkspace.timezone || 'UTC'}
+                </span>
+              </div>
+
+              <div className="p-3 rounded-lg bg-white border border-slate-200/80 text-xs">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+                  Tenant Isolation
+                </span>
+                <span className="font-semibold text-emerald-700 flex items-center gap-1.5 mt-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                  Strict Backend Scoping
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {/* Infrastructure Verification Card */}
+      <Card className="border-slate-200 bg-white">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-lg bg-indigo-600 text-white shadow-sm">
+              <div className="p-2 rounded-lg bg-slate-900 text-white shadow-sm">
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div>
-                <CardTitle className="text-base">Stage 1 Foundation Status</CardTitle>
+                <CardTitle className="text-base">System Infrastructure &amp; Security</CardTitle>
                 <CardDescription>
-                  Active environment integrity and infrastructure health checks
+                  Active environment integrity, multi-tenant isolation, and database health
                 </CardDescription>
               </div>
             </div>
@@ -108,7 +234,7 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 rounded-xl bg-white border border-slate-200/80 shadow-xs flex items-start gap-3">
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 shadow-xs flex items-start gap-3">
               <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600 mt-0.5">
                 <Database className="w-4 h-4" />
               </div>
@@ -126,25 +252,25 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="p-4 rounded-xl bg-white border border-slate-200/80 shadow-xs flex items-start gap-3">
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 shadow-xs flex items-start gap-3">
               <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600 mt-0.5">
                 <ShieldCheck className="w-4 h-4" />
               </div>
               <div>
                 <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
-                  Session &amp; Security
+                  Tenant Isolation
                 </span>
                 <span className="text-sm font-bold text-slate-800 flex items-center gap-1.5 mt-0.5">
                   <CheckCircle2 className="w-3.5 h-3.5 text-indigo-500" />
-                  JWT + Rotated Refresh
+                  Guards &amp; Audit Logs
                 </span>
                 <span className="text-[11px] text-slate-400 block mt-1">
-                  Bcrypt 12 Rounds &amp; RBAC Active
+                  RBAC Hierarchy &amp; Anti-IDOR
                 </span>
               </div>
             </div>
 
-            <div className="p-4 rounded-xl bg-white border border-slate-200/80 shadow-xs flex items-start gap-3">
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 shadow-xs flex items-start gap-3">
               <div className="p-2 rounded-lg bg-violet-50 text-violet-600 mt-0.5">
                 <Sparkles className="w-4 h-4" />
               </div>

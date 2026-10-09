@@ -8,6 +8,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { HealthModule } from './health/health.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { WorkspacesModule } from './workspaces/workspaces.module';
 
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
@@ -35,6 +36,7 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
     HealthModule,
     UsersModule,
     AuthModule,
+    WorkspacesModule,
   ],
   providers: [
     {

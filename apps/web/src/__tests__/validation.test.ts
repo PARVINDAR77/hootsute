@@ -16,6 +16,23 @@ const registerSchema = z.object({
     .regex(/[\d\W]/, 'Must contain at least 1 number or special character'),
 });
 
+const workspaceSchema = z.object({
+  name: z.string().min(2, 'Workspace name must be at least 2 characters').max(100),
+  slug: z
+    .string()
+    .min(2, 'Slug must be at least 2 characters')
+    .max(50)
+    .regex(/^[a-z0-9-]+$/, 'Slug can only contain lowercase alphanumeric characters and hyphens')
+    .optional()
+    .or(z.literal('')),
+  websiteUrl: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+});
+
+const inviteMemberSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+  role: z.enum(['ADMIN', 'EDITOR', 'VIEWER']),
+});
+
 describe('Frontend Form Validation Schemas', () => {
   describe('Login Validation', () => {
     it('should validate valid email and password', () => {
@@ -85,6 +102,51 @@ describe('Frontend Form Validation Schemas', () => {
         name: 'Jane Doe',
         email: 'jane@company.com',
         password: 'password123!',
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('Workspace Validation', () => {
+    it('should accept valid workspace creation payload', () => {
+      const result = workspaceSchema.safeParse({
+        name: 'Acme Digital Agency',
+        slug: 'acme-digital',
+        websiteUrl: 'https://acme.agency',
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('should reject invalid slug characters', () => {
+      const result = workspaceSchema.safeParse({
+        name: 'Acme Digital',
+        slug: 'Acme Digital!',
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject invalid website URL', () => {
+      const result = workspaceSchema.safeParse({
+        name: 'Acme Digital',
+        websiteUrl: 'not-a-url',
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('Workspace Member Invitation Validation', () => {
+    it('should accept valid invite payload', () => {
+      const result = inviteMemberSchema.safeParse({
+        email: 'collaborator@agency.com',
+        role: 'EDITOR',
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('should reject invalid role', () => {
+      const result = inviteMemberSchema.safeParse({
+        email: 'collaborator@agency.com',
+        role: 'SUPER_ADMIN',
       });
       expect(result.success).toBe(false);
     });

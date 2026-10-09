@@ -9,5 +9,10 @@ export const ROUTES = {
   RESET_PASSWORD: '/reset-password',
   DASHBOARD: '/dashboard',
   SETTINGS: '/settings',
+  SETTINGS_WORKSPACE: '/settings/workspace',
+  SETTINGS_MEMBERS: '/settings/members',
+  SETTINGS_INVITATIONS: '/settings/invitations',
+  WORKSPACE_ONBOARDING: '/onboarding/workspace',
+  INVITATIONS_ACCEPT: '/invitations/accept',
   UNAUTHORIZED: '/unauthorized',
 };

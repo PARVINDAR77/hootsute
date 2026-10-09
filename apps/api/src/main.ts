@@ -63,6 +63,8 @@ async function bootstrap() {
     )
     .addTag('Health & Monitoring', 'Liveness and database readiness probes')
     .addTag('Authentication', 'Registration, secure login, rotated refresh, and session revocation')
+    .addTag('Workspaces', 'Multi-tenant business workspace management and memberships')
+    .addTag('Invitations', 'Workspace team member invitations and acceptance flow')
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);

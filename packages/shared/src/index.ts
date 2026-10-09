@@ -11,6 +11,24 @@ export enum UserStatus {
   PENDING_VERIFICATION = 'PENDING_VERIFICATION',
 }
 
+export enum WorkspaceRole {
+  OWNER = 'OWNER',
+  ADMIN = 'ADMIN',
+  EDITOR = 'EDITOR',
+  VIEWER = 'VIEWER',
+}
+
+export enum WorkspaceStatus {
+  ACTIVE = 'ACTIVE',
+  SUSPENDED = 'SUSPENDED',
+}
+
+export enum WorkspaceMemberStatus {
+  ACTIVE = 'ACTIVE',
+  INVITED = 'INVITED',
+  SUSPENDED = 'SUSPENDED',
+}
+
 export interface SafeUser {
   id: string;
   email: string;
@@ -40,4 +58,56 @@ export interface ApiResponse<T = any> {
   data?: T;
   message?: string;
   error?: string | string[];
+}
+
+export interface WorkspaceDto {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  logoUrl?: string | null;
+  websiteUrl?: string | null;
+  industry?: string | null;
+  timezone: string;
+  defaultLanguage: string;
+  status: WorkspaceStatus;
+  createdAt: string;
+  updatedAt: string;
+  createdById: string;
+  currentUserRole?: WorkspaceRole;
+}
+
+export interface WorkspaceMemberDto {
+  id: string;
+  workspaceId: string;
+  userId: string;
+  role: WorkspaceRole;
+  status: WorkspaceMemberStatus;
+  joinedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+    status: UserStatus;
+  };
+}
+
+export interface WorkspaceInvitationDto {
+  id: string;
+  workspaceId: string;
+  email: string;
+  role: WorkspaceRole;
+  expiresAt: string;
+  acceptedAt?: string | null;
+  revokedAt?: string | null;
+  invitedById: string;
+  createdAt: string;
+  invitationUrl?: string; // provided in dev/honest mode
+  invitedBy?: {
+    id: string;
+    name: string;
+    email: string;
+  };
 }

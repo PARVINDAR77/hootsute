@@ -20,6 +20,24 @@ enum UserStatus {
   PENDING_VERIFICATION
 }
 
+enum WorkspaceRole {
+  OWNER
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+enum WorkspaceStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum WorkspaceMemberStatus {
+  ACTIVE
+  INVITED
+  SUSPENDED
+}
+
 model User {
   id              String           @id @default(uuid())
   email           String           @unique
@@ -31,8 +49,11 @@ model User {
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 
-  refreshSessions RefreshSession[]
-  auditLogs       AuditLog[]
+  refreshSessions      RefreshSession[]
+  auditLogs            AuditLog[]
+  createdWorkspaces    Workspace[]           @relation("WorkspaceCreatedBy")
+  workspaceMemberships WorkspaceMember[]
+  sentInvitations      WorkspaceInvitation[] @relation("SentInvitations")
 
   @@index([email])
   @@index([role])
@@ -59,9 +80,80 @@ model RefreshSession {
   @@map("refresh_sessions")
 }
 
+model Workspace {
+  id              String          @id @default(uuid())
+  name            String
+  slug            String          @unique
+  description     String?
+  logoUrl         String?
+  websiteUrl      String?
+  industry        String?
+  timezone        String          @default("UTC")
+  defaultLanguage String          @default("en")
+  status          WorkspaceStatus @default(ACTIVE)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  createdById     String
+
+  createdBy   User                  @relation("WorkspaceCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  members     WorkspaceMember[]
+  invitations WorkspaceInvitation[]
+  auditLogs   AuditLog[]
+
+  @@index([slug])
+  @@index([status])
+  @@index([createdById])
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  id          String                @id @default(uuid())
+  workspaceId String
+  userId      String
+  role        WorkspaceRole         @default(EDITOR)
+  status      WorkspaceMemberStatus @default(ACTIVE)
+  joinedAt    DateTime?
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@index([workspaceId])
+  @@index([userId])
+  @@index([role])
+  @@index([status])
+  @@map("workspace_members")
+}
+
+model WorkspaceInvitation {
+  id          String        @id @default(uuid())
+  workspaceId String
+  email       String
+  role        WorkspaceRole @default(EDITOR)
+  tokenHash   String        @unique
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  revokedAt   DateTime?
+  invitedById String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  invitedBy User      @relation("SentInvitations", fields: [invitedById], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([email])
+  @@index([tokenHash])
+  @@index([expiresAt])
+  @@map("workspace_invitations")
+}
+
 model AuditLog {
   id          String   @id @default(uuid())
   actorUserId String?
+  workspaceId String?
   action      String
   entityType  String
   entityId    String?
@@ -69,9 +161,11 @@ model AuditLog {
   ipAddress   String?
   createdAt   DateTime @default(now())
 
-  actorUser User? @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+  actorUser User?      @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+  workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@index([actorUserId, createdAt])
+  @@index([workspaceId, createdAt])
   @@index([action])
   @@index([createdAt])
   @@map("audit_logs")

@@ -1,8 +1,10 @@
-# OmniSocial AI — AI Social Media Management SaaS (Stage 1 Foundation)
+# OmniSocial AI — AI Social Media Management SaaS
 
 OmniSocial AI is a multi-tenant AI Social Media Management platform inspired by tools like Hootsuite. 
 
-This repository contains **Stage 1: Architectural Foundation, Enterprise Authentication, PostgreSQL Persistence, and Modern SaaS Web Interface**.
+This repository contains:
+* **Stage 1**: Architectural Foundation, Enterprise Authentication, PostgreSQL Persistence, and Modern SaaS Web Interface.
+* **Stage 2**: Business Workspaces, Multi-Tenancy, Membership Management, Cryptographic Invitations & Onboarding Wizard.
 
 ---
 
@@ -11,10 +13,10 @@ This repository contains **Stage 1: Architectural Foundation, Enterprise Authent
 ```text
 hootsute/
 ├── apps/
-│   ├── web/                    # Next.js 14 App Router Frontend (Tailwind CSS, React Hook Form, Zod)
-│   └── api/                    # NestJS REST API (/api/v1, Swagger, Prisma ORM, Bcrypt, JWT)
+│   ├── web/                    # Next.js 14 App Router Frontend (Tailwind CSS, Lucide Icons, Workspace Context)
+│   └── api/                    # NestJS REST API (/api/v1, Swagger, Prisma ORM, Bcrypt, JWT, WorkspaceAuthGuard)
 ├── packages/
-│   └── shared/                 # Shared TypeScript models, enums (UserRole, UserStatus), and interfaces
+│   └── shared/                 # Shared TypeScript models, enums (WorkspaceRole, WorkspaceStatus), and interfaces
 ├── docs/                       # Architecture, Database, Security & API Documentation
 │   ├── PROJECT_OVERVIEW.md
 │   ├── SYSTEM_ARCHITECTURE.md
@@ -33,19 +35,26 @@ hootsute/
 
 ## 2. Technology Stack
 
-* **Frontend**: Next.js 14 (App Router), React 18, TypeScript, Tailwind CSS, Lucide Icons, React Hook Form, Zod.
+* **Frontend**: Next.js 14 (App Router), React 18, TypeScript, Tailwind CSS, Lucide Icons, Context Providers (`AuthContext`, `WorkspaceContext`).
 * **Backend**: NestJS 10, TypeScript, Express, `@nestjs/jwt`, `@nestjs/swagger`, `class-validator`, `cookie-parser`.
-* **Database & ORM**: PostgreSQL 18, Prisma ORM 5 with versioned schema migrations.
-* **Security & Auth**: Bcrypt password hashing (12 salt rounds), short-lived JWT access tokens (15m), rotating DB-persisted refresh sessions (7d) with automatic token reuse containment, RBAC guards (`SUPER_ADMIN`, `BUSINESS_OWNER`, `BUSINESS_ADMIN`, `BUSINESS_MEMBER`), and RFC-compliant error filters.
+* **Database & ORM**: PostgreSQL 18, Prisma ORM 5 with versioned schema migrations (`hootsute_db` and isolated `hootsute_test_db`).
+* **Security & Multi-Tenancy**:
+  * Bcrypt password hashing (12 salt rounds).
+  * Short-lived JWT access tokens (15m) and rotating DB-persisted refresh sessions (7d) with automatic token reuse containment.
+  * Multi-tenant relational hierarchy: `User -> WorkspaceMember -> Workspace -> Resources`.
+  * `WorkspaceAuthGuard`: Strict tenant-isolation guard validating membership and role hierarchy (`OWNER` > `ADMIN` > `EDITOR` > `VIEWER`).
+  * Cryptographic SHA-256 invitation tokens (single-use, expiring in 7 days, revocable).
+  * Atomic ownership transfer and final-owner protection.
+  * Comprehensive audit logging for all workspace and membership lifecycle events.
 
 ---
 
-## 3. Beginner-Friendly Windows Development Guide
+## 3. Windows Development Guide
 
 ### Prerequisites
 1. **Node.js**: v20+ or v24+ (`node -v`)
 2. **npm**: v10+ (`npm -v`)
-3. **PostgreSQL**: Either local PostgreSQL 16-18 OR Docker Desktop for Windows.
+3. **PostgreSQL**: Local PostgreSQL 16–18 OR Docker Desktop for Windows.
 
 ---
 
@@ -73,9 +82,7 @@ docker compose up -d
 ```
 
 #### Option B: Using Local Windows PostgreSQL Service
-If using an installed PostgreSQL 18 on Windows, ensure the service is running:
 ```powershell
-# To start database server on custom data directory
 & "C:\Program Files\PostgreSQL\18\bin\pg_ctl.exe" -D "d:\hootsute\pgdata" start
 ```
 
@@ -83,7 +90,6 @@ If using an installed PostgreSQL 18 on Windows, ensure the service is running:
 
 ### Step 3: Install Dependencies & Build Shared Package
 
-Run `npm install` from the workspace root:
 ```powershell
 npm install
 npm run build --workspace=@packages/shared
@@ -93,77 +99,60 @@ npm run build --workspace=@packages/shared
 
 ### Step 4: Apply Database Migrations
 
-Generate Prisma Client and apply migrations to synchronize PostgreSQL:
+Generate Prisma Client and apply versioned migrations:
 ```powershell
 npm run prisma:generate
-npx prisma migrate dev --name init_auth_foundation --schema=apps/api/prisma/schema.prisma
+npx prisma migrate deploy --schema=apps/api/prisma/schema.prisma
 ```
 
 ---
 
-### Step 5: Securely Bootstrap the Initial Super Administrator
+### Step 5: Run Development Servers
 
-Public registration creates `BUSINESS_OWNER` accounts. To provision the initial `SUPER_ADMIN`, run the secure CLI script:
+Run both the NestJS API and Next.js frontend concurrently:
 ```powershell
-npm run admin:create -- admin@omnisocial.ai "YourSecurePassword123!" "System Administrator"
+npm run dev
 ```
 
----
-
-### Step 6: Start Backend and Frontend
-
-#### In Terminal 1 (NestJS API on Port 4000):
+Or run services individually in dedicated terminals:
 ```powershell
+# Start NestJS REST API (port 4000)
 npm run dev:api
-```
-* **Base API**: `http://localhost:4000/api/v1`
-* **Health Check**: `http://localhost:4000/api/v1/health`
-* **DB Readiness**: `http://localhost:4000/api/v1/health/ready`
-* **Swagger OpenAPI Docs**: `http://localhost:4000/api/docs`
 
-#### In Terminal 2 (Next.js Web on Port 3000):
-```powershell
+# Start Next.js Frontend (port 3000)
 npm run dev:web
 ```
-* **Web Application**: `http://localhost:3000`
-* **Sign In**: `http://localhost:3000/login`
-* **Register Workspace**: `http://localhost:3000/register`
-* **Dashboard**: `http://localhost:3000/dashboard`
 
 ---
 
-## 4. Running Automated Tests
+## 4. Verification & Testing
 
-Run backend unit and integration test suites:
+### Run All Automated Tests
 ```powershell
+# Run API Unit Tests (Auth & Workspaces Service, Guards)
 npm run test:api
-```
 
-Run frontend form validation tests:
-```powershell
+# Run Frontend Unit Tests (Validation schemas)
 npm run test:web
+
+# Run End-to-End Tests against isolated test database (Tenant Isolation, RBAC, Auth, Invitations)
+npm run test:e2e
+```
+
+### Run Production Builds
+```powershell
+npm run build:api
+npm run build:web
 ```
 
 ---
 
-## 5. REST API Endpoints Overview
+## 5. Multi-Tenant Workspaces & Pages
 
-| Method | Path | Auth Required | Description |
-|:---|:---|:---|:---|
-| `GET` | `/api/v1/health` | No | Liveness probe & uptime |
-| `GET` | `/api/v1/health/ready` | No | PostgreSQL database readiness verification |
-| `POST` | `/api/v1/auth/register` | No | User & workspace registration |
-| `POST` | `/api/v1/auth/login` | No | User authentication & token issuance |
-| `POST` | `/api/v1/auth/refresh` | No | Rotates access and refresh tokens |
-| `POST` | `/api/v1/auth/logout` | Yes | Revokes active session & clears cookies |
-| `POST` | `/api/v1/auth/logout-all` | Yes | Invalides all active user sessions |
-| `GET` | `/api/v1/auth/me` | Yes | Returns current authenticated user profile |
-| `GET` | `/api/docs` | No | Interactive Swagger UI |
-
----
-
-## 6. Common Windows Troubleshooting
-
-* **Port 5432 in use**: If another PostgreSQL instance is already bound to port 5432, update `POSTGRES_PORT` and `DATABASE_URL` in `.env` to `5433` or stop the conflicting service using `Get-Process | Where-Object { $_.ProcessName -like "*postgres*" }`.
-* **Prisma schema not found**: Always specify `--schema=apps/api/prisma/schema.prisma` if executing Prisma commands from the root directory.
-* **CORS issues**: Ensure `CORS_ORIGIN=http://localhost:3000` is defined in `.env`.
+* **Workspace Onboarding**: `/onboarding/workspace` — wizard to initialize business workspace with custom slug and timezone.
+* **Workspace Selector**: Interactive header dropdown to switch between authorized workspaces.
+* **Workspace Settings**: `/settings/workspace` — configure business name, industry, timezone, website, and description (read-only for non-admins).
+* **Team Members**: `/settings/members` — member roster with role update dropdowns, member removal, and atomic ownership transfer.
+* **Invitations**: `/settings/invitations` — issue single-use hashed invitations, view pending invites, copy direct link (development mode), and revoke tokens.
+* **Invitation Acceptance**: `/invitations/accept?token=...` — public token inspection and authenticated acceptance flow with auto-redirection to dashboard.
+* **Swagger API Documentation**: `http://localhost:4000/api/docs` — complete OpenAPI specification for all auth, health, workspace, and invitation endpoints.
