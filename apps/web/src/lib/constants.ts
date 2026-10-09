@@ -12,6 +12,8 @@ export const ROUTES = {
   SETTINGS_WORKSPACE: '/settings/workspace',
   SETTINGS_MEMBERS: '/settings/members',
   SETTINGS_INVITATIONS: '/settings/invitations',
+  SETTINGS_SOCIAL_ACCOUNTS: '/settings/social-accounts',
+  SETTINGS_SOCIAL_ACCOUNTS_CONNECT: '/settings/social-accounts/connect',
   WORKSPACE_ONBOARDING: '/onboarding/workspace',
   INVITATIONS_ACCEPT: '/invitations/accept',
   UNAUTHORIZED: '/unauthorized',

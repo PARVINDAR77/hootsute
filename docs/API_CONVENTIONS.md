@@ -28,7 +28,7 @@ In case of exceptions or validation failures, the global `HttpExceptionFilter` i
   "path": "/api/v1/auth/login",
   "correlationId": "req-98f98d7a-12e4-4a25-9a84-0a3cbfe99881",
   "error": "Bad Request",
-  "message": ["email must be an email", "password must be longer than or equal to 8 characters"]
+  "message": ["email must be an email"]
 }
 ```
 
@@ -63,3 +63,14 @@ In case of exceptions or validation failures, the global `HttpExceptionFilter` i
 | `POST` | `/api/v1/workspaces/:workspaceId/invitations/:invitationId/revoke` | Workspace ADMIN / OWNER | Revoke a pending invitation |
 | `GET`  | `/api/v1/invitations/info` | Public | Retrieve public workspace info by raw token |
 | `POST` | `/api/v1/invitations/accept` | Authenticated | Claim invitation token and join workspace |
+
+### Social Media Accounts & OAuth (Stage 3)
+| Method | Endpoint | Access Level | Description |
+| :--- | :--- | :--- | :--- |
+| `GET`  | `/api/v1/workspaces/:workspaceId/social-accounts` | Workspace Member | List connected social accounts (credentials omitted) |
+| `POST` | `/api/v1/workspaces/:workspaceId/social-accounts/meta/connect` | Workspace ADMIN / OWNER | Initiate Meta OAuth 2.0 flow & generate CSRF state |
+| `GET`  | `/api/v1/oauth/meta/callback` | Public | Provider OAuth callback; exchanges code & redirects |
+| `GET`  | `/api/v1/workspaces/:workspaceId/social-accounts/meta/candidates` | Workspace ADMIN / OWNER | Retrieve discovered Facebook Pages & Instagram accounts |
+| `POST` | `/api/v1/workspaces/:workspaceId/social-accounts/meta/select` | Workspace ADMIN / OWNER | Connect selected accounts with AES-256-GCM encryption |
+| `POST` | `/api/v1/workspaces/:workspaceId/social-accounts/:accountId/reconnect` | Workspace ADMIN / OWNER | Reauthorize an expired or revoked connection |
+| `DELETE`| `/api/v1/workspaces/:workspaceId/social-accounts/:accountId` | Workspace ADMIN / OWNER | Disconnect account and delete encrypted credentials |

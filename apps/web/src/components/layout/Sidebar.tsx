@@ -25,13 +25,13 @@ export function Sidebar() {
 
   const workspaceNav = [
     { name: 'Dashboard', href: ROUTES.DASHBOARD, icon: LayoutDashboard },
-    { name: 'Workspace Settings', href: '/settings/workspace', icon: Building2 },
-    { name: 'Team Members', href: '/settings/members', icon: Users },
-    { name: 'Invitations', href: '/settings/invitations', icon: Mail },
+    { name: 'Social Accounts', href: ROUTES.SETTINGS_SOCIAL_ACCOUNTS, icon: Share2 },
+    { name: 'Workspace Settings', href: ROUTES.SETTINGS_WORKSPACE, icon: Building2 },
+    { name: 'Team Members', href: ROUTES.SETTINGS_MEMBERS, icon: Users },
+    { name: 'Invitations', href: ROUTES.SETTINGS_INVITATIONS, icon: Mail },
   ];
 
   const futureNav = [
-    { name: 'Social Accounts', icon: Share2, stage: 'Stage 3' },
     { name: 'AI Marketing', icon: Sparkles, stage: 'Stage 4' },
     { name: 'WhatsApp Approval', icon: MessageSquare, stage: 'Stage 5' },
     { name: 'Scheduler & Posts', icon: Calendar, stage: 'Stage 6' },

@@ -157,6 +157,11 @@ export default function DashboardPage() {
               </div>
 
               <div className="flex items-center gap-2">
+                <Link href={ROUTES.SETTINGS_SOCIAL_ACCOUNTS}>
+                  <Button variant="outline" size="sm" leftIcon={<Share2 className="w-3.5 h-3.5" />}>
+                    Channels
+                  </Button>
+                </Link>
                 <Link href={ROUTES.SETTINGS_WORKSPACE}>
                   <Button variant="outline" size="sm" leftIcon={<Settings className="w-3.5 h-3.5" />}>
                     Settings
@@ -291,27 +296,32 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Honest Empty States for Planned Modules */}
+      {/* Planned Modules & Roadmap */}
       <div>
         <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-4">
-          Upcoming Capabilities (Roadmap Stages 3–7)
+          Capabilities &amp; Roadmap (Stages 3–7)
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Social Accounts Empty State */}
-          <Card className="border-dashed border-2 border-slate-200 bg-slate-50/50">
+          {/* Social Accounts Card (Stage 3 Active) */}
+          <Card className="border-indigo-200 bg-indigo-50/20">
             <CardContent className="p-8 text-center flex flex-col items-center justify-center space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-white text-slate-400 flex items-center justify-center shadow-xs border border-slate-200">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-xs">
                 <Share2 className="w-5 h-5" />
               </div>
               <div className="space-y-1">
                 <div className="flex items-center justify-center gap-1.5">
-                  <h4 className="text-sm font-semibold text-slate-800">Connected Accounts</h4>
-                  <Badge variant="outline">Stage 3</Badge>
+                  <h4 className="text-sm font-semibold text-slate-800">Social Channels</h4>
+                  <Badge variant="success">Stage 3 Live</Badge>
                 </div>
                 <p className="text-xs text-slate-500 max-w-xs mx-auto">
-                  No social media accounts are connected yet. Meta Graph, LinkedIn, and X integrations will activate in Stage 3.
+                  Connect official Facebook Pages and Instagram Professional accounts with encrypted token storage.
                 </p>
               </div>
+              <Link href={ROUTES.SETTINGS_SOCIAL_ACCOUNTS}>
+                <Button size="sm" variant="outline" className="mt-1 text-xs">
+                  Manage Channels
+                </Button>
+              </Link>
             </CardContent>
           </Card>
 

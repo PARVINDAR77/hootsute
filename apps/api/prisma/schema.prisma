@@ -38,6 +38,24 @@ enum WorkspaceMemberStatus {
   SUSPENDED
 }
 
+enum SocialProvider {
+  META_FACEBOOK
+  META_INSTAGRAM
+}
+
+enum SocialAccountType {
+  FACEBOOK_PAGE
+  INSTAGRAM_BUSINESS
+  INSTAGRAM_CREATOR
+}
+
+enum SocialConnectionStatus {
+  CONNECTED
+  EXPIRED
+  REVOKED
+  DISCONNECTED
+}
+
 model User {
   id              String           @id @default(uuid())
   email           String           @unique
@@ -49,11 +67,14 @@ model User {
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 
-  refreshSessions      RefreshSession[]
-  auditLogs            AuditLog[]
-  createdWorkspaces    Workspace[]           @relation("WorkspaceCreatedBy")
-  workspaceMemberships WorkspaceMember[]
-  sentInvitations      WorkspaceInvitation[] @relation("SentInvitations")
+  refreshSessions          RefreshSession[]
+  auditLogs                AuditLog[]
+  createdWorkspaces        Workspace[]           @relation("WorkspaceCreatedBy")
+  workspaceMemberships     WorkspaceMember[]
+  sentInvitations          WorkspaceInvitation[] @relation("SentInvitations")
+  connectedSocialAccounts  SocialAccount[]       @relation("SocialAccountsConnected")
+  oauthStates              OAuthState[]          @relation("UserOAuthStates")
+  oauthSessions            OAuthSession[]        @relation("UserOAuthSessions")
 
   @@index([email])
   @@index([role])
@@ -95,10 +116,13 @@ model Workspace {
   updatedAt       DateTime        @updatedAt
   createdById     String
 
-  createdBy   User                  @relation("WorkspaceCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
-  members     WorkspaceMember[]
-  invitations WorkspaceInvitation[]
-  auditLogs   AuditLog[]
+  createdBy      User                  @relation("WorkspaceCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  members        WorkspaceMember[]
+  invitations    WorkspaceInvitation[]
+  auditLogs      AuditLog[]
+  socialAccounts SocialAccount[]
+  oauthStates    OAuthState[]
+  oauthSessions  OAuthSession[]
 
   @@index([slug])
   @@index([status])
@@ -148,6 +172,75 @@ model WorkspaceInvitation {
   @@index([tokenHash])
   @@index([expiresAt])
   @@map("workspace_invitations")
+}
+
+model SocialAccount {
+  id                   String                 @id @default(uuid())
+  workspaceId          String
+  provider             SocialProvider
+  providerAccountId    String
+  accountName          String
+  accountUsername      String?
+  accountType          SocialAccountType
+  profileImageUrl      String?
+  connectionStatus     SocialConnectionStatus @default(CONNECTED)
+  encryptedAccessToken String
+  grantedScopes        String[]
+  tokenExpiresAt       DateTime?
+  lastValidatedAt      DateTime               @default(now())
+  connectedByUserId    String
+  metadata             Json?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  connectedBy User      @relation("SocialAccountsConnected", fields: [connectedByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([workspaceId, provider, providerAccountId])
+  @@index([workspaceId])
+  @@index([provider, providerAccountId])
+  @@index([connectionStatus])
+  @@map("social_accounts")
+}
+
+model OAuthState {
+  id          String         @id @default(uuid())
+  state       String         @unique
+  workspaceId String
+  userId      String
+  provider    SocialProvider
+  redirectUri String
+  expiresAt   DateTime
+  usedAt      DateTime?
+  createdAt   DateTime       @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation("UserOAuthStates", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([state])
+  @@index([workspaceId])
+  @@index([expiresAt])
+  @@map("oauth_states")
+}
+
+model OAuthSession {
+  id                 String         @id @default(uuid())
+  sessionTokenHash   String         @unique
+  workspaceId        String
+  userId             String
+  provider           SocialProvider
+  encryptedPayload   String
+  expiresAt          DateTime
+  consumedAt         DateTime?
+  createdAt          DateTime       @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation("UserOAuthSessions", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([sessionTokenHash])
+  @@index([workspaceId])
+  @@index([expiresAt])
+  @@map("oauth_sessions")
 }
 
 model AuditLog {

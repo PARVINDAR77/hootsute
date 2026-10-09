@@ -9,6 +9,7 @@ import { HealthModule } from './health/health.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { WorkspacesModule } from './workspaces/workspaces.module';
+import { SocialAccountsModule } from './social-accounts/social-accounts.module';
 
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
@@ -37,6 +38,7 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
     UsersModule,
     AuthModule,
     WorkspacesModule,
+    SocialAccountsModule,
   ],
   providers: [
     {

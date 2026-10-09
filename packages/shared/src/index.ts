@@ -111,3 +111,65 @@ export interface WorkspaceInvitationDto {
     email: string;
   };
 }
+
+export enum SocialProvider {
+  META_FACEBOOK = 'META_FACEBOOK',
+  META_INSTAGRAM = 'META_INSTAGRAM',
+}
+
+export enum SocialAccountType {
+  FACEBOOK_PAGE = 'FACEBOOK_PAGE',
+  INSTAGRAM_BUSINESS = 'INSTAGRAM_BUSINESS',
+  INSTAGRAM_CREATOR = 'INSTAGRAM_CREATOR',
+}
+
+export enum SocialConnectionStatus {
+  CONNECTED = 'CONNECTED',
+  EXPIRED = 'EXPIRED',
+  REVOKED = 'REVOKED',
+  DISCONNECTED = 'DISCONNECTED',
+}
+
+export interface SocialAccountDto {
+  id: string;
+  workspaceId: string;
+  provider: SocialProvider;
+  providerAccountId: string;
+  accountName: string;
+  accountUsername?: string | null;
+  accountType: SocialAccountType;
+  profileImageUrl?: string | null;
+  connectionStatus: SocialConnectionStatus;
+  grantedScopes: string[];
+  tokenExpiresAt?: string | null;
+  lastValidatedAt: string;
+  connectedByUserId: string;
+  createdAt: string;
+  updatedAt: string;
+  metadata?: Record<string, any> | null;
+}
+
+export interface CandidateSocialAccount {
+  id: string;
+  name: string;
+  username?: string | null;
+  category?: string | null;
+  accountType: SocialAccountType;
+  provider: SocialProvider;
+  profileImageUrl?: string | null;
+  tasks?: string[];
+  instagramBusinessAccount?: {
+    id: string;
+    name: string;
+    username: string;
+    profilePictureUrl?: string | null;
+  } | null;
+  isAlreadyConnected?: boolean;
+}
+
+export interface OAuthSessionResponse {
+  sessionToken: string;
+  expiresAt: string;
+  accounts: CandidateSocialAccount[];
+}
+

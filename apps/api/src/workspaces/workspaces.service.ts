@@ -484,14 +484,15 @@ export class WorkspacesService {
       },
     });
 
-    // In honest development mode, return the token & url directly for testing
+    // In development mode only, return the token & url for test/local convenience.
+    // In production, invitation tokens are strictly delivered via email provider and never exposed in API responses.
+    const isDevelopment = process.env.NODE_ENV !== 'production';
     const appUrl = process.env.CORS_ORIGIN || 'http://localhost:3000';
-    const invitationUrl = `${appUrl}/invitations/accept?token=${rawToken}`;
+    const invitationUrl = isDevelopment ? `${appUrl}/invitations/accept?token=${rawToken}` : undefined;
 
     return {
       ...invitation,
-      rawToken, // Provided in development mode
-      invitationUrl,
+      ...(isDevelopment && { rawToken, invitationUrl }),
     };
   }
 

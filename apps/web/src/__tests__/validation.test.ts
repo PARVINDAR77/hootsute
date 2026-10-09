@@ -33,6 +33,19 @@ const inviteMemberSchema = z.object({
   role: z.enum(['ADMIN', 'EDITOR', 'VIEWER']),
 });
 
+const selectAccountsSchema = z.object({
+  sessionToken: z.string().min(1, 'Session token is required'),
+  selectedAccounts: z
+    .array(
+      z.object({
+        providerAccountId: z.string().min(1),
+        provider: z.enum(['META_FACEBOOK', 'META_INSTAGRAM']),
+        accountType: z.enum(['FACEBOOK_PAGE', 'INSTAGRAM_BUSINESS', 'INSTAGRAM_CREATOR']),
+      }),
+    )
+    .min(1, 'Must select at least one account'),
+});
+
 describe('Frontend Form Validation Schemas', () => {
   describe('Login Validation', () => {
     it('should validate valid email and password', () => {
@@ -147,6 +160,30 @@ describe('Frontend Form Validation Schemas', () => {
       const result = inviteMemberSchema.safeParse({
         email: 'collaborator@agency.com',
         role: 'SUPER_ADMIN',
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('Social Account Selection Validation', () => {
+    it('should accept valid account selection', () => {
+      const result = selectAccountsSchema.safeParse({
+        sessionToken: 'valid-session-token',
+        selectedAccounts: [
+          {
+            providerAccountId: 'page-101',
+            provider: 'META_FACEBOOK',
+            accountType: 'FACEBOOK_PAGE',
+          },
+        ],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('should reject empty selected accounts array', () => {
+      const result = selectAccountsSchema.safeParse({
+        sessionToken: 'valid-session-token',
+        selectedAccounts: [],
       });
       expect(result.success).toBe(false);
     });
