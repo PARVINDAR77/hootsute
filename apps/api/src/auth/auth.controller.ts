@@ -13,6 +13,7 @@ import {
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -30,43 +31,45 @@ export class AuthController {
     private readonly configService: ConfigService,
   ) {}
 
-  private setAuthCookies(res: Response, accessToken: string, refreshToken: string) {
+  private getCookieOptions(customPath?: string) {
     const isProduction = this.configService.get<string>('nodeEnv') === 'production';
-    const domain = this.configService.get<string>('cookie.domain') || 'localhost';
+    const domain = this.configService.get<string>('cookie.domain');
+    const isLocalhost = !domain || domain === 'localhost' || domain === '127.0.0.1';
 
-    const cookieOptions = {
+    const options: any = {
       httpOnly: true,
       secure: isProduction,
-      sameSite: (isProduction ? 'none' : 'lax') as 'none' | 'lax',
-      path: '/',
+      sameSite: 'lax' as const,
+      path: customPath || '/',
     };
 
-    // Refresh token cookie (7 days)
+    if (!isLocalhost && isProduction && domain) {
+      options.domain = domain;
+    }
+
+    return options;
+  }
+
+  private setAuthCookies(res: Response, accessToken: string, refreshToken: string) {
+    // Refresh token cookie (7 days) scoped to /api/v1/auth
     res.cookie('refreshToken', refreshToken, {
-      ...cookieOptions,
-      path: '/api/v1/auth',
+      ...this.getCookieOptions('/api/v1/auth'),
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    // Access token cookie (15 mins)
+    // Access token cookie (15 mins) for SSR / browser requests
     res.cookie('accessToken', accessToken, {
-      ...cookieOptions,
+      ...this.getCookieOptions('/'),
       maxAge: 15 * 60 * 1000,
     });
   }
 
   private clearAuthCookies(res: Response) {
-    const isProduction = this.configService.get<string>('nodeEnv') === 'production';
-    const cookieOptions = {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: (isProduction ? 'none' : 'lax') as 'none' | 'lax',
-    };
-
-    res.clearCookie('refreshToken', { ...cookieOptions, path: '/api/v1/auth' });
-    res.clearCookie('accessToken', { ...cookieOptions, path: '/' });
+    res.clearCookie('refreshToken', this.getCookieOptions('/api/v1/auth'));
+    res.clearCookie('accessToken', this.getCookieOptions('/'));
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Public()
   @Post('register')
   @ApiOperation({ summary: 'Register a new business owner account' })
@@ -81,6 +84,7 @@ export class AuthController {
     };
   }
 
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
@@ -98,10 +102,13 @@ export class AuthController {
     const result = await this.authService.login(dto, ipAddress, userAgent);
     this.setAuthCookies(res, result.accessToken, result.refreshToken);
 
+    // If client is a non-browser client explicitly requesting tokens in body via header
+    const isExplicitApiConsumer = req.headers['x-client-type'] === 'mobile' || req.headers['x-client-type'] === 'cli';
+
     return {
       user: result.user,
       accessToken: result.accessToken,
-      refreshToken: result.refreshToken,
+      ...(isExplicitApiConsumer ? { refreshToken: result.refreshToken } : {}),
       tokenType: 'Bearer',
       expiresIn: result.expiresIn,
     };
@@ -129,10 +136,12 @@ export class AuthController {
     const result = await this.authService.refresh(token, ipAddress, userAgent);
     this.setAuthCookies(res, result.accessToken, result.refreshToken);
 
+    const isExplicitApiConsumer = req.headers['x-client-type'] === 'mobile' || req.headers['x-client-type'] === 'cli' || !!dto?.refreshToken;
+
     return {
       user: result.user,
       accessToken: result.accessToken,
-      refreshToken: result.refreshToken,
+      ...(isExplicitApiConsumer ? { refreshToken: result.refreshToken } : {}),
       tokenType: 'Bearer',
       expiresIn: result.expiresIn,
     };
