@@ -285,8 +285,9 @@ describe('Social Media Account Connections & OAuth (e2e)', () => {
       });
       expect(dbRecord).toBeDefined();
       expect(dbRecord!.encryptedAccessToken).not.toBe('EAA_secret_page_access_token_super_confidential');
-      // Format must be iv:authTag:ciphertext
-      expect(dbRecord!.encryptedAccessToken.split(':').length).toBe(3);
+      // Format must be v1:iv:authTag:ciphertext
+      expect(dbRecord!.encryptedAccessToken.startsWith('v1:')).toBe(true);
+      expect(dbRecord!.encryptedAccessToken.split(':').length).toBe(4);
 
       // Verify decrypt yields original secret
       const decrypted = tokenVault.decrypt(dbRecord!.encryptedAccessToken);
