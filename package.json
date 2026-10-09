@@ -1,0 +1,23 @@
+{
+  "name": "ai-social-media-saas",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:api": "npm run start:dev --workspace=@apps/api",
+    "dev:web": "npm run dev --workspace=@apps/web",
+    "build": "npm run build --workspaces --if-present",
+    "build:api": "npm run build --workspace=@apps/api",
+    "build:web": "npm run build --workspace=@apps/web",
+    "test": "npm run test --workspaces --if-present",
+    "test:api": "npm run test --workspace=@apps/api",
+    "test:web": "npm run test --workspace=@apps/web",
+    "prisma:generate": "npm run prisma:generate --workspace=@apps/api",
+    "prisma:migrate": "npm run prisma:migrate --workspace=@apps/api",
+    "admin:create": "npm run admin:create --workspace=@apps/api"
+  }
+}
