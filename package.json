@@ -19,6 +19,7 @@
     "test:e2e": "npm run test:e2e --workspace=@apps/api",
     "prisma:generate": "npm run prisma:generate --workspace=@apps/api",
     "prisma:migrate": "npm run prisma:migrate --workspace=@apps/api",
-    "admin:create": "npm run admin:create --workspace=@apps/api"
+    "admin:create": "npm run admin:create --workspace=@apps/api",
+    "seed:occasions": "npm run seed:occasions --workspace=@apps/api"
   }
 }

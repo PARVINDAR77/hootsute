@@ -33,14 +33,33 @@ export class LoggingInterceptor implements NestInterceptor {
           const { statusCode } = response;
           const delay = Date.now() - now;
           this.logger.log(
-            `[${correlationId}] ${method} ${originalUrl} ${statusCode} - ${delay}ms - ${ip} - ${userAgent}`,
+            `[${correlationId}] ${method} ${originalUrl} ${statusCode} - ${delay}ms`,
+            {
+              correlationId,
+              method,
+              path: originalUrl,
+              statusCode,
+              durationMs: delay,
+              ip,
+              userAgent,
+            },
           );
         },
         error: (error) => {
           const delay = Date.now() - now;
           const statusCode = error?.status || 500;
           this.logger.warn(
-            `[${correlationId}] ${method} ${originalUrl} ${statusCode} - ${delay}ms - ${ip} - ${userAgent}`,
+            `[${correlationId}] ${method} ${originalUrl} ${statusCode} - ${delay}ms`,
+            {
+              correlationId,
+              method,
+              path: originalUrl,
+              statusCode,
+              durationMs: delay,
+              ip,
+              userAgent,
+              errorMessage: error?.message,
+            },
           );
         },
       }),

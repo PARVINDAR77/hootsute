@@ -21,4 +21,31 @@ export default () => ({
     ttl: parseInt(process.env.THROTTLE_TTL, 10) || 60,
     limit: parseInt(process.env.THROTTLE_LIMIT, 10) || 100,
   },
+  ai: {
+    textProvider: (process.env.AI_TEXT_PROVIDER || (process.env.NODE_ENV === 'test' ? 'mock' : 'gemini')).toLowerCase(),
+    textModel: process.env.AI_TEXT_MODEL || 'gemini-1.5-flash',
+    geminiApiKey: process.env.GEMINI_API_KEY || '',
+    openaiApiKey: process.env.OPENAI_API_KEY || '',
+    openaiModel: process.env.OPENAI_TEXT_MODEL || 'gpt-4o-mini',
+    timeoutMs: parseInt(process.env.AI_REQUEST_TIMEOUT_MS, 10) || 30000,
+    maxRetries: parseInt(process.env.AI_MAX_RETRIES, 10) || 2,
+  },
+  whatsapp: {
+    provider: (process.env.WHATSAPP_PROVIDER || (process.env.NODE_ENV === 'test' ? 'mock' : 'meta')).toLowerCase(),
+    accessToken: process.env.META_WHATSAPP_ACCESS_TOKEN || '',
+    phoneNumberId: process.env.META_WHATSAPP_PHONE_NUMBER_ID || '',
+    wabaId: process.env.META_WHATSAPP_WABA_ID || '',
+    appSecret: process.env.META_WHATSAPP_APP_SECRET || '',
+    verifyToken: process.env.META_WHATSAPP_VERIFY_TOKEN || 'omnisocial_wa_verify_token',
+    actionTokenSecret: process.env.WHATSAPP_ACTION_SECRET || 'dev-action-secret-minimum-32-characters-required',
+    reviewBaseUrl: process.env.FRONTEND_APP_URL || 'http://localhost:3000',
+  },
+  meta: {
+    appId: process.env.META_APP_ID || '',
+    appSecret: process.env.META_APP_SECRET || '',
+    apiVersion: process.env.META_API_VERSION || 'v21.0',
+    oauthRedirectUri: process.env.META_OAUTH_REDIRECT_URI || 'http://localhost:4000/api/v1/oauth/meta/callback',
+    webhookVerifyToken: process.env.META_WEBHOOK_VERIFY_TOKEN || 'omnisocial_meta_social_verify_token',
+  },
 });
+

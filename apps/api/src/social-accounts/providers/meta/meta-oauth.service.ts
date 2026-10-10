@@ -39,8 +39,12 @@ export class MetaOAuthService {
       'pages_show_list',
       'pages_read_engagement',
       'pages_manage_posts',
+      'pages_manage_engagement',
+      'read_insights',
       'instagram_basic',
       'instagram_content_publish',
+      'instagram_manage_comments',
+      'instagram_manage_insights',
     ];
   }
 

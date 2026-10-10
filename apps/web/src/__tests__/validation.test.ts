@@ -188,4 +188,190 @@ describe('Frontend Form Validation Schemas', () => {
       expect(result.success).toBe(false);
     });
   });
+
+  describe('Brand Kit Form Validation', () => {
+    const brandKitSchema = z.object({
+      businessName: z.string().min(1, 'Business name is required').max(100),
+      primaryColor: z
+        .string()
+        .regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, 'Must be a valid hex color code')
+        .optional()
+        .or(z.literal('')),
+      secondaryColor: z
+        .string()
+        .regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, 'Must be a valid hex color code')
+        .optional()
+        .or(z.literal('')),
+      websiteUrl: z
+        .string()
+        .url('Must be a valid URL')
+        .regex(/^https?:\/\//, 'Must begin with http or https')
+        .optional()
+        .or(z.literal('')),
+    });
+
+    it('should accept valid brand kit configuration', () => {
+      const result = brandKitSchema.safeParse({
+        businessName: 'Om Artisanal Silks',
+        primaryColor: '#800020',
+        secondaryColor: '#FFD700',
+        websiteUrl: 'https://omartisanal.com',
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('should reject invalid primary color hex codes', () => {
+      const result = brandKitSchema.safeParse({
+        businessName: 'Test Brand',
+        primaryColor: 'not-a-hex',
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject invalid website URL protocol', () => {
+      const result = brandKitSchema.safeParse({
+        businessName: 'Test Brand',
+        websiteUrl: 'ftp://invalid-ftp.com',
+      });
+      // z.string().url() requires http/https in standard RFC
+      const resultJs = brandKitSchema.safeParse({
+        businessName: 'Test Brand',
+        websiteUrl: 'javascript:alert(1)',
+      });
+      expect(resultJs.success).toBe(false);
+    });
+  });
+
+  describe('AI Content Generation Form Validation', () => {
+    const contentGenerationSchema = z.object({
+      title: z.string().min(1, 'Title is required').max(200),
+      objective: z.enum([
+        'ENGAGEMENT',
+        'SALES_LEADS',
+        'ANNOUNCEMENT',
+        'FESTIVAL_WISHES',
+        'BRAND_AWARENESS',
+        'EVENT_PROMOTION',
+        'EDUCATIONAL',
+        'RECRUITMENT',
+      ]),
+      platforms: z
+        .array(z.enum(['INSTAGRAM', 'FACEBOOK', 'LINKEDIN', 'TWITTER_X']))
+        .min(1, 'Must select at least one platform')
+        .max(4, 'Cannot select more than 4 platforms'),
+      userInstructions: z.string().max(1000).optional(),
+    });
+
+    it('should accept valid multi-platform generation request', () => {
+      const result = contentGenerationSchema.safeParse({
+        title: 'Navratri Garba Launch',
+        objective: 'FESTIVAL_WISHES',
+        platforms: ['INSTAGRAM', 'FACEBOOK'],
+        userInstructions: 'Highlight handcrafted Chaniya Cholis with festive blessings',
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('should reject empty platforms selection', () => {
+      const result = contentGenerationSchema.safeParse({
+        title: 'Navratri Garba Launch',
+        objective: 'FESTIVAL_WISHES',
+        platforms: [],
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject empty title', () => {
+      const result = contentGenerationSchema.safeParse({
+        title: '',
+        objective: 'ENGAGEMENT',
+        platforms: ['INSTAGRAM'],
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('Draft Rejection Workflow Validation', () => {
+    const rejectDraftSchema = z.object({
+      rejectionReason: z.string().min(3, 'Rejection reason must be at least 3 characters'),
+    });
+
+    it('should accept valid rejection reason', () => {
+      const result = rejectDraftSchema.safeParse({
+        rejectionReason: 'Please refine the call to action and discount expiry.',
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('should reject empty rejection reason', () => {
+      const result = rejectDraftSchema.safeParse({
+        rejectionReason: '  ',
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('WhatsApp Business Configuration & Recipient Consent Validation', () => {
+    const whatsAppSettingsSchema = z.object({
+      wabaId: z.string().min(1, 'WABA ID is required'),
+      phoneNumberId: z.string().min(1, 'Phone Number ID is required'),
+      systemUserAccessToken: z.string().min(1, 'Access Token is required'),
+      businessPhoneNumber: z.string().optional(),
+    });
+
+    const recipientConsentSchema = z.object({
+      displayName: z.string().min(2, 'Name must be at least 2 characters'),
+      phoneNumber: z.string().regex(/^\+[1-9]\d{7,14}$/, 'Must be valid E.164 phone format'),
+      consentAcknowledged: z.literal(true, {
+        errorMap: () => ({ message: 'Explicit consent acknowledgement is required' }),
+      }),
+    });
+
+    it('should validate valid WhatsApp Cloud API settings', () => {
+      const result = whatsAppSettingsSchema.safeParse({
+        wabaId: '108923485729103',
+        phoneNumberId: '1009823481239',
+        systemUserAccessToken: 'EAAB...secret-token',
+        businessPhoneNumber: '+919876543210',
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('should reject WhatsApp settings with missing WABA ID or token', () => {
+      const result = whatsAppSettingsSchema.safeParse({
+        wabaId: '',
+        phoneNumberId: '1009823481239',
+        systemUserAccessToken: '',
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('should validate recipient registration with explicit consent acknowledgement', () => {
+      const result = recipientConsentSchema.safeParse({
+        displayName: 'Pooja Patel (Head of Brand)',
+        phoneNumber: '+919876543210',
+        consentAcknowledged: true,
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('should reject recipient registration when consent is false or unacknowledged', () => {
+      const result = recipientConsentSchema.safeParse({
+        displayName: 'Pooja Patel',
+        phoneNumber: '+919876543210',
+        consentAcknowledged: false,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject invalid phone format for recipient registration', () => {
+      const result = recipientConsentSchema.safeParse({
+        displayName: 'Pooja Patel',
+        phoneNumber: '12345',
+        consentAcknowledged: true,
+      });
+      expect(result.success).toBe(false);
+    });
+  });
 });
+

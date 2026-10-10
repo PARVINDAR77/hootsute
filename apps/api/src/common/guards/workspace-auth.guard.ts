@@ -36,6 +36,7 @@ export class WorkspaceAuthGuard implements CanActivate {
 
     const workspaceId =
       request.params?.workspaceId ||
+      request.params?.wsId ||
       request.headers?.['x-workspace-id'] ||
       request.body?.workspaceId;
 

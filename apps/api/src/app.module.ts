@@ -4,34 +4,48 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD, APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 
 import configuration from './config/configuration';
+import { validateEnvironment } from './config/env-validation';
 import { PrismaModule } from './prisma/prisma.module';
 import { HealthModule } from './health/health.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { WorkspacesModule } from './workspaces/workspaces.module';
 import { SocialAccountsModule } from './social-accounts/social-accounts.module';
-
+import { BrandProfileModule } from './brand-profile/brand-profile.module';
+import { OccasionsModule } from './occasions/occasions.module';
+import { ContentDraftsModule } from './content-drafts/content-drafts.module';
+import { ContentGenerationModule } from './content-generation/content-generation.module';
+import { WhatsAppModule } from './whatsapp/whatsapp.module';
+import { PublishingModule } from './publishing/publishing.module';
+import { AnalyticsModule } from './analytics/analytics.module';
+import { InboxModule } from './inbox/inbox.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 
+import { RedisThrottlerStorage } from './common/throttler/redis-throttler-storage.service';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration],
+      validate: validateEnvironment,
     }),
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => [
-        {
-          ttl: config.get<number>('throttler.ttl', 60) * 1000,
-          limit: config.get<number>('throttler.limit', 100),
-        },
-      ],
+      useFactory: (config: ConfigService) => ({
+        throttlers: [
+          {
+            ttl: config.get<number>('throttler.ttl', 60) * 1000,
+            limit: config.get<number>('throttler.limit', 100),
+          },
+        ],
+        storage: new RedisThrottlerStorage(config),
+      }),
     }),
     PrismaModule,
     HealthModule,
@@ -39,6 +53,14 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
     AuthModule,
     WorkspacesModule,
     SocialAccountsModule,
+    BrandProfileModule,
+    OccasionsModule,
+    ContentDraftsModule,
+    ContentGenerationModule,
+    WhatsAppModule,
+    PublishingModule,
+    AnalyticsModule,
+    InboxModule,
   ],
   providers: [
     {

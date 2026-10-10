@@ -3,12 +3,22 @@ import { AlertCircle, CheckCircle2, Info, AlertTriangle } from 'lucide-react';
 
 export interface AlertProps {
   type?: 'error' | 'success' | 'warning' | 'info';
+  variant?: 'error' | 'danger' | 'success' | 'warning' | 'info';
   title?: string;
-  message: string;
+  message?: string;
+  children?: React.ReactNode;
   className?: string;
 }
 
-export function Alert({ type = 'error', title, message, className = '' }: AlertProps) {
+export function Alert({
+  type,
+  variant,
+  title,
+  message,
+  children,
+  className = '',
+}: AlertProps) {
+  const resolvedType = (variant === 'danger' ? 'error' : variant) || type || 'error';
   const configs = {
     error: {
       bg: 'bg-rose-50 border-rose-200 text-rose-800',
@@ -28,14 +38,15 @@ export function Alert({ type = 'error', title, message, className = '' }: AlertP
     },
   };
 
-  const current = configs[type];
+  const current = configs[resolvedType as keyof typeof configs] || configs.error;
 
   return (
     <div className={`flex gap-3 p-4 rounded-xl border ${current.bg} ${className}`}>
       {current.icon}
-      <div className="space-y-0.5">
+      <div className="space-y-0.5 min-w-0 flex-1">
         {title && <h5 className="text-sm font-semibold">{title}</h5>}
-        <p className="text-sm leading-relaxed">{message}</p>
+        {message && <p className="text-sm leading-relaxed">{message}</p>}
+        {children}
       </div>
     </div>
   );

@@ -34,14 +34,46 @@ export class HttpExceptionFilter implements ExceptionFilter {
         message = respObj.message || message;
         errorName = respObj.error || errorName;
       }
-    } else if (exception instanceof Error) {
-      this.logger.error(`Unhandled Exception [${correlationId}]: ${exception.message}`, exception.stack);
+    }
+
+    if (exception instanceof Error && status >= 500) {
+      this.logger.error(
+        `[${correlationId}] ${request.method} ${request.url} => ${status}: ${exception.message}`,
+        exception.stack,
+        {
+          correlationId,
+          method: request.method,
+          path: request.url,
+          statusCode: status,
+        },
+      );
       if (process.env.NODE_ENV !== 'production') {
         message = exception.message;
       }
+    } else if (status >= 500) {
+      this.logger.error(
+        `[${correlationId}] ${request.method} ${request.url} => ${status}: ${errorName}`,
+        undefined,
+        {
+          correlationId,
+          method: request.method,
+          path: request.url,
+          statusCode: status,
+        },
+      );
+    } else {
+      this.logger.warn(
+        `[${correlationId}] ${request.method} ${request.url} => ${status}`,
+        {
+          correlationId,
+          method: request.method,
+          path: request.url,
+          statusCode: status,
+          error: errorName,
+        },
+      );
     }
 
-    // Do not leak stack traces or internal implementation in production
     const errorResponse = {
       statusCode: status,
       timestamp: new Date().toISOString(),
@@ -50,12 +82,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
       error: errorName,
       message,
     };
-
-    if (status >= 500) {
-      this.logger.error(`[${correlationId}] ${request.method} ${request.url} => ${status}`);
-    } else {
-      this.logger.warn(`[${correlationId}] ${request.method} ${request.url} => ${status}: ${JSON.stringify(message)}`);
-    }
 
     response.status(status).json(errorResponse);
   }

@@ -296,25 +296,96 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Planned Modules & Roadmap */}
+      {/* Active Modules & Capabilities */}
       <div>
         <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-4">
-          Capabilities &amp; Roadmap (Stages 3–7)
+          OmniSocial AI Suite (Active Features)
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Social Accounts Card (Stage 3 Active) */}
-          <Card className="border-indigo-200 bg-indigo-50/20">
-            <CardContent className="p-8 text-center flex flex-col items-center justify-center space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* AI Content Studio (Stage 4 Active) */}
+          <Card className="border-indigo-300 bg-gradient-to-b from-indigo-50/50 to-white shadow-xs">
+            <CardContent className="p-5 text-center flex flex-col items-center justify-center space-y-3">
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-700 text-white flex items-center justify-center shadow-md shadow-indigo-100">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center justify-center gap-1.5">
+                  <h4 className="text-sm font-bold text-slate-900">AI Content Studio</h4>
+                  <Badge variant="success">Stage 4</Badge>
+                </div>
+                <p className="text-xs text-slate-500 max-w-xs mx-auto">
+                  Festival &amp; promotional post generator with cultural context.
+                </p>
+              </div>
+              <Link href={ROUTES.CONTENT_STUDIO}>
+                <Button size="sm" className="mt-1 text-xs gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Launch Studio</span>
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* Drafts & Approval Review (Stage 4 Active) */}
+          <Card className="border-emerald-300 bg-gradient-to-b from-emerald-50/40 to-white shadow-xs">
+            <CardContent className="p-5 text-center flex flex-col items-center justify-center space-y-3">
+              <div className="w-11 h-11 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-md shadow-emerald-100">
+                <CheckCircle2 className="w-5 h-5" />
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center justify-center gap-1.5">
+                  <h4 className="text-sm font-bold text-slate-900">Drafts &amp; Approval</h4>
+                  <Badge variant="success">Stage 4</Badge>
+                </div>
+                <p className="text-xs text-slate-500 max-w-xs mx-auto">
+                  Multi-platform review with four-eyes separation of duties.
+                </p>
+              </div>
+              <Link href={ROUTES.CONTENT_DRAFTS}>
+                <Button size="sm" variant="outline" className="mt-1 text-xs border-emerald-300 text-emerald-800 hover:bg-emerald-50">
+                  Review Drafts
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* Publishing Calendar (Stage 6 Active) */}
+          <Card className="border-purple-300 bg-gradient-to-b from-purple-50/50 to-white shadow-xs">
+            <CardContent className="p-5 text-center flex flex-col items-center justify-center space-y-3">
+              <div className="w-11 h-11 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-100">
+                <Calendar className="w-5 h-5" />
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center justify-center gap-1.5">
+                  <h4 className="text-sm font-bold text-slate-900">Publishing Calendar</h4>
+                  <Badge variant="purple">Stage 6</Badge>
+                </div>
+                <p className="text-xs text-slate-500 max-w-xs mx-auto">
+                  Interactive multi-channel schedule, month/week views, &amp; automated dispatch.
+                </p>
+              </div>
+              <Link href={ROUTES.CALENDAR}>
+                <Button size="sm" className="mt-1 text-xs gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white">
+                  <Calendar className="w-3.5 h-3.5" />
+                  <span>View Calendar</span>
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* Social Channels (Stage 3 Active) */}
+          <Card className="border-slate-200 bg-white shadow-xs">
+            <CardContent className="p-5 text-center flex flex-col items-center justify-center space-y-3">
+              <div className="w-11 h-11 rounded-2xl bg-slate-800 text-white flex items-center justify-center shadow-xs">
                 <Share2 className="w-5 h-5" />
               </div>
               <div className="space-y-1">
                 <div className="flex items-center justify-center gap-1.5">
                   <h4 className="text-sm font-semibold text-slate-800">Social Channels</h4>
-                  <Badge variant="success">Stage 3 Live</Badge>
+                  <Badge variant="purple">Connected</Badge>
                 </div>
                 <p className="text-xs text-slate-500 max-w-xs mx-auto">
-                  Connect official Facebook Pages and Instagram Professional accounts with encrypted token storage.
+                  Facebook Pages and Instagram Professional accounts.
                 </p>
               </div>
               <Link href={ROUTES.SETTINGS_SOCIAL_ACCOUNTS}>
@@ -322,42 +393,6 @@ export default function DashboardPage() {
                   Manage Channels
                 </Button>
               </Link>
-            </CardContent>
-          </Card>
-
-          {/* AI Creative Drafts Empty State */}
-          <Card className="border-dashed border-2 border-slate-200 bg-slate-50/50">
-            <CardContent className="p-8 text-center flex flex-col items-center justify-center space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-white text-slate-400 flex items-center justify-center shadow-xs border border-slate-200">
-                <Calendar className="w-5 h-5" />
-              </div>
-              <div className="space-y-1">
-                <div className="flex items-center justify-center gap-1.5">
-                  <h4 className="text-sm font-semibold text-slate-800">Content Schedule</h4>
-                  <Badge variant="outline">Stage 4–6</Badge>
-                </div>
-                <p className="text-xs text-slate-500 max-w-xs mx-auto">
-                  No scheduled publications or pending drafts. AI post creation and WhatsApp approval workflows arrive in Stages 4 &amp; 5.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Growth Analytics Empty State */}
-          <Card className="border-dashed border-2 border-slate-200 bg-slate-50/50">
-            <CardContent className="p-8 text-center flex flex-col items-center justify-center space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-white text-slate-400 flex items-center justify-center shadow-xs border border-slate-200">
-                <BarChart3 className="w-5 h-5" />
-              </div>
-              <div className="space-y-1">
-                <div className="flex items-center justify-center gap-1.5">
-                  <h4 className="text-sm font-semibold text-slate-800">Growth Analytics</h4>
-                  <Badge variant="outline">Stage 7</Badge>
-                </div>
-                <p className="text-xs text-slate-500 max-w-xs mx-auto">
-                  Social metrics will display real-time engagement and reach sync once social channels and publication history are established.
-                </p>
-              </div>
             </CardContent>
           </Card>
         </div>

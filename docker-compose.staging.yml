@@ -1,0 +1,129 @@
+# ==============================================================================
+# OmniSocial AI — Staging Docker Compose Orchestration
+# ==============================================================================
+# Architecture:
+# - postgres: Isolated staging relational database (omnisocial_staging_db)
+# - redis: Isolated staging key-value store with password authentication
+# - api: NestJS backend service (listening on 4001, healthchecked at /api/v1/health)
+# - web: Next.js standalone web frontend (listening on 3001, healthchecked at /)
+#
+# Zero-Trust Perimeter Rules:
+# - Internal bridge network (omnisocial_staging_internal) only
+# - Database (5432) and Redis (6379) ports are NEVER bound to host or public interfaces
+# - API and Web bind strictly to loopback (127.0.0.1) for reverse proxy ingress
+# ==============================================================================
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: omnisocial-staging-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${STAGING_POSTGRES_USER:-staging_app}
+      POSTGRES_PASSWORD: ${STAGING_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${STAGING_POSTGRES_DB:-omnisocial_staging_db}
+    volumes:
+      - postgres_staging_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${STAGING_POSTGRES_USER:-staging_app} -d ${STAGING_POSTGRES_DB:-omnisocial_staging_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - omnisocial_staging_internal
+    # Port 5432 remains unexposed to host for security isolation
+
+  redis:
+    image: redis:7-alpine
+    container_name: omnisocial-staging-redis
+    restart: always
+    command: redis-server --requirepass "${STAGING_REDIS_PASSWORD:-staging_redis_secret_not_for_prod}" --save 60 1 --loglevel notice
+    volumes:
+      - redis_staging_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${STAGING_REDIS_PASSWORD:-staging_redis_secret_not_for_prod}", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    networks:
+      - omnisocial_staging_internal
+    # Port 6379 remains unexposed to host for security isolation
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    image: omnisocial-api:staging
+    container_name: omnisocial-staging-api
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - path: .env.staging
+        required: false
+    environment:
+      NODE_ENV: production
+      PORT: 4001
+      API_PREFIX: /api/v1
+      DATABASE_URL: postgresql://${STAGING_POSTGRES_USER:-staging_app}:${STAGING_POSTGRES_PASSWORD}@postgres:5432/${STAGING_POSTGRES_DB:-omnisocial_staging_db}?schema=public
+      REDIS_URL: redis://:${STAGING_REDIS_PASSWORD:-staging_redis_secret_not_for_prod}@redis:6379
+      RATE_LIMIT_REDIS_FALLBACK: fail-closed
+      LOG_FORMAT: json
+      CORS_ORIGIN: ${STAGING_CORS_ORIGIN:-https://staging-app.omnisocial.ai}
+      COOKIE_DOMAIN: ${STAGING_COOKIE_DOMAIN:-staging-app.omnisocial.ai}
+      COOKIE_SECURE: "true"
+    ports:
+      # Bound to loopback interface for host reverse proxy ingress
+      - "127.0.0.1:4001:4001"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:4001/api/v1/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - omnisocial_staging_internal
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${STAGING_NEXT_PUBLIC_API_URL:-https://staging-api.omnisocial.ai/api/v1}
+        NEXT_PUBLIC_APP_NAME: "OmniSocial AI (Staging)"
+    image: omnisocial-web:staging
+    container_name: omnisocial-staging-web
+    restart: always
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      HOSTNAME: "0.0.0.0"
+    ports:
+      # Bound to loopback interface for host reverse proxy ingress
+      - "127.0.0.1:3001:3001"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3001 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - omnisocial_staging_internal
+
+networks:
+  omnisocial_staging_internal:
+    driver: bridge
+
+volumes:
+  postgres_staging_data:
+    driver: local
+  redis_staging_data:
+    driver: local

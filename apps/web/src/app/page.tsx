@@ -20,6 +20,16 @@ export default function HomePage() {
     }
   }, [isLoading, isAuthenticated, router]);
 
+  // Fallback safety: redirect to login if verification takes more than 2 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!isAuthenticated) {
+        router.replace(ROUTES.LOGIN);
+      }
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [isAuthenticated, router]);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50">
       <div className="flex flex-col items-center gap-3">

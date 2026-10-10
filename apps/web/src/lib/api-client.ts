@@ -22,15 +22,28 @@ export const setAccessToken = (token: string | null) => {
 
 export const getAccessToken = () => inMemoryAccessToken;
 
-let isRefreshing = false;
-let refreshSubscribers: ((token: string) => void)[] = [];
+interface RefreshSubscriber {
+  resolve: (token: string) => void;
+  reject: (err: any) => void;
+}
 
-const subscribeTokenRefresh = (cb: (token: string) => void) => {
-  refreshSubscribers.push(cb);
+let isRefreshing = false;
+let refreshSubscribers: RefreshSubscriber[] = [];
+
+const subscribeTokenRefresh = (
+  resolve: (token: string) => void,
+  reject: (err: any) => void,
+) => {
+  refreshSubscribers.push({ resolve, reject });
 };
 
 const onTokenRefreshed = (token: string) => {
-  refreshSubscribers.forEach((cb) => cb(token));
+  refreshSubscribers.forEach((sub) => sub.resolve(token));
+  refreshSubscribers = [];
+};
+
+const onTokenRefreshFailed = (err: any) => {
+  refreshSubscribers.forEach((sub) => sub.reject(err));
   refreshSubscribers = [];
 };
 
@@ -79,17 +92,22 @@ export async function apiClient<T = any>(
               return apiClient<T>(endpoint, options, true);
             }
           }
+
+          // If refresh failed (e.g. no session cookie), reject all waiting subscribers
+          const refreshError = new ApiError('Session expired or unauthorized', 401);
+          onTokenRefreshFailed(refreshError);
         } catch (refreshErr) {
-          // Refresh failed
+          onTokenRefreshFailed(refreshErr);
         } finally {
           isRefreshing = false;
         }
       } else {
-        // Wait for token refresh to complete and retry
-        return new Promise<T>((resolve) => {
-          subscribeTokenRefresh(() => {
-            resolve(apiClient<T>(endpoint, options, true));
-          });
+        // Wait for token refresh to complete and retry, or reject if refresh failed
+        return new Promise<T>((resolve, reject) => {
+          subscribeTokenRefresh(
+            () => resolve(apiClient<T>(endpoint, options, true)),
+            (err) => reject(err),
+          );
         });
       }
     }

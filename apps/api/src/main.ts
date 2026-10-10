@@ -3,11 +3,17 @@ import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import * as cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { StructuredLoggerService } from './common/logging/structured-logger.service';
 
 async function bootstrap() {
+  const structuredLogger = new StructuredLoggerService();
   const logger = new Logger('Bootstrap');
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: structuredLogger,
+    rawBody: true,
+  });
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('port', 4000);
@@ -16,6 +22,30 @@ async function bootstrap() {
 
   // Enable graceful shutdown
   app.enableShutdownHooks();
+
+  // Security Headers via Helmet
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          scriptSrc: ["'self'", "'unsafe-inline'"],
+          imgSrc: ["'self'", 'data:', 'https:'],
+        },
+      },
+      crossOriginEmbedderPolicy: false,
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+      hsts:
+        process.env.NODE_ENV === 'production'
+          ? {
+              maxAge: 31536000,
+              includeSubDomains: true,
+              preload: true,
+            }
+          : false,
+    }),
+  );
 
   // Middleware
   app.use(cookieParser());

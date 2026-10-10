@@ -56,6 +56,62 @@ enum SocialConnectionStatus {
   DISCONNECTED
 }
 
+enum DraftStatus {
+  DRAFT
+  IN_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum CampaignObjective {
+  ENGAGEMENT
+  SALES_LEADS
+  ANNOUNCEMENT
+  FESTIVAL_WISHES
+  BRAND_AWARENESS
+  EVENT_PROMOTION
+  EDUCATIONAL
+  RECRUITMENT
+}
+
+enum ContentType {
+  POST
+  REEL_STORY_BRIEF
+  CAROUSEL
+  CAMPAIGN
+}
+
+enum SocialPlatform {
+  FACEBOOK
+  INSTAGRAM
+  LINKEDIN
+  TWITTER_X
+}
+
+enum BrandTone {
+  PROFESSIONAL
+  CASUAL_FRIENDLY
+  FESTIVE_WARM
+  INSPIRATIONAL
+  URGENT_PROMOTIONAL
+  AUTHORITATIVE
+  PLAYFUL
+}
+
+enum WhatsAppMessageStatus {
+  QUEUED
+  SENT
+  DELIVERED
+  READ
+  FAILED
+}
+
+enum RecipientConsentStatus {
+  OPTED_IN
+  OPTED_OUT
+  PENDING_VERIFICATION
+}
+
 model User {
   id              String           @id @default(uuid())
   email           String           @unique
@@ -75,6 +131,21 @@ model User {
   connectedSocialAccounts  SocialAccount[]       @relation("SocialAccountsConnected")
   oauthStates              OAuthState[]          @relation("UserOAuthStates")
   oauthSessions            OAuthSession[]        @relation("UserOAuthSessions")
+  createdDrafts            ContentDraft[]        @relation("DraftCreatedBy")
+  updatedDrafts            ContentDraft[]        @relation("DraftUpdatedBy")
+  approvalRequestedDrafts  ContentDraft[]        @relation("DraftApprovalRequestedBy")
+  approvedDrafts           ContentDraft[]        @relation("DraftApprovedBy")
+  contentRevisions         ContentRevision[]     @relation("RevisionCreatedBy")
+  whatsAppRecipientConsents WhatsAppRecipientConsent[]
+  createdScheduledPosts    ScheduledPost[]       @relation("ScheduledPostCreatedBy")
+  cancelledScheduledPosts  ScheduledPost[]       @relation("ScheduledPostCancelledBy")
+  dismissedGrowthInsights  GrowthInsight[]       @relation("GrowthInsightDismissedBy")
+  assignedSocialInteractions SocialInteraction[] @relation("InteractionAssignedTo")
+  assignedBySocialInteractions SocialInteraction[] @relation("InteractionAssignedBy")
+  resolvedSocialInteractions SocialInteraction[] @relation("InteractionResolvedBy")
+  interactionReplyAttempts InteractionReplyAttempt[] @relation("ReplyAttemptAuthor")
+  interactionNotes         InteractionNote[]     @relation("InteractionNoteAuthor")
+  inboxNotifications       InboxNotification[]   @relation("InboxNotificationRecipient")
 
   @@index([email])
   @@index([role])
@@ -116,13 +187,28 @@ model Workspace {
   updatedAt       DateTime        @updatedAt
   createdById     String
 
-  createdBy      User                  @relation("WorkspaceCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  createdBy      User                   @relation("WorkspaceCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
   members        WorkspaceMember[]
   invitations    WorkspaceInvitation[]
   auditLogs      AuditLog[]
   socialAccounts SocialAccount[]
   oauthStates    OAuthState[]
   oauthSessions  OAuthSession[]
+  brandProfile              WorkspaceBrandProfile?
+  contentDrafts             ContentDraft[]
+  whatsAppConfig            WorkspaceWhatsAppConfig?
+  whatsAppRecipients        WhatsAppRecipientConsent[]
+  whatsAppMessages          WhatsAppNotificationMessage[]
+  scheduledPosts            ScheduledPost[]
+  accountAnalyticsSnapshots AccountAnalyticsSnapshot[]
+  postAnalyticsSnapshots    PostAnalyticsSnapshot[]
+  analyticsSyncJobs         AnalyticsSyncJob[]
+  growthInsights            GrowthInsight[]
+  socialInteractions        SocialInteraction[]
+  interactionReplyAttempts  InteractionReplyAttempt[]
+  interactionNotes          InteractionNote[]
+  inboxSyncCheckpoints      InboxSyncCheckpoint[]
+  inboxNotifications        InboxNotification[]
 
   @@index([slug])
   @@index([status])
@@ -193,8 +279,15 @@ model SocialAccount {
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @updatedAt
 
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  connectedBy User      @relation("SocialAccountsConnected", fields: [connectedByUserId], references: [id], onDelete: Restrict)
+  workspace        Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  connectedBy      User                  @relation("SocialAccountsConnected", fields: [connectedByUserId], references: [id], onDelete: Restrict)
+  scheduledTargets          ScheduledPostTarget[]
+  accountAnalyticsSnapshots AccountAnalyticsSnapshot[]
+  postAnalyticsSnapshots    PostAnalyticsSnapshot[]
+  analyticsSyncJobs         AnalyticsSyncJob[]
+  analyticsSyncErrors       AnalyticsSyncError[]
+  socialInteractions        SocialInteraction[]
+  inboxSyncCheckpoint       InboxSyncCheckpoint?
 
   @@unique([workspaceId, provider, providerAccountId])
   @@index([workspaceId])
@@ -243,6 +336,134 @@ model OAuthSession {
   @@map("oauth_sessions")
 }
 
+model WorkspaceBrandProfile {
+  id                   String    @id @default(uuid())
+  workspaceId          String    @unique
+  businessName         String
+  industry             String?
+  businessDescription  String?
+  targetAudience       String?
+  productsAndServices  String?
+  brandVoice           String?
+  preferredLanguage    String    @default("en")
+  supportedLanguages   String[]  @default(["en"])
+  primaryColor         String?
+  secondaryColor       String?
+  logoUrl              String?
+  slogan               String?
+  websiteUrl           String?
+  contactDetails       Json?
+  brandGuidelines      String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@map("workspace_brand_profiles")
+}
+
+model ContentDraft {
+  id                         String            @id @default(uuid())
+  workspaceId                String
+  createdByUserId            String
+  updatedByUserId            String?
+  title                      String
+  objective                  CampaignObjective @default(ENGAGEMENT)
+  contentType                ContentType       @default(POST)
+  language                   String            @default("en")
+  status                     DraftStatus       @default(DRAFT)
+  approvalRequestedByUserId  String?
+  approvedByUserId           String?
+  approvedAt                 DateTime?
+  rejectionReason            String?
+  createdAt                  DateTime          @default(now())
+  updatedAt                  DateTime          @updatedAt
+
+  workspace           Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy           User              @relation("DraftCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  updatedBy           User?             @relation("DraftUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+  approvalRequestedBy User?             @relation("DraftApprovalRequestedBy", fields: [approvalRequestedByUserId], references: [id], onDelete: SetNull)
+  approvedBy          User?             @relation("DraftApprovedBy", fields: [approvedByUserId], references: [id], onDelete: SetNull)
+  variants            ContentVariant[]
+  revisions           ContentRevision[]
+  whatsAppMessages    WhatsAppNotificationMessage[]
+  scheduledPosts      ScheduledPost[]
+
+  @@index([workspaceId])
+  @@index([status])
+  @@index([createdByUserId])
+  @@index([approvalRequestedByUserId])
+  @@index([approvedByUserId])
+  @@map("content_drafts")
+}
+
+model ContentVariant {
+  id             String         @id @default(uuid())
+  draftId        String
+  platform       SocialPlatform
+  headline       String?
+  body           String
+  callToAction   String?
+  hashtags       String[]       @default([])
+  linkUrl        String?
+  mediaBrief     String?
+  mediaAssetUrl  String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  draft     ContentDraft      @relation(fields: [draftId], references: [id], onDelete: Cascade)
+  revisions ContentRevision[]
+
+  @@index([draftId])
+  @@index([platform])
+  @@map("content_variants")
+}
+
+model ContentRevision {
+  id              String   @id @default(uuid())
+  draftId         String
+  variantId       String?
+  revisionNumber  Int
+  action          String
+  promptSummary   String?
+  inputSnapshot   Json?
+  outputSnapshot  Json
+  createdByUserId String
+  createdAt       DateTime @default(now())
+
+  draft         ContentDraft    @relation(fields: [draftId], references: [id], onDelete: Cascade)
+  variant       ContentVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  createdByUser User            @relation("RevisionCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([draftId, revisionNumber])
+  @@index([draftId])
+  @@index([variantId])
+  @@index([createdByUserId])
+  @@map("content_revisions")
+}
+
+model FestivalOccasion {
+  id                String   @id @default(uuid())
+  name              String
+  slug              String   @unique
+  description       String
+  culturalContext   String
+  category          String
+  dateType          String
+  typicalPeriod     String
+  supportedRegions  String[] @default(["All India"])
+  promptGuidance    String
+  suggestedHashtags String[] @default([])
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([slug])
+  @@index([isActive])
+  @@map("festival_occasions")
+}
+
 model AuditLog {
   id          String   @id @default(uuid())
   actorUserId String?
@@ -263,3 +484,539 @@ model AuditLog {
   @@index([createdAt])
   @@map("audit_logs")
 }
+
+model WorkspaceWhatsAppConfig {
+  id                   String   @id @default(uuid())
+  workspaceId          String   @unique
+  wabaId               String
+  phoneNumberId        String
+  encryptedAccessToken String
+  businessPhoneNumber  String?
+  isActive             Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@map("workspace_whatsapp_configs")
+}
+
+model WhatsAppRecipientConsent {
+  id            String                 @id @default(uuid())
+  workspaceId   String
+  userId        String?
+  phoneNumber   String
+  displayName   String
+  status        RecipientConsentStatus @default(OPTED_IN)
+  consentSource String                 @default("WORKSPACE_ADMIN_REGISTRATION")
+  optedInAt     DateTime               @default(now())
+  optedOutAt    DateTime?
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+
+  workspace Workspace                     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User?                         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  messages  WhatsAppNotificationMessage[]
+
+  @@unique([workspaceId, phoneNumber])
+  @@index([workspaceId, status])
+  @@map("whatsapp_recipient_consents")
+}
+
+model WhatsAppNotificationMessage {
+  id                 String                @id @default(uuid())
+  workspaceId        String
+  draftId            String?
+  recipientConsentId String
+  providerMessageId  String?               @unique
+  templateName       String                @default("content_draft_approval_request")
+  language           String                @default("en")
+  parameters         Json?
+  status             WhatsAppMessageStatus @default(QUEUED)
+  errorMessage       String?
+  sentAt             DateTime?
+  deliveredAt        DateTime?
+  readAt             DateTime?
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+
+  workspace Workspace                @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  draft     ContentDraft?            @relation(fields: [draftId], references: [id], onDelete: SetNull)
+  recipient WhatsAppRecipientConsent @relation(fields: [recipientConsentId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, createdAt])
+  @@index([draftId])
+  @@index([providerMessageId])
+  @@map("whatsapp_notification_messages")
+}
+
+model WhatsAppWebhookEvent {
+  id          String   @id @default(uuid())
+  eventId     String   @unique
+  eventType   String
+  payload     Json
+  processedAt DateTime @default(now())
+
+  @@index([eventId])
+  @@map("whatsapp_webhook_events")
+}
+
+enum ScheduledPostStatus {
+  SCHEDULED
+  PROCESSING
+  PARTIALLY_PUBLISHED
+  PUBLISHED
+  FAILED
+  CANCELLED
+  NEEDS_REAPPROVAL
+}
+
+enum PublishTargetStatus {
+  PENDING
+  DISPATCHING
+  PUBLISHED
+  FAILED
+  AUTH_REQUIRED
+  AMBIGUOUS_TIMEOUT
+  RETRYING
+  CANCELLED
+  SKIPPED
+}
+
+enum AttemptOutcome {
+  SUCCESS
+  DEFINITIVE_FAILURE
+  AMBIGUOUS_TIMEOUT
+  AUTH_FAILURE
+  RATE_LIMITED
+}
+
+model ScheduledPost {
+  id                     String              @id @default(uuid())
+  workspaceId            String
+  draftId                String
+  createdById            String
+  scheduledAt            DateTime
+  timezone               String              @default("UTC")
+  status                 ScheduledPostStatus @default(SCHEDULED)
+  approvedRevisionNumber Int
+  contentSnapshot        Json
+  snapshotHash           String
+  queueJobId             String?
+  cancelledAt            DateTime?
+  cancelledById          String?
+  cancellationReason     String?
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+
+  workspace              Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  draft                  ContentDraft        @relation(fields: [draftId], references: [id], onDelete: Restrict)
+  createdBy              User                @relation("ScheduledPostCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  cancelledBy            User?               @relation("ScheduledPostCancelledBy", fields: [cancelledById], references: [id], onDelete: SetNull)
+  targets                ScheduledPostTarget[]
+
+  @@index([workspaceId, scheduledAt])
+  @@index([workspaceId, status])
+  @@index([draftId])
+  @@index([scheduledAt, status])
+  @@map("scheduled_posts")
+}
+
+model ScheduledPostTarget {
+  id              String              @id @default(uuid())
+  scheduledPostId String
+  socialAccountId String
+  platform        SocialPlatform
+  variantId       String?
+  status          PublishTargetStatus @default(PENDING)
+  externalPostId  String?
+  externalPostUrl String?
+  attemptCount    Int                 @default(0)
+  maxAttempts     Int                 @default(3)
+  lastAttemptAt   DateTime?
+  nextRetryAt     DateTime?
+  publishedAt     DateTime?
+  errorCode       String?
+  errorMessage    String?
+  rawResponse     Json?
+  idempotencyKey  String              @unique @default(uuid())
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  scheduledPost   ScheduledPost       @relation(fields: [scheduledPostId], references: [id], onDelete: Cascade)
+  socialAccount   SocialAccount       @relation(fields: [socialAccountId], references: [id], onDelete: Restrict)
+  attempts               PublishingAttempt[]
+  postAnalyticsSnapshots PostAnalyticsSnapshot[]
+
+  @@unique([scheduledPostId, socialAccountId])
+  @@index([scheduledPostId])
+  @@index([socialAccountId])
+  @@index([status, nextRetryAt])
+  @@map("scheduled_post_targets")
+}
+
+model PublishingAttempt {
+  id                    String         @id @default(uuid())
+  targetId              String
+  attemptNumber         Int
+  startedAt             DateTime       @default(now())
+  completedAt           DateTime?
+  outcome               AttemptOutcome
+  sanitizedErrorCode    String?
+  sanitizedErrorMessage String?
+  externalPostId        String?
+  reconciliationStatus  String?
+  reconciledAt          DateTime?
+  metadata              Json?
+
+  target                ScheduledPostTarget @relation(fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@unique([targetId, attemptNumber])
+  @@index([targetId])
+  @@index([outcome])
+  @@map("publishing_attempts")
+}
+
+enum AnalyticsMetricPeriod {
+  DAY
+  WEEK
+  DAYS_28
+  LIFETIME
+}
+
+enum PostAnalyticsType {
+  POST
+  IMAGE
+  VIDEO
+  REEL
+  CAROUSEL
+  STORY
+}
+
+enum SyncJobType {
+  ACCOUNT_DAILY
+  POST_INCREMENTAL
+  MANUAL_REFRESH
+  HISTORICAL_BACKFILL
+}
+
+enum SyncJobStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  PARTIAL_SUCCESS
+  FAILED
+}
+
+enum GrowthInsightCategory {
+  TIMING
+  CONTENT_FORMAT
+  ENGAGEMENT
+  TOPIC_AUDIENCE
+  CONSISTENCY
+}
+
+model AccountAnalyticsSnapshot {
+  id                 String                @id @default(uuid())
+  workspaceId        String
+  socialAccountId    String
+  platform           SocialPlatform
+  period             AnalyticsMetricPeriod @default(DAY)
+  snapshotDate       DateTime
+  followersCount     Int?
+  followersNetChange Int?
+  impressions        Int?
+  reach              Int?
+  profileViews       Int?
+  websiteClicks      Int?
+  engagementTotal    Int?
+  engagementRate     Float?
+  provenance         String?
+  rawMetrics         Json?
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+
+  workspace          Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  socialAccount      SocialAccount         @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+
+  @@unique([socialAccountId, period, snapshotDate])
+  @@index([workspaceId, snapshotDate])
+  @@index([socialAccountId, snapshotDate])
+  @@index([workspaceId, platform, snapshotDate])
+  @@map("account_analytics_snapshots")
+}
+
+model PostAnalyticsSnapshot {
+  id                    String               @id @default(uuid())
+  workspaceId           String
+  socialAccountId       String
+  scheduledPostTargetId String?
+  externalPostId        String
+  platform              SocialPlatform
+  postType              PostAnalyticsType    @default(POST)
+  publishedAt           DateTime?
+  snapshotDate          DateTime
+  likesCount            Int?
+  commentsCount         Int?
+  sharesCount           Int?
+  savesCount            Int?
+  impressions           Int?
+  reach                 Int?
+  clicks                Int?
+  videoViews            Int?
+  watchTimeMs           BigInt?
+  engagementRate        Float?
+  provenance            String?
+  rawMetrics            Json?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+
+  workspace             Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  socialAccount         SocialAccount        @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  scheduledPostTarget   ScheduledPostTarget? @relation(fields: [scheduledPostTargetId], references: [id], onDelete: SetNull)
+
+  @@unique([socialAccountId, externalPostId, snapshotDate])
+  @@index([workspaceId, snapshotDate])
+  @@index([socialAccountId, snapshotDate])
+  @@index([externalPostId])
+  @@index([scheduledPostTargetId])
+  @@index([workspaceId, platform, snapshotDate])
+  @@map("post_analytics_snapshots")
+}
+
+model AnalyticsSyncJob {
+  id                   String               @id @default(uuid())
+  workspaceId          String
+  socialAccountId      String?
+  jobType              SyncJobType
+  status               SyncJobStatus        @default(QUEUED)
+  startedAt            DateTime?
+  completedAt          DateTime?
+  itemsProcessed       Int                  @default(0)
+  itemsFailed          Int                  @default(0)
+  lastSuccessfulSyncAt DateTime?
+  leaseExpiresAt       DateTime?
+  claimToken           String?
+  errorCode            String?
+  errorMessage         String?
+  metadata             Json?
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+
+  workspace            Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  socialAccount        SocialAccount?       @relation(fields: [socialAccountId], references: [id], onDelete: SetNull)
+  errors               AnalyticsSyncError[]
+
+  @@index([workspaceId, status])
+  @@index([socialAccountId, status])
+  @@index([status, leaseExpiresAt])
+  @@map("analytics_sync_jobs")
+}
+
+model AnalyticsSyncError {
+  id                String            @id @default(uuid())
+  syncJobId         String
+  socialAccountId   String?
+  externalPostId    String?
+  errorCode         String
+  errorMessage      String
+  httpStatus        Int?
+  isPermissionError Boolean          @default(false)
+  createdAt         DateTime         @default(now())
+
+  syncJob           AnalyticsSyncJob @relation(fields: [syncJobId], references: [id], onDelete: Cascade)
+  socialAccount     SocialAccount?   @relation(fields: [socialAccountId], references: [id], onDelete: SetNull)
+
+  @@index([syncJobId])
+  @@index([socialAccountId])
+  @@index([isPermissionError])
+  @@map("analytics_sync_errors")
+}
+
+model GrowthInsight {
+  id              String                @id @default(uuid())
+  workspaceId     String
+  category        GrowthInsightCategory
+  title           String
+  summary         String
+  suggestedAction String
+  evidence        Json
+  confidenceScore Float
+  expiresAt       DateTime?
+  dismissedAt     DateTime?
+  dismissedById   String?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  workspace       Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  dismissedBy     User?                 @relation("GrowthInsightDismissedBy", fields: [dismissedById], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, category])
+  @@index([workspaceId, dismissedAt])
+  @@map("growth_insights")
+}
+
+enum InteractionType {
+  COMMENT
+  REPLY
+  MENTION
+}
+
+enum InteractionWorkflowStatus {
+  OPEN
+  ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+  IGNORED
+}
+
+enum ReplyAttemptStatus {
+  PENDING
+  SENT
+  FAILED
+  AMBIGUOUS_TIMEOUT
+}
+
+model SocialInteraction {
+  id                    String                    @id @default(uuid())
+  workspaceId           String
+  socialAccountId       String
+  platform              SocialPlatform
+  interactionType       InteractionType           @default(COMMENT)
+  externalInteractionId String
+  parentExternalId      String?
+  externalPostId        String?
+  externalPostUrl       String?
+  authorProviderId      String
+  authorName            String
+  authorUsername        String?
+  authorProfileUrl      String?
+  content               String
+  publishedAt           DateTime
+  isFromPageOrAccount   Boolean                   @default(false)
+  workflowStatus        InteractionWorkflowStatus @default(OPEN)
+  isRead                Boolean                   @default(false)
+  assignedToUserId      String?
+  assignedAt            DateTime?
+  assignedByUserId      String?
+  resolvedAt            DateTime?
+  resolvedByUserId      String?
+  rawMetadata           Json?
+  createdAt             DateTime                  @default(now())
+  updatedAt             DateTime                  @updatedAt
+
+  workspace     Workspace                 @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  socialAccount SocialAccount             @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  assignedTo    User?                     @relation("InteractionAssignedTo", fields: [assignedToUserId], references: [id], onDelete: SetNull)
+  assignedBy    User?                     @relation("InteractionAssignedBy", fields: [assignedByUserId], references: [id], onDelete: SetNull)
+  resolvedBy    User?                     @relation("InteractionResolvedBy", fields: [resolvedByUserId], references: [id], onDelete: SetNull)
+  replyAttempts InteractionReplyAttempt[]
+  notes         InteractionNote[]
+  notifications InboxNotification[]
+
+  @@unique([socialAccountId, externalInteractionId])
+  @@index([workspaceId, workflowStatus])
+  @@index([workspaceId, isRead])
+  @@index([workspaceId, platform, publishedAt])
+  @@index([assignedToUserId, workflowStatus])
+  @@index([externalPostId])
+  @@map("social_interactions")
+}
+
+model InteractionReplyAttempt {
+  id              String             @id @default(uuid())
+  interactionId   String
+  workspaceId     String
+  authorUserId    String
+  content         String
+  externalReplyId String?
+  status          ReplyAttemptStatus @default(PENDING)
+  idempotencyKey  String             @unique
+  errorCode       String?
+  errorMessage    String?
+  rawResponse     Json?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  interaction SocialInteraction @relation(fields: [interactionId], references: [id], onDelete: Cascade)
+  workspace   Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  authorUser  User              @relation("ReplyAttemptAuthor", fields: [authorUserId], references: [id], onDelete: Restrict)
+
+  @@index([interactionId])
+  @@index([workspaceId, status])
+  @@map("interaction_reply_attempts")
+}
+
+model InteractionNote {
+  id            String   @id @default(uuid())
+  interactionId String
+  workspaceId   String
+  authorUserId  String
+  content       String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  interaction SocialInteraction @relation(fields: [interactionId], references: [id], onDelete: Cascade)
+  workspace   Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  authorUser  User              @relation("InteractionNoteAuthor", fields: [authorUserId], references: [id], onDelete: Restrict)
+
+  @@index([interactionId])
+  @@index([workspaceId])
+  @@map("interaction_notes")
+}
+
+model SocialWebhookEvent {
+  id          String         @id @default(uuid())
+  eventId     String         @unique
+  provider    SocialProvider
+  eventType   String?
+  payload     Json
+  processedAt DateTime       @default(now())
+  status      String         @default("PROCESSED")
+
+  @@index([eventId])
+  @@index([provider, processedAt])
+  @@map("social_webhook_events")
+}
+
+model InboxSyncCheckpoint {
+  id              String    @id @default(uuid())
+  workspaceId     String
+  socialAccountId String    @unique
+  lastSyncedAt    DateTime?
+  nextCursor      String?
+  status          String    @default("IDLE")
+  errorMessage    String?
+  metadata        Json?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  workspace     Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  socialAccount SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@map("inbox_sync_checkpoints")
+}
+
+model InboxNotification {
+  id              String   @id @default(uuid())
+  workspaceId     String
+  recipientUserId String
+  interactionId   String?
+  type            String
+  title           String
+  message         String
+  isRead          Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  workspace   Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  recipient   User               @relation("InboxNotificationRecipient", fields: [recipientUserId], references: [id], onDelete: Cascade)
+  interaction SocialInteraction? @relation(fields: [interactionId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, recipientUserId, isRead])
+  @@index([interactionId])
+  @@map("inbox_notifications")
+}
+
+

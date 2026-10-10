@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "nest build",
+    "dev": "nest start --watch",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -13,11 +14,12 @@
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:e2e": "jest --config ./test/jest-e2e.json --runInBand",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
-    "admin:create": "ts-node scripts/create-super-admin.ts"
+    "admin:create": "ts-node scripts/create-super-admin.ts",
+    "seed:occasions": "ts-node scripts/seed-occasions.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.3.8",
@@ -26,6 +28,7 @@
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.3.8",
+    "@nestjs/schedule": "^4.1.2",
     "@nestjs/swagger": "^7.3.1",
     "@nestjs/throttler": "^5.1.2",
     "@packages/shared": "*",
@@ -34,6 +37,8 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "cookie-parser": "^1.4.6",
+    "helmet": "^8.3.0",
+    "ioredis": "^6.0.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",
@@ -46,6 +51,7 @@
     "@types/bcrypt": "^5.0.2",
     "@types/cookie-parser": "^1.4.7",
     "@types/express": "^4.17.21",
+    "@types/ioredis": "^4.28.10",
     "@types/jest": "^29.5.12",
     "@types/node": "^20.12.12",
     "@types/passport-jwt": "^4.0.1",
