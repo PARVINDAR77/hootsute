@@ -165,3 +165,35 @@
   - 14 API E2E test suites (197 tests passed)
   - 11 Web test suites (92 tests passed)
   - Clean production builds for shared package, NestJS backend, and Next.js frontend
+
+---
+
+## Phase 17: Social Listening, Brand Mentions & Sentiment Monitoring Engine (Stage 17)
+- [x] Database schema & zero-downtime PostgreSQL migrations for `ListeningQuery` and `ListeningMention`
+  - Relational mapping to `Workspace` and `User`
+  - Keyword and exclusion array tracking with indexed search
+  - Mentions stream model tracking author, handle, platform, followers, content, url, reach estimates, and engagement counters
+  - Cascading cleanup and star / read state management
+- [x] Shared TypeScript contracts & DTOs in `@packages/shared` (`ListeningSentiment`, `ListeningQueryDto`, `CreateListeningQueryDto`, `UpdateListeningQueryDto`, `ListeningMentionDto`, `ListeningStreamFilterDto`, `ListeningAnalyticsSummaryDto`)
+- [x] Rule-Based NLP Sentiment & Crisis Analysis Engine (`SentimentAnalyzerService`)
+  - Normalized polarity scoring between -1.0 and +1.0
+  - Contextual negations and linguistic intensifier handling
+  - Automatic brand crisis / security incident marker alerting
+- [x] Social Listening Backend Service & Controller (`apps/api/src/listening/`)
+  - Complete query CRUD with collision prevention
+  - Multi-platform sample mention generator seeding realistic brand & competitor buzz
+  - Advanced feed filtering (query, sentiment, platform, keyword text search, starred)
+  - Aggregated brand sentiment analytics (volume over time, reach, top authors, platform breakdown)
+  - Star toggle and read-status mutations
+- [x] Frontend Social Listening Dashboard (`apps/web/src/app/(dashboard)/listening/page.tsx`)
+  - Sentiment & reach KPI summary cards (% Positive, % Negative, Total Mentions, Est. Reach)
+  - Query pill navigation tabs with individual mention counters
+  - Filter toolbar with live search, sentiment dropdown, platform dropdown, and starred toggle
+  - Rich mention cards featuring author avatars, follower badges, sentiment scores, and direct link actions
+  - `CreateQueryModal.tsx`: Keyword tags, exclusions, multi-platform selection checkboxes, and live validation
+  - Sidebar integration (`ROUTES.LISTENING`)
+- [x] 100% test pass rates across all test suites:
+  - 51 API unit test suites (401 tests passed)
+  - 15 API E2E test suites (101 tests passed)
+  - 12 Web test suites (96 tests passed)
+  - Zero-error Next.js production build with 26 static pages

@@ -1270,4 +1270,114 @@ export interface LinkClickAnalyticsDto {
   recentEvents: LinkClickEventDto[];
 }
 
+// ==========================================
+// Phase 17: Social Listening, Brand Mentions & Sentiment Monitoring Engine
+// ==========================================
+
+export enum ListeningSentiment {
+  POSITIVE = 'POSITIVE',
+  NEUTRAL = 'NEUTRAL',
+  NEGATIVE = 'NEGATIVE',
+}
+
+export interface ListeningQueryDto {
+  id: string;
+  workspaceId: string;
+  createdById: string;
+  name: string;
+  keywords: string[];
+  excludedKeywords: string[];
+  platforms: SocialPlatform[];
+  languages: string[];
+  isActive: boolean;
+  sentimentFilter: string;
+  totalMentions?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateListeningQueryDto {
+  name: string;
+  keywords: string[];
+  excludedKeywords?: string[];
+  platforms: SocialPlatform[];
+  languages?: string[];
+  sentimentFilter?: 'ALL' | 'POSITIVE' | 'NEUTRAL' | 'NEGATIVE';
+}
+
+export interface UpdateListeningQueryDto {
+  name?: string;
+  keywords?: string[];
+  excludedKeywords?: string[];
+  platforms?: SocialPlatform[];
+  languages?: string[];
+  isActive?: boolean;
+  sentimentFilter?: 'ALL' | 'POSITIVE' | 'NEUTRAL' | 'NEGATIVE';
+}
+
+export interface ListeningMentionDto {
+  id: string;
+  queryId: string;
+  queryName?: string;
+  workspaceId: string;
+  platform: SocialPlatform;
+  externalId: string;
+  authorHandle: string;
+  authorName?: string | null;
+  authorAvatarUrl?: string | null;
+  authorFollowersCount: number;
+  content: string;
+  url?: string | null;
+  publishedAt: string;
+  sentiment: ListeningSentiment;
+  sentimentScore: number;
+  reachEstimate: number;
+  engagementCount: number;
+  isRead: boolean;
+  isStarred: boolean;
+  createdAt: string;
+}
+
+export interface ListeningStreamFilterDto {
+  queryId?: string;
+  sentiment?: ListeningSentiment | 'ALL';
+  platform?: SocialPlatform | 'ALL';
+  search?: string;
+  onlyStarred?: boolean;
+  page?: number;
+  limit?: number;
+}
+
+export interface ListeningSentimentBreakdownDto {
+  sentiment: ListeningSentiment;
+  count: number;
+  percentage: number;
+}
+
+export interface ListeningAnalyticsSummaryDto {
+  totalMentions: number;
+  estimatedTotalReach: number;
+  averageSentimentScore: number;
+  sentimentBreakdown: ListeningSentimentBreakdownDto[];
+  mentionsOverTime: {
+    date: string;
+    positive: number;
+    neutral: number;
+    negative: number;
+    total: number;
+  }[];
+  topAuthors: {
+    authorHandle: string;
+    authorName?: string | null;
+    platform: SocialPlatform;
+    followersCount: number;
+    mentionsCount: number;
+  }[];
+  platformBreakdown: {
+    platform: SocialPlatform;
+    count: number;
+    percentage: number;
+  }[];
+}
+
 

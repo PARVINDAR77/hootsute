@@ -22,6 +22,7 @@ import {
   CreditCard,
   Zap,
   Link2,
+  Radio,
 } from 'lucide-react';
 import { ROUTES } from '@/lib/constants';
 import { useWorkspace } from '@/lib/workspace-context';
@@ -147,7 +148,7 @@ export function Sidebar() {
           </Link>
         </div>
 
-        {/* Community & Conversations */}
+        {/* Community, Listening & Inbox */}
         <div className="space-y-1">
           <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
             <span>Community &amp; Inbox</span>
@@ -169,6 +170,23 @@ export function Sidebar() {
               }`}
             />
             <span>Social Inbox</span>
+          </Link>
+          <Link
+            href={ROUTES.LISTENING}
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+              pathname === ROUTES.LISTENING || pathname.startsWith(`${ROUTES.LISTENING}/`)
+                ? 'bg-indigo-50 text-indigo-700 font-semibold shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+            }`}
+          >
+            <Radio
+              className={`w-4 h-4 ${
+                pathname === ROUTES.LISTENING || pathname.startsWith(`${ROUTES.LISTENING}/`)
+                  ? 'text-indigo-600'
+                  : 'text-slate-400'
+              }`}
+            />
+            <span>Social Listening</span>
           </Link>
         </div>
 

@@ -93,6 +93,12 @@ enum SocialPlatform {
   TWITTER_X
 }
 
+enum ListeningSentiment {
+  POSITIVE
+  NEUTRAL
+  NEGATIVE
+}
+
 enum BrandTone {
   PROFESSIONAL
   CASUAL_FRIENDLY
@@ -212,6 +218,7 @@ model User {
   inboxNotifications       InboxNotification[]   @relation("InboxNotificationRecipient")
   uploadedMediaAssets      MediaAsset[]          @relation("MediaAssetUploadedBy")
   shortenedLinks           ShortenedLink[]       @relation("ShortenedLinkCreatedBy")
+  createdListeningQueries  ListeningQuery[]      @relation("ListeningQueryCreatedBy")
 
   @@index([email])
   @@index([role])
@@ -284,6 +291,8 @@ model Workspace {
   automationRules           AutomationRule[]
   automationLogs            AutomationExecutionLog[]
   shortenedLinks            ShortenedLink[]
+  listeningQueries          ListeningQuery[]
+  listeningMentions         ListeningMention[]
 
   @@index([slug])
   @@index([status])
@@ -1262,6 +1271,60 @@ model LinkClickEvent {
   @@index([shortenedLinkId])
   @@index([shortenedLinkId, clickedAt])
   @@map("link_click_events")
+}
+
+model ListeningQuery {
+  id               String               @id @default(uuid())
+  workspaceId      String
+  createdById      String
+  name             String
+  keywords         String[]
+  excludedKeywords String[]             @default([])
+  platforms        SocialPlatform[]
+  languages        String[]             @default(["en"])
+  isActive         Boolean              @default(true)
+  sentimentFilter  String               @default("ALL")
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  workspace        Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy        User                 @relation("ListeningQueryCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  mentions         ListeningMention[]
+
+  @@index([workspaceId])
+  @@index([workspaceId, isActive])
+  @@map("listening_queries")
+}
+
+model ListeningMention {
+  id                   String             @id @default(uuid())
+  queryId              String
+  workspaceId          String
+  platform             SocialPlatform
+  externalId           String
+  authorHandle         String
+  authorName           String?
+  authorAvatarUrl      String?
+  authorFollowersCount Int                @default(0)
+  content              String
+  url                  String?
+  publishedAt          DateTime           @default(now())
+  sentiment            ListeningSentiment @default(NEUTRAL)
+  sentimentScore       Float              @default(0.0)
+  reachEstimate        Int                @default(0)
+  engagementCount      Int                @default(0)
+  isRead               Boolean            @default(false)
+  isStarred            Boolean            @default(false)
+  createdAt            DateTime           @default(now())
+
+  query                ListeningQuery     @relation(fields: [queryId], references: [id], onDelete: Cascade)
+  workspace            Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([platform, externalId])
+  @@index([workspaceId, publishedAt])
+  @@index([queryId])
+  @@index([workspaceId, sentiment])
+  @@map("listening_mentions")
 }
 
 

@@ -25,6 +25,7 @@ export const ROUTES = {
   INBOX: '/inbox',
   AUTOMATIONS: '/automations',
   LINKS: '/links',
+  LISTENING: '/listening',
   WORKSPACE_ONBOARDING: '/onboarding/workspace',
   INVITATIONS_ACCEPT: '/invitations/accept',
   UNAUTHORIZED: '/unauthorized',
