@@ -27,6 +27,7 @@ import {
   PieChart,
   ShieldAlert,
   Swords,
+  Webhook,
 } from 'lucide-react';
 import { ROUTES } from '@/lib/constants';
 import { useWorkspace } from '@/lib/workspace-context';
@@ -270,6 +271,23 @@ export function Sidebar() {
               }`}
             />
             <span>Smart Workflows</span>
+          </Link>
+          <Link
+            href={ROUTES.SETTINGS_WEBHOOKS}
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+              pathname === ROUTES.SETTINGS_WEBHOOKS || pathname.startsWith(`${ROUTES.SETTINGS_WEBHOOKS}/`)
+                ? 'bg-indigo-50 text-indigo-700 font-semibold shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+            }`}
+          >
+            <Webhook
+              className={`w-4 h-4 ${
+                pathname === ROUTES.SETTINGS_WEBHOOKS || pathname.startsWith(`${ROUTES.SETTINGS_WEBHOOKS}/`)
+                  ? 'text-indigo-600'
+                  : 'text-slate-400'
+              }`}
+            />
+            <span>Outbound Webhooks</span>
           </Link>
         </div>
 

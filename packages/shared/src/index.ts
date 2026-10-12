@@ -1848,5 +1848,95 @@ export interface CompetitorComparisonSummaryDto {
   }[];
 }
 
+// ==========================================
+// Phase 22: Outbound Webhooks & Developer Integrations Engine
+// ==========================================
+
+export enum WebhookDeliveryStatus {
+  SUCCESS = 'SUCCESS',
+  FAILED = 'FAILED',
+  PENDING_RETRY = 'PENDING_RETRY',
+}
+
+export const WEBHOOK_EVENT_TYPES = [
+  'post.published',
+  'post.failed',
+  'inbox.message_received',
+  'inbox.crisis_flagged',
+  'approval.requested',
+  'approval.approved',
+  'approval.rejected',
+  'competitor.lead_change',
+  'webhook.test_ping',
+] as const;
+
+export type WebhookEventType = (typeof WEBHOOK_EVENT_TYPES)[number];
+
+export interface WebhookDeliveryLogDto {
+  id: string;
+  subscriptionId: string;
+  workspaceId: string;
+  eventType: string;
+  payload: Record<string, any>;
+  statusCode?: number | null;
+  durationMs: number;
+  responseBody?: string | null;
+  errorMessage?: string | null;
+  status: WebhookDeliveryStatus;
+  attemptNumber: number;
+  nextRetryAt?: string | null;
+  createdAt: string;
+  subscriptionName?: string;
+}
+
+export interface WebhookSubscriptionDto {
+  id: string;
+  workspaceId: string;
+  name: string;
+  targetUrl: string;
+  secretKey: string;
+  eventTypes: string[];
+  isActive: boolean;
+  description?: string | null;
+  failureCount: number;
+  lastTriggeredAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  latestDeliveries?: WebhookDeliveryLogDto[];
+}
+
+export interface CreateWebhookSubscriptionDto {
+  name: string;
+  targetUrl: string;
+  eventTypes: string[];
+  description?: string;
+  isActive?: boolean;
+}
+
+export interface UpdateWebhookSubscriptionDto {
+  name?: string;
+  targetUrl?: string;
+  eventTypes?: string[];
+  description?: string;
+  isActive?: boolean;
+}
+
+export interface WebhookTestPingResponseDto {
+  delivered: boolean;
+  statusCode?: number | null;
+  durationMs: number;
+  responseBody?: string | null;
+  errorMessage?: string | null;
+  signatureHeader: string;
+  timestampHeader: string;
+}
+
+export interface WebhookSecretRotateResponseDto {
+  subscriptionId: string;
+  newSecretKey: string;
+  rotatedAt: string;
+}
+
+
 
 

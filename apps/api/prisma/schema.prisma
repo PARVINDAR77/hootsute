@@ -313,6 +313,8 @@ model Workspace {
   moderationRules           InboxModerationRule[]
   autoReplyTemplates        InboxAutoReplyTemplate[]
   competitorProfiles        CompetitorProfile[]
+  webhookSubscriptions      WebhookSubscription[]
+  webhookDeliveryLogs       WebhookDeliveryLog[]
 
   @@index([slug])
   @@index([status])
@@ -1638,4 +1640,57 @@ model CompetitorBenchmarkSnapshot {
   @@index([competitorProfileId, period])
   @@map("competitor_benchmark_snapshots")
 }
+
+enum WebhookDeliveryStatus {
+  SUCCESS
+  FAILED
+  PENDING_RETRY
+}
+
+model WebhookSubscription {
+  id              String               @id @default(uuid())
+  workspaceId     String
+  name            String
+  targetUrl       String
+  secretKey       String
+  eventTypes      String[]             @default([])
+  isActive        Boolean              @default(true)
+  description     String?
+  failureCount    Int                  @default(0)
+  lastTriggeredAt DateTime?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  workspace       Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  deliveries      WebhookDeliveryLog[]
+
+  @@index([workspaceId])
+  @@index([workspaceId, isActive])
+  @@map("webhook_subscriptions")
+}
+
+model WebhookDeliveryLog {
+  id             String                @id @default(uuid())
+  subscriptionId String
+  workspaceId    String
+  eventType      String
+  payload        Json                  @default("{}")
+  statusCode     Int?
+  durationMs     Int                   @default(0)
+  responseBody   String?               @db.Text
+  errorMessage   String?
+  status         WebhookDeliveryStatus @default(SUCCESS)
+  attemptNumber  Int                   @default(1)
+  nextRetryAt    DateTime?
+  createdAt      DateTime              @default(now())
+
+  subscription   WebhookSubscription   @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  workspace      Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId])
+  @@index([workspaceId, createdAt])
+  @@index([workspaceId, status])
+  @@map("webhook_delivery_logs")
+}
+
 

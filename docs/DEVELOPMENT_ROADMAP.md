@@ -298,4 +298,34 @@
   - 16 Web test suites (111 tests passed)
   - Zero-error monorepo Next.js production build across all 34 static and dynamic routes
 
+---
+
+## Phase 22: Outbound Webhooks & Developer Integrations Engine (Stage 22)
+- [x] Database schema & zero-downtime PostgreSQL migrations:
+  - `WebhookDeliveryStatus` enum (`SUCCESS`, `FAILED`, `PENDING_RETRY`)
+  - `WebhookSubscription` model (name, targetUrl, secretKey, eventTypes, isActive, description, failureCount, lastTriggeredAt)
+  - `WebhookDeliveryLog` model (subscriptionId, workspaceId, eventType, payload, statusCode, durationMs, responseBody, errorMessage, status, attemptNumber, nextRetryAt)
+  - Workspace relations: `webhookSubscriptions WebhookSubscription[]`, `webhookDeliveryLogs WebhookDeliveryLog[]`
+- [x] Shared TypeScript contracts & DTOs in `@packages/shared`:
+  - `WebhookDeliveryStatus`, `WEBHOOK_EVENT_TYPES`, `WebhookEventType`
+  - `WebhookSubscriptionDto`, `CreateWebhookSubscriptionDto`, `UpdateWebhookSubscriptionDto`
+  - `WebhookDeliveryLogDto`, `WebhookTestPingResponseDto`, `WebhookSecretRotateResponseDto`
+- [x] Outbound Webhook Dispatch & Management Engine (`apps/api/src/webhooks/`):
+  - `WebhooksService`: Subscription CRUD, cryptographically secure HMAC-SHA256 signature generator (`X-OmniSocial-Signature: sha256=...`), timestamp header (`X-OmniSocial-Timestamp`), secret rotation, live test ping dispatcher, event broadcast dispatch engine, delivery log recorder with latency tracking, and manual retry handler
+  - `WebhooksController`: REST endpoints under `/api/v1/workspaces/:workspaceId/webhooks` with strict RBAC authorization
+  - Registered in `AppModule`
+- [x] Frontend Developer Webhook & Delivery Stream Suite (`apps/web/`):
+  - `WebhooksPage` (`/settings/webhooks`):
+    - Configured Endpoints view: status badges, failure indicators, subscribed event tags, secret key masking with eye toggle and copy buttons, Rotate Secret modal, Send Test Ping trigger, Edit/Delete
+    - Outbound Delivery Stream tab: live attempt logs with HTTP status codes, latency in ms, event type, timestamp, payload inspector modal, and one-click manual retry
+    - Developer Verification Guide tab: Node.js HMAC-SHA256 verification code snippet
+    - Register/Edit Webhook modal with event checkboxes
+  - Sidebar integration with `Webhook` icon under Automations navigation (`ROUTES.SETTINGS_WEBHOOKS`)
+- [x] 100% test pass rates across all test suites:
+  - 58 API unit test suites (458 tests passed)
+  - 20 API E2E test suites (268 tests passed)
+  - 17 Web test suites (114 tests passed)
+  - Zero-error monorepo Next.js production build across all 35 static and dynamic routes
+
+
 
