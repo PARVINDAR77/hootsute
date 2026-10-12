@@ -26,6 +26,7 @@ import {
   Globe,
   PieChart,
   ShieldAlert,
+  Swords,
 } from 'lucide-react';
 import { ROUTES } from '@/lib/constants';
 import { useWorkspace } from '@/lib/workspace-context';
@@ -166,6 +167,23 @@ export function Sidebar() {
               }`}
             />
             <span>Executive Reports</span>
+          </Link>
+          <Link
+            href={ROUTES.COMPETITORS}
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+              pathname === ROUTES.COMPETITORS || pathname.startsWith(`${ROUTES.COMPETITORS}/`)
+                ? 'bg-indigo-50 text-indigo-700 font-semibold shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+            }`}
+          >
+            <Swords
+              className={`w-4 h-4 ${
+                pathname === ROUTES.COMPETITORS || pathname.startsWith(`${ROUTES.COMPETITORS}/`)
+                  ? 'text-indigo-600'
+                  : 'text-slate-400'
+              }`}
+            />
+            <span>Competitor Intel</span>
           </Link>
         </div>
 

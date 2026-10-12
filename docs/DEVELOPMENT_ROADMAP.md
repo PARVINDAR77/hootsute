@@ -272,3 +272,30 @@
   - 15 Web test suites (108 tests passed)
   - Zero-error monorepo Next.js production build across all 33 static and dynamic routes
 
+---
+
+## Phase 21: Competitor Benchmarking & Public Intelligence Hub (Stage 21)
+- [x] Database schema & zero-downtime PostgreSQL migrations:
+  - `CompetitorCategory` enum (`DIRECT`, `INDIRECT`, `ASPIRATIONAL`)
+  - `CompetitorProfile` model (name, websiteUrl, avatarUrl, category, notes, isActive, relations to Workspace, socialAccounts, and snapshots)
+  - `CompetitorSocialAccount` model (competitorProfileId, platform, handle, publicUrl, followersCount, followingCount, postsCount, isActive, lastSyncedAt)
+  - `CompetitorBenchmarkSnapshot` model (competitorProfileId, platform, period, snapshotDate, followerGrowthRate, followersCount, engagementRate, postingFrequencyWeekly, estReach, estImpressions, sentimentScore, sentimentDistribution JSON, topPostExcerpt, topPostEngagementRate)
+  - Workspace relations: `competitorProfiles CompetitorProfile[]`
+- [x] Shared TypeScript contracts & DTOs in `@packages/shared`:
+  - `CompetitorCategory`, `CompetitorProfileDto`, `CreateCompetitorProfileDto`, `UpdateCompetitorProfileDto`
+  - `CompetitorSocialAccountDto`, `AddCompetitorAccountDto`, `CompetitorBenchmarkSnapshotDto`
+  - `CompetitorComparisonSummaryDto`, `CompetitorLeaderboardItemDto`
+- [x] Competitor Intelligence Backend Engine (`apps/api/src/competitors/`):
+  - `CompetitorsService`: Profile and social channel CRUD, automated public telemetry snapshot generator across DAY, WEEK, DAYS_28 periods, side-by-side benchmark comparison engine with natural-language AI strategic recommendations
+  - `CompetitorsController`: REST endpoints under `/api/v1/workspaces/:workspaceId/competitors` with strict RBAC (`OWNER`/`ADMIN` write; `VIEWER` read)
+  - Registered in `AppModule`
+- [x] Frontend Public Intelligence & Benchmarking Dashboard (`apps/web/`):
+  - `CompetitorsPage` (`/competitors`): Comparative KPI summary banner (Avg Engagement Rate lead, Total Brand Reach, Publishing Cadence, Sentiment Index lead), Industry Leaderboard matrix with relative engagement distribution bars and category badges, AI Strategic Insights callout cards, Top Performing Content feed, Tracked Competitor Profiles grid with channel chips, Track Competitor Modal, and Add Channel Modal
+  - Sidebar integration with `Swords` icon under Analytics navigation (`ROUTES.COMPETITORS`)
+- [x] 100% test pass rates across all test suites:
+  - 57 API unit test suites (448 tests passed)
+  - 19 API E2E test suites (257 tests passed)
+  - 16 Web test suites (111 tests passed)
+  - Zero-error monorepo Next.js production build across all 34 static and dynamic routes
+
+

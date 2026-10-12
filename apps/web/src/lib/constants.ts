@@ -29,6 +29,7 @@ export const ROUTES = {
   REPORTS: '/reports',
   SETTINGS_WHITE_LABEL: '/settings/white-label',
   SETTINGS_INBOX_MODERATION: '/settings/inbox-moderation',
+  COMPETITORS: '/competitors',
   WORKSPACE_ONBOARDING: '/onboarding/workspace',
   INVITATIONS_ACCEPT: '/invitations/accept',
   UNAUTHORIZED: '/unauthorized',

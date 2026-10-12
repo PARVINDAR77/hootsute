@@ -1710,4 +1710,143 @@ export interface InboxTriageResultDto {
   assignedUserId?: string | null;
 }
 
+// ==========================================
+// Phase 21: Competitor Benchmarking & Public Intelligence Hub
+// ==========================================
+
+export enum CompetitorCategory {
+  DIRECT = 'DIRECT',
+  INDIRECT = 'INDIRECT',
+  ASPIRATIONAL = 'ASPIRATIONAL',
+}
+
+export interface CompetitorSocialAccountDto {
+  id: string;
+  competitorProfileId: string;
+  platform: SocialPlatform;
+  handle: string;
+  publicUrl?: string | null;
+  followersCount: number;
+  followingCount: number;
+  postsCount: number;
+  isActive: boolean;
+  lastSyncedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CompetitorBenchmarkSnapshotDto {
+  id: string;
+  competitorProfileId: string;
+  platform?: SocialPlatform | null;
+  period: AnalyticsMetricPeriod;
+  snapshotDate: string;
+  followerGrowthRate: number;
+  followersCount: number;
+  engagementRate: number;
+  postingFrequencyWeekly: number;
+  estReach: number;
+  estImpressions: number;
+  sentimentScore: number;
+  sentimentDistribution: {
+    positive: number;
+    neutral: number;
+    negative: number;
+  };
+  topPostExcerpt?: string | null;
+  topPostEngagementRate?: number | null;
+  createdAt: string;
+}
+
+export interface CompetitorProfileDto {
+  id: string;
+  workspaceId: string;
+  name: string;
+  websiteUrl?: string | null;
+  avatarUrl?: string | null;
+  category: CompetitorCategory;
+  notes?: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  socialAccounts?: CompetitorSocialAccountDto[];
+  latestSnapshot?: CompetitorBenchmarkSnapshotDto | null;
+}
+
+export interface CreateCompetitorSocialAccountInput {
+  platform: SocialPlatform;
+  handle: string;
+  publicUrl?: string;
+  followersCount?: number;
+  followingCount?: number;
+  postsCount?: number;
+}
+
+export interface CreateCompetitorProfileDto {
+  name: string;
+  websiteUrl?: string;
+  avatarUrl?: string;
+  category?: CompetitorCategory;
+  notes?: string;
+  accounts?: CreateCompetitorSocialAccountInput[];
+}
+
+export interface UpdateCompetitorProfileDto {
+  name?: string;
+  websiteUrl?: string;
+  avatarUrl?: string;
+  category?: CompetitorCategory;
+  notes?: string;
+  isActive?: boolean;
+}
+
+export interface AddCompetitorAccountDto {
+  platform: SocialPlatform;
+  handle: string;
+  publicUrl?: string;
+  followersCount?: number;
+  followingCount?: number;
+  postsCount?: number;
+}
+
+export interface CompetitorLeaderboardItemDto {
+  name: string;
+  isOwnBrand: boolean;
+  category?: CompetitorCategory | 'OWN_BRAND';
+  avatarUrl?: string | null;
+  totalFollowers: number;
+  avgEngagementRate: number;
+  followerGrowthRate: number;
+  postingFrequencyWeekly: number;
+  sentimentScore: number;
+}
+
+export interface CompetitorComparisonSummaryDto {
+  period: AnalyticsMetricPeriod;
+  brandSummary: {
+    totalFollowers: number;
+    avgEngagementRate: number;
+    followerGrowthRate: number;
+    postingFrequencyWeekly: number;
+    sentimentScore: number;
+  };
+  competitorBenchmarkAvg: {
+    totalFollowers: number;
+    avgEngagementRate: number;
+    followerGrowthRate: number;
+    postingFrequencyWeekly: number;
+    sentimentScore: number;
+  };
+  leaderboard: CompetitorLeaderboardItemDto[];
+  keyInsights: string[];
+  topPerformingPosts: {
+    brandOrCompetitor: string;
+    platform: SocialPlatform;
+    excerpt: string;
+    engagementRate: number;
+    date: string;
+  }[];
+}
+
+
 

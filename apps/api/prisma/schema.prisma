@@ -312,6 +312,7 @@ model Workspace {
   generatedReports          GeneratedExecutiveReport[]
   moderationRules           InboxModerationRule[]
   autoReplyTemplates        InboxAutoReplyTemplate[]
+  competitorProfiles        CompetitorProfile[]
 
   @@index([slug])
   @@index([status])
@@ -1564,3 +1565,77 @@ model InboxAutoReplyTemplate {
   @@index([workspaceId, category])
   @@map("inbox_auto_reply_templates")
 }
+
+enum CompetitorCategory {
+  DIRECT
+  INDIRECT
+  ASPIRATIONAL
+}
+
+model CompetitorProfile {
+  id             String                        @id @default(uuid())
+  workspaceId    String
+  name           String
+  websiteUrl     String?
+  avatarUrl      String?
+  category       CompetitorCategory            @default(DIRECT)
+  notes          String?
+  isActive       Boolean                       @default(true)
+  createdAt      DateTime                      @default(now())
+  updatedAt      DateTime                      @updatedAt
+
+  workspace      Workspace                     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  socialAccounts CompetitorSocialAccount[]
+  snapshots      CompetitorBenchmarkSnapshot[]
+
+  @@index([workspaceId])
+  @@index([workspaceId, isActive])
+  @@map("competitor_profiles")
+}
+
+model CompetitorSocialAccount {
+  id                  String             @id @default(uuid())
+  competitorProfileId String
+  platform            SocialPlatform
+  handle              String
+  publicUrl           String?
+  followersCount      Int                @default(0)
+  followingCount      Int                @default(0)
+  postsCount          Int                @default(0)
+  isActive            Boolean            @default(true)
+  lastSyncedAt        DateTime?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  competitorProfile   CompetitorProfile  @relation(fields: [competitorProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([competitorProfileId, platform])
+  @@index([competitorProfileId])
+  @@map("competitor_social_accounts")
+}
+
+model CompetitorBenchmarkSnapshot {
+  id                     String                @id @default(uuid())
+  competitorProfileId    String
+  platform               SocialPlatform?
+  period                 AnalyticsMetricPeriod @default(DAY)
+  snapshotDate           DateTime
+  followerGrowthRate     Float                 @default(0.0)
+  followersCount         Int                   @default(0)
+  engagementRate         Float                 @default(0.0)
+  postingFrequencyWeekly Float                 @default(0.0)
+  estReach               Int                   @default(0)
+  estImpressions         Int                   @default(0)
+  sentimentScore         Float                 @default(0.0)
+  sentimentDistribution  Json                  @default("{\"positive\":0,\"neutral\":0,\"negative\":0}")
+  topPostExcerpt         String?
+  topPostEngagementRate  Float?
+  createdAt              DateTime              @default(now())
+
+  competitorProfile      CompetitorProfile     @relation(fields: [competitorProfileId], references: [id], onDelete: Cascade)
+
+  @@index([competitorProfileId, snapshotDate])
+  @@index([competitorProfileId, period])
+  @@map("competitor_benchmark_snapshots")
+}
+
