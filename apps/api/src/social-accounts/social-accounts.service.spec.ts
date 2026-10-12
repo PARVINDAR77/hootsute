@@ -9,17 +9,22 @@ import { SocialAccountsService } from './social-accounts.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TokenVaultService } from './token-vault/token-vault.service';
 import { MetaOAuthService } from './providers/meta/meta-oauth.service';
+import { LinkedInOAuthService } from './providers/linkedin/linkedin-oauth.service';
+import { TwitterOAuthService } from './providers/twitter/twitter-oauth.service';
 import {
   SocialProvider,
   SocialAccountType,
   SocialConnectionStatus,
 } from '@packages/shared';
+import * as crypto from 'crypto';
 
 describe('SocialAccountsService', () => {
   let service: SocialAccountsService;
   let prisma: any;
   let tokenVault: any;
   let metaOAuth: any;
+  let linkedinOAuth: any;
+  let twitterOAuth: any;
   let configService: any;
 
   beforeEach(async () => {
@@ -57,9 +62,21 @@ describe('SocialAccountsService', () => {
       handleOAuthCallback: jest.fn(),
     };
 
+    linkedinOAuth = {
+      generateAuthorizationUrl: jest.fn().mockReturnValue('https://linkedin.com/oauth/v2/authorization?sample'),
+      exchangeCodeAndFetchAccounts: jest.fn(),
+    };
+
+    twitterOAuth = {
+      generateAuthorizationUrl: jest.fn().mockReturnValue('https://twitter.com/i/oauth2/authorize?sample'),
+      exchangeCodeAndFetchAccounts: jest.fn(),
+    };
+
     configService = {
       get: jest.fn().mockImplementation((key: string) => {
         if (key === 'META_OAUTH_REDIRECT_URI') return 'http://localhost:4000/api/v1/oauth/meta/callback';
+        if (key === 'LINKEDIN_OAUTH_REDIRECT_URI') return 'http://localhost:4000/api/v1/oauth/linkedin/callback';
+        if (key === 'TWITTER_OAUTH_REDIRECT_URI') return 'http://localhost:4000/api/v1/oauth/twitter/callback';
         if (key === 'CORS_ORIGIN') return 'http://localhost:3000';
         return null;
       }),
@@ -71,6 +88,8 @@ describe('SocialAccountsService', () => {
         { provide: PrismaService, useValue: prisma },
         { provide: TokenVaultService, useValue: tokenVault },
         { provide: MetaOAuthService, useValue: metaOAuth },
+        { provide: LinkedInOAuthService, useValue: linkedinOAuth },
+        { provide: TwitterOAuthService, useValue: twitterOAuth },
         { provide: ConfigService, useValue: configService },
       ],
     }).compile();
@@ -327,6 +346,182 @@ describe('SocialAccountsService', () => {
           workspaceId: 'ws-1',
           actorUserId: 'user-1',
           action: 'SOCIAL_ACCOUNT_DISCONNECT',
+        }),
+      });
+    });
+  });
+
+  describe('Multi-Network: LinkedIn OAuth & Selection', () => {
+    it('should generate an OAuth state and return LinkedIn authorization URL', async () => {
+      const result = await service.initiateLinkedInOAuth('ws-1', 'user-1');
+
+      expect(result.authorizationUrl).toBe('https://linkedin.com/oauth/v2/authorization?sample');
+      expect(result.state).toBeDefined();
+      expect(result.provider).toBe(SocialProvider.LINKEDIN);
+      expect(prisma.oAuthState.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          workspaceId: 'ws-1',
+          userId: 'user-1',
+          provider: SocialProvider.LINKEDIN,
+        }),
+      });
+    });
+
+    it('should handle LinkedIn callback, exchange tokens and save encrypted session', async () => {
+      prisma.oAuthState.findUnique.mockResolvedValue({
+        id: 'state-li-1',
+        state: 'valid-li-state',
+        usedAt: null,
+        expiresAt: new Date(Date.now() + 60000),
+        workspaceId: 'ws-1',
+        userId: 'user-1',
+        redirectUri: 'http://localhost:4000/api/v1/oauth/linkedin/callback',
+      });
+
+      linkedinOAuth.exchangeCodeAndFetchAccounts.mockResolvedValue({
+        accessToken: 'li-access-token-secret',
+        expiresIn: 3600,
+        accounts: [
+          {
+            id: 'li-person-123',
+            name: 'Jane Doe',
+            username: 'janedoe',
+            accountType: SocialAccountType.LINKEDIN_PROFILE,
+            provider: SocialProvider.LINKEDIN,
+          },
+        ],
+      });
+
+      const res = await service.handleLinkedInCallback('li-auth-code', 'valid-li-state');
+
+      expect(res.redirectUrl).toContain('/settings/social-accounts/connect?session=');
+      expect(prisma.oAuthSession.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          workspaceId: 'ws-1',
+          userId: 'user-1',
+          provider: SocialProvider.LINKEDIN,
+        }),
+      });
+    });
+
+    it('should select and connect a LinkedIn account with encrypted token', async () => {
+      const sessionToken = 'li-session-token';
+      const sessionTokenHash = crypto.createHash('sha256').update(sessionToken).digest('hex');
+
+      prisma.oAuthSession.findUnique.mockResolvedValue({
+        id: 'session-li-1',
+        sessionTokenHash,
+        workspaceId: 'ws-1',
+        userId: 'user-1',
+        consumedAt: null,
+        expiresAt: new Date(Date.now() + 60000),
+        encryptedPayload: 'encrypted_payload',
+      });
+
+      tokenVault.decrypt.mockReturnValue(
+        JSON.stringify({
+          accounts: [
+            {
+              id: 'li-person-123',
+              name: 'Jane Doe',
+              username: 'janedoe',
+              category: 'Personal Profile',
+              accountType: SocialAccountType.LINKEDIN_PROFILE,
+              provider: SocialProvider.LINKEDIN,
+            },
+          ],
+          accessToken: 'li-access-token-secret',
+          grantedScopes: ['openid', 'profile', 'w_member_social'],
+          expiresAt: null,
+        }),
+      );
+
+      prisma.socialAccount.upsert.mockResolvedValue({
+        id: 'sa-li-1',
+        workspaceId: 'ws-1',
+        provider: SocialProvider.LINKEDIN,
+        providerAccountId: 'li-person-123',
+        accountName: 'Jane Doe',
+        accountType: SocialAccountType.LINKEDIN_PROFILE,
+        encryptedAccessToken: 'encrypted_token',
+      });
+
+      const res = await service.selectAccounts('ws-1', 'user-1', {
+        sessionToken,
+        selectedAccounts: [
+          {
+            provider: SocialProvider.LINKEDIN,
+            providerAccountId: 'li-person-123',
+            accountType: SocialAccountType.LINKEDIN_PROFILE,
+          },
+        ],
+      });
+
+      expect(res.success).toBe(true);
+      expect(res.accounts.length).toBe(1);
+      expect(prisma.socialAccount.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            workspaceId_provider_providerAccountId: {
+              workspaceId: 'ws-1',
+              provider: SocialProvider.LINKEDIN,
+              providerAccountId: 'li-person-123',
+            },
+          },
+        }),
+      );
+    });
+  });
+
+  describe('Multi-Network: Twitter / X OAuth & Selection', () => {
+    it('should generate an OAuth state and return Twitter authorization URL', async () => {
+      const result = await service.initiateTwitterOAuth('ws-1', 'user-1');
+
+      expect(result.authorizationUrl).toBe('https://twitter.com/i/oauth2/authorize?sample');
+      expect(result.state).toBeDefined();
+      expect(result.provider).toBe(SocialProvider.TWITTER_X);
+      expect(prisma.oAuthState.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          workspaceId: 'ws-1',
+          userId: 'user-1',
+          provider: SocialProvider.TWITTER_X,
+        }),
+      });
+    });
+
+    it('should handle Twitter callback, exchange tokens and save encrypted session', async () => {
+      prisma.oAuthState.findUnique.mockResolvedValue({
+        id: 'state-tw-1',
+        state: 'valid-tw-state',
+        usedAt: null,
+        expiresAt: new Date(Date.now() + 60000),
+        workspaceId: 'ws-1',
+        userId: 'user-1',
+        redirectUri: 'http://localhost:4000/api/v1/oauth/twitter/callback',
+      });
+
+      twitterOAuth.exchangeCodeAndFetchAccounts.mockResolvedValue({
+        accessToken: 'tw-access-token-secret',
+        expiresIn: 7200,
+        accounts: [
+          {
+            id: 'tw-user-789',
+            name: 'Tech Brand (@techbrand)',
+            username: 'techbrand',
+            accountType: SocialAccountType.TWITTER_PROFILE,
+            provider: SocialProvider.TWITTER_X,
+          },
+        ],
+      });
+
+      const res = await service.handleTwitterCallback('tw-auth-code', 'valid-tw-state');
+
+      expect(res.redirectUrl).toContain('/settings/social-accounts/connect?session=');
+      expect(prisma.oAuthSession.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          workspaceId: 'ws-1',
+          userId: 'user-1',
+          provider: SocialProvider.TWITTER_X,
         }),
       });
     });

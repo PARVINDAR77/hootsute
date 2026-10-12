@@ -41,12 +41,17 @@ enum WorkspaceMemberStatus {
 enum SocialProvider {
   META_FACEBOOK
   META_INSTAGRAM
+  LINKEDIN
+  TWITTER_X
 }
 
 enum SocialAccountType {
   FACEBOOK_PAGE
   INSTAGRAM_BUSINESS
   INSTAGRAM_CREATOR
+  LINKEDIN_PAGE
+  LINKEDIN_PROFILE
+  TWITTER_PROFILE
 }
 
 enum SocialConnectionStatus {

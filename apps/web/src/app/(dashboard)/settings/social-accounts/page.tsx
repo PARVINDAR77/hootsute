@@ -96,6 +96,48 @@ function SocialAccountsContent() {
     }
   };
 
+  const handleConnectLinkedIn = async () => {
+    if (!currentWorkspace?.id || !canManage) return;
+
+    setIsInitiating(true);
+    setErrorMessage(null);
+
+    try {
+      const result = await apiClient<{ authorizationUrl: string; state: string }>(
+        `/workspaces/${currentWorkspace.id}/social-accounts/linkedin/connect`,
+        { method: 'POST', body: JSON.stringify({}) },
+      );
+
+      if (result?.authorizationUrl) {
+        window.location.href = result.authorizationUrl;
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Failed to initiate LinkedIn OAuth.');
+      setIsInitiating(false);
+    }
+  };
+
+  const handleConnectTwitter = async () => {
+    if (!currentWorkspace?.id || !canManage) return;
+
+    setIsInitiating(true);
+    setErrorMessage(null);
+
+    try {
+      const result = await apiClient<{ authorizationUrl: string; state: string }>(
+        `/workspaces/${currentWorkspace.id}/social-accounts/twitter/connect`,
+        { method: 'POST', body: JSON.stringify({}) },
+      );
+
+      if (result?.authorizationUrl) {
+        window.location.href = result.authorizationUrl;
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Failed to initiate Twitter / X OAuth.');
+      setIsInitiating(false);
+    }
+  };
+
   const handleDisconnect = async () => {
     if (!currentWorkspace?.id || !accountToDisconnect) return;
 
@@ -136,6 +178,24 @@ function SocialAccountsContent() {
         return (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200">
             Instagram Creator
+          </span>
+        );
+      case SocialAccountType.LINKEDIN_PAGE:
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-sky-50 text-sky-800 border border-sky-300">
+            LinkedIn Page
+          </span>
+        );
+      case SocialAccountType.LINKEDIN_PROFILE:
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-800 border border-blue-200">
+            LinkedIn Profile
+          </span>
+        );
+      case SocialAccountType.TWITTER_PROFILE:
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-800 border border-slate-300">
+            Twitter / X Profile
           </span>
         );
       default:
@@ -308,6 +368,106 @@ function SocialAccountsContent() {
                   isLoading={isInitiating}
                 >
                   Connect Instagram
+                </Button>
+              ) : (
+                <span className="text-[11px] text-slate-400 font-medium">Admin required</span>
+              )}
+            </CardFooter>
+          </Card>
+
+          {/* LinkedIn Channel Card */}
+          <Card className="border-slate-200 hover:border-indigo-200 transition-colors">
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#0A66C2] text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                    in
+                  </div>
+                  <div>
+                    <CardTitle className="text-base">LinkedIn</CardTitle>
+                    <CardDescription>
+                      Publish updates to personal profiles &amp; organization company pages
+                    </CardDescription>
+                  </div>
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-sky-50 text-sky-800 border border-sky-300 uppercase">
+                  Profile &amp; Page
+                </span>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3 text-xs text-slate-600">
+              <p>
+                Connect LinkedIn member profiles or Company Pages you manage for professional B2B outreach.
+              </p>
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                <span className="px-2 py-0.5 bg-slate-100 rounded text-[10px] text-slate-600 font-mono">
+                  w_member_social
+                </span>
+                <span className="px-2 py-0.5 bg-slate-100 rounded text-[10px] text-slate-600 font-mono">
+                  w_organization_social
+                </span>
+              </div>
+            </CardContent>
+            <CardFooter className="pt-2 border-t border-slate-100 flex justify-between items-center">
+              <span className="text-[11px] text-slate-400">OpenID / UGC</span>
+              {canManage ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleConnectLinkedIn}
+                  isLoading={isInitiating}
+                >
+                  Connect LinkedIn
+                </Button>
+              ) : (
+                <span className="text-[11px] text-slate-400 font-medium">Admin required</span>
+              )}
+            </CardFooter>
+          </Card>
+
+          {/* Twitter / X Channel Card */}
+          <Card className="border-slate-200 hover:border-indigo-200 transition-colors">
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                    𝕏
+                  </div>
+                  <div>
+                    <CardTitle className="text-base">Twitter / X</CardTitle>
+                    <CardDescription>
+                      Real-time tweet publishing with 280-character validation
+                    </CardDescription>
+                  </div>
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-300 uppercase">
+                  v2 API
+                </span>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3 text-xs text-slate-600">
+              <p>
+                Connect your brand Twitter / X handle. Direct automated tweet scheduling and publishing.
+              </p>
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                <span className="px-2 py-0.5 bg-slate-100 rounded text-[10px] text-slate-600 font-mono">
+                  tweet.read
+                </span>
+                <span className="px-2 py-0.5 bg-slate-100 rounded text-[10px] text-slate-600 font-mono">
+                  tweet.write
+                </span>
+              </div>
+            </CardContent>
+            <CardFooter className="pt-2 border-t border-slate-100 flex justify-between items-center">
+              <span className="text-[11px] text-slate-400">OAuth 2.0 PKCE</span>
+              {canManage ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleConnectTwitter}
+                  isLoading={isInitiating}
+                >
+                  Connect Twitter / X
                 </Button>
               ) : (
                 <span className="text-[11px] text-slate-400 font-medium">Admin required</span>

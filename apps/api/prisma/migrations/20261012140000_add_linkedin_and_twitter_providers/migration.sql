@@ -1,0 +1,8 @@
+-- AlterEnum
+ALTER TYPE "SocialProvider" ADD VALUE 'LINKEDIN';
+ALTER TYPE "SocialProvider" ADD VALUE 'TWITTER_X';
+
+-- AlterEnum
+ALTER TYPE "SocialAccountType" ADD VALUE 'LINKEDIN_PAGE';
+ALTER TYPE "SocialAccountType" ADD VALUE 'LINKEDIN_PROFILE';
+ALTER TYPE "SocialAccountType" ADD VALUE 'TWITTER_PROFILE';

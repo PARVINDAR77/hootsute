@@ -11,6 +11,8 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { TokenVaultService } from './token-vault/token-vault.service';
 import { MetaOAuthService } from './providers/meta/meta-oauth.service';
+import { LinkedInOAuthService } from './providers/linkedin/linkedin-oauth.service';
+import { TwitterOAuthService } from './providers/twitter/twitter-oauth.service';
 import {
   SocialProvider,
   SocialAccountType,
@@ -22,7 +24,9 @@ import { MetaPageCandidate } from './providers/meta/meta-provider.interface';
 import * as crypto from 'crypto';
 
 interface SessionDecryptedPayload {
-  pages: MetaPageCandidate[];
+  pages?: MetaPageCandidate[];
+  accounts?: CandidateSocialAccount[];
+  accessToken?: string;
   grantedScopes: string[];
   expiresAt: string | null;
 }
@@ -35,6 +39,8 @@ export class SocialAccountsService {
     private readonly prisma: PrismaService,
     private readonly tokenVaultService: TokenVaultService,
     private readonly metaOAuthService: MetaOAuthService,
+    private readonly linkedinOAuthService: LinkedInOAuthService,
+    private readonly twitterOAuthService: TwitterOAuthService,
     private readonly configService: ConfigService,
   ) {}
 
@@ -57,6 +63,7 @@ export class SocialAccountsService {
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes expiry
 
     const serverRedirectUri =
+      customRedirectUri ||
       this.configService.get<string>('META_OAUTH_REDIRECT_URI') ||
       'http://localhost:4000/api/v1/oauth/meta/callback';
 
@@ -148,6 +155,205 @@ export class SocialAccountsService {
   }
 
   /**
+   * Initiates LinkedIn OAuth 2.0 flow:
+   * Generates secure single-use state, saves state to DB, and returns authorization URL.
+   */
+  async initiateLinkedInOAuth(workspaceId: string, userId: string, customRedirectUri?: string) {
+    const state = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes expiry
+
+    const serverRedirectUri =
+      customRedirectUri ||
+      this.configService.get<string>('LINKEDIN_OAUTH_REDIRECT_URI') ||
+      'http://localhost:4000/api/v1/oauth/linkedin/callback';
+
+    await this.prisma.oAuthState.create({
+      data: {
+        state,
+        workspaceId,
+        userId,
+        provider: SocialProvider.LINKEDIN,
+        redirectUri: serverRedirectUri,
+        expiresAt,
+      },
+    });
+
+    const authorizationUrl = this.linkedinOAuthService.generateAuthorizationUrl(state, serverRedirectUri);
+
+    this.logger.log(`Initiated LinkedIn OAuth for workspace [${workspaceId}] user [${userId}]`);
+
+    return {
+      authorizationUrl,
+      state,
+      provider: SocialProvider.LINKEDIN,
+      expiresAt,
+    };
+  }
+
+  /**
+   * Handles incoming OAuth callback from LinkedIn:
+   */
+  async handleLinkedInCallback(code: string, state: string) {
+    const stateRecord = await this.prisma.oAuthState.findUnique({
+      where: { state },
+    });
+
+    if (!stateRecord) {
+      throw new BadRequestException('Invalid or unknown OAuth state parameter');
+    }
+
+    if (stateRecord.usedAt) {
+      throw new BadRequestException('OAuth state has already been used');
+    }
+
+    if (stateRecord.expiresAt < new Date()) {
+      throw new BadRequestException('OAuth state has expired');
+    }
+
+    await this.prisma.oAuthState.update({
+      where: { id: stateRecord.id },
+      data: { usedAt: new Date() },
+    });
+
+    const liResult = await this.linkedinOAuthService.exchangeCodeAndFetchAccounts(
+      code,
+      stateRecord.redirectUri,
+    );
+
+    const sessionToken = crypto.randomBytes(32).toString('hex');
+    const sessionTokenHash = this.hashToken(sessionToken);
+
+    const expiresAt = liResult.expiresIn
+      ? new Date(Date.now() + liResult.expiresIn * 1000).toISOString()
+      : null;
+
+    const payload: SessionDecryptedPayload = {
+      accounts: liResult.accounts,
+      accessToken: liResult.accessToken,
+      grantedScopes: ['openid', 'profile', 'email', 'w_member_social'],
+      expiresAt,
+    };
+
+    const encryptedPayload = this.tokenVaultService.encrypt(JSON.stringify(payload));
+    const sessionExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+    await this.prisma.oAuthSession.create({
+      data: {
+        sessionTokenHash,
+        workspaceId: stateRecord.workspaceId,
+        userId: stateRecord.userId,
+        provider: SocialProvider.LINKEDIN,
+        encryptedPayload,
+        expiresAt: sessionExpiresAt,
+      },
+    });
+
+    const frontendUrl = this.configService.get<string>('CORS_ORIGIN') || 'http://localhost:3000';
+    const redirectUrl = `${frontendUrl}/settings/social-accounts/connect?session=${sessionToken}&workspaceId=${stateRecord.workspaceId}`;
+
+    return { redirectUrl, sessionToken, workspaceId: stateRecord.workspaceId };
+  }
+
+  /**
+   * Initiates Twitter / X OAuth 2.0 flow:
+   */
+  async initiateTwitterOAuth(workspaceId: string, userId: string, customRedirectUri?: string) {
+    const state = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    const serverRedirectUri =
+      customRedirectUri ||
+      this.configService.get<string>('TWITTER_OAUTH_REDIRECT_URI') ||
+      'http://localhost:4000/api/v1/oauth/twitter/callback';
+
+    await this.prisma.oAuthState.create({
+      data: {
+        state,
+        workspaceId,
+        userId,
+        provider: SocialProvider.TWITTER_X,
+        redirectUri: serverRedirectUri,
+        expiresAt,
+      },
+    });
+
+    const authorizationUrl = this.twitterOAuthService.generateAuthorizationUrl(state, serverRedirectUri);
+
+    this.logger.log(`Initiated Twitter OAuth for workspace [${workspaceId}] user [${userId}]`);
+
+    return {
+      authorizationUrl,
+      state,
+      provider: SocialProvider.TWITTER_X,
+      expiresAt,
+    };
+  }
+
+  /**
+   * Handles incoming OAuth callback from Twitter / X:
+   */
+  async handleTwitterCallback(code: string, state: string) {
+    const stateRecord = await this.prisma.oAuthState.findUnique({
+      where: { state },
+    });
+
+    if (!stateRecord) {
+      throw new BadRequestException('Invalid or unknown OAuth state parameter');
+    }
+
+    if (stateRecord.usedAt) {
+      throw new BadRequestException('OAuth state has already been used');
+    }
+
+    if (stateRecord.expiresAt < new Date()) {
+      throw new BadRequestException('OAuth state has expired');
+    }
+
+    await this.prisma.oAuthState.update({
+      where: { id: stateRecord.id },
+      data: { usedAt: new Date() },
+    });
+
+    const twResult = await this.twitterOAuthService.exchangeCodeAndFetchAccounts(
+      code,
+      stateRecord.redirectUri,
+    );
+
+    const sessionToken = crypto.randomBytes(32).toString('hex');
+    const sessionTokenHash = this.hashToken(sessionToken);
+
+    const expiresAt = twResult.expiresIn
+      ? new Date(Date.now() + twResult.expiresIn * 1000).toISOString()
+      : null;
+
+    const payload: SessionDecryptedPayload = {
+      accounts: twResult.accounts,
+      accessToken: twResult.accessToken,
+      grantedScopes: ['tweet.read', 'tweet.write', 'users.read', 'offline.access'],
+      expiresAt,
+    };
+
+    const encryptedPayload = this.tokenVaultService.encrypt(JSON.stringify(payload));
+    const sessionExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+    await this.prisma.oAuthSession.create({
+      data: {
+        sessionTokenHash,
+        workspaceId: stateRecord.workspaceId,
+        userId: stateRecord.userId,
+        provider: SocialProvider.TWITTER_X,
+        encryptedPayload,
+        expiresAt: sessionExpiresAt,
+      },
+    });
+
+    const frontendUrl = this.configService.get<string>('CORS_ORIGIN') || 'http://localhost:3000';
+    const redirectUrl = `${frontendUrl}/settings/social-accounts/connect?session=${sessionToken}&workspaceId=${stateRecord.workspaceId}`;
+
+    return { redirectUrl, sessionToken, workspaceId: stateRecord.workspaceId };
+  }
+
+  /**
    * Retrieves available candidate accounts for selection:
    * Strips all raw access tokens and annotates which accounts are already connected.
    */
@@ -196,41 +402,50 @@ export class SocialAccountsService {
 
     const candidates: CandidateSocialAccount[] = [];
 
-    for (const page of payload.pages) {
-      // Facebook Page Candidate
-      candidates.push({
-        id: page.id,
-        name: page.name,
-        username: page.username || null,
-        category: page.category || null,
-        accountType: SocialAccountType.FACEBOOK_PAGE,
-        provider: SocialProvider.META_FACEBOOK,
-        profileImageUrl: null,
-        tasks: page.tasks,
-        isAlreadyConnected: existingSet.has(`${SocialProvider.META_FACEBOOK}:${page.id}`),
-        instagramBusinessAccount: page.instagramBusinessAccount
-          ? {
-              id: page.instagramBusinessAccount.id,
-              name: page.instagramBusinessAccount.name,
-              username: page.instagramBusinessAccount.username,
-              profilePictureUrl: page.instagramBusinessAccount.profilePictureUrl || null,
-            }
-          : null,
-      });
-
-      // If page has a connected Instagram Professional account, add it as a separate candidate
-      if (page.instagramBusinessAccount) {
-        const ig = page.instagramBusinessAccount;
+    if (payload.pages && Array.isArray(payload.pages)) {
+      for (const page of payload.pages) {
+        // Facebook Page Candidate
         candidates.push({
-          id: ig.id,
-          name: ig.name,
-          username: ig.username,
-          category: 'Instagram Business',
-          accountType: SocialAccountType.INSTAGRAM_BUSINESS,
-          provider: SocialProvider.META_INSTAGRAM,
-          profileImageUrl: ig.profilePictureUrl || null,
-          isAlreadyConnected: existingSet.has(`${SocialProvider.META_INSTAGRAM}:${ig.id}`),
-          instagramBusinessAccount: null,
+          id: page.id,
+          name: page.name,
+          username: page.username || null,
+          category: page.category || null,
+          accountType: SocialAccountType.FACEBOOK_PAGE,
+          provider: SocialProvider.META_FACEBOOK,
+          profileImageUrl: null,
+          tasks: page.tasks,
+          isAlreadyConnected: existingSet.has(`${SocialProvider.META_FACEBOOK}:${page.id}`),
+          instagramBusinessAccount: page.instagramBusinessAccount
+            ? {
+                id: page.instagramBusinessAccount.id,
+                name: page.instagramBusinessAccount.name,
+                username: page.instagramBusinessAccount.username,
+                profilePictureUrl: page.instagramBusinessAccount.profilePictureUrl || null,
+              }
+            : null,
+        });
+
+        // If page has a connected Instagram Professional account, add it as a separate candidate
+        if (page.instagramBusinessAccount) {
+          const ig = page.instagramBusinessAccount;
+          candidates.push({
+            id: ig.id,
+            name: ig.name,
+            username: ig.username,
+            category: 'Instagram Business',
+            accountType: SocialAccountType.INSTAGRAM_BUSINESS,
+            provider: SocialProvider.META_INSTAGRAM,
+            profileImageUrl: ig.profilePictureUrl || null,
+            isAlreadyConnected: existingSet.has(`${SocialProvider.META_INSTAGRAM}:${ig.id}`),
+            instagramBusinessAccount: null,
+          });
+        }
+      }
+    } else if (payload.accounts && Array.isArray(payload.accounts)) {
+      for (const acc of payload.accounts) {
+        candidates.push({
+          ...acc,
+          isAlreadyConnected: existingSet.has(`${acc.provider}:${acc.id}`),
         });
       }
     }
@@ -292,7 +507,7 @@ export class SocialAccountsService {
       let metadata: any = {};
 
       if (item.accountType === SocialAccountType.FACEBOOK_PAGE) {
-        const page = payload.pages.find((p) => p.id === item.providerAccountId);
+        const page = payload.pages?.find((p) => p.id === item.providerAccountId);
         if (!page) {
           throw new BadRequestException(`Facebook Page [${item.providerAccountId}] not found in authorization session`);
         }
@@ -301,8 +516,7 @@ export class SocialAccountsService {
         accountUsername = page.username || null;
         metadata = { category: page.category, tasks: page.tasks };
       } else if (item.accountType === SocialAccountType.INSTAGRAM_BUSINESS) {
-        // Meta Graph API manages Instagram via the connected Facebook Page's access token
-        const pageWithIg = payload.pages.find(
+        const pageWithIg = payload.pages?.find(
           (p) => p.instagramBusinessAccount?.id === item.providerAccountId,
         );
         if (!pageWithIg || !pageWithIg.instagramBusinessAccount) {
@@ -315,6 +529,22 @@ export class SocialAccountsService {
         accountUsername = pageWithIg.instagramBusinessAccount.username;
         profileImageUrl = pageWithIg.instagramBusinessAccount.profilePictureUrl || null;
         metadata = { linkedFacebookPageId: pageWithIg.id, linkedFacebookPageName: pageWithIg.name };
+      } else if (
+        item.accountType === SocialAccountType.LINKEDIN_PAGE ||
+        item.accountType === SocialAccountType.LINKEDIN_PROFILE ||
+        item.accountType === SocialAccountType.TWITTER_PROFILE
+      ) {
+        const found = payload.accounts?.find((a) => a.id === item.providerAccountId);
+        if (!found) {
+          throw new BadRequestException(
+            `Account [${item.providerAccountId}] not found in authorization session`,
+          );
+        }
+        tokenToEncrypt = payload.accessToken || null;
+        accountName = found.name;
+        accountUsername = found.username || null;
+        profileImageUrl = found.profileImageUrl || null;
+        metadata = { category: found.category };
       }
 
       if (!tokenToEncrypt) {
@@ -486,6 +716,12 @@ export class SocialAccountsService {
       throw new NotFoundException('Social account not found in this workspace');
     }
 
+    if (account.provider === SocialProvider.LINKEDIN) {
+      return this.initiateLinkedInOAuth(workspaceId, userId);
+    }
+    if (account.provider === SocialProvider.TWITTER_X) {
+      return this.initiateTwitterOAuth(workspaceId, userId);
+    }
     return this.initiateMetaOAuth(workspaceId, userId);
   }
 }

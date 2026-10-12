@@ -53,7 +53,7 @@ function ConnectCandidateAccountsContent() {
     setIsLoading(true);
 
     apiClient<{ accounts: CandidateSocialAccount[] }>(
-      `/workspaces/${targetWorkspaceId}/social-accounts/meta/candidates?sessionToken=${encodeURIComponent(
+      `/workspaces/${targetWorkspaceId}/social-accounts/candidates?sessionToken=${encodeURIComponent(
         sessionToken,
       )}`,
     )
@@ -115,7 +115,7 @@ function ConnectCandidateAccountsContent() {
       }));
 
     try {
-      await apiClient(`/workspaces/${targetWorkspaceId}/social-accounts/meta/select`, {
+      await apiClient(`/workspaces/${targetWorkspaceId}/social-accounts/select`, {
         method: 'POST',
         body: JSON.stringify({
           sessionToken,
@@ -133,11 +133,50 @@ function ConnectCandidateAccountsContent() {
     }
   };
 
+  const getCandidateInfo = (account: CandidateSocialAccount) => {
+    if (
+      account.provider === SocialProvider.LINKEDIN ||
+      account.accountType === SocialAccountType.LINKEDIN_PAGE ||
+      account.accountType === SocialAccountType.LINKEDIN_PROFILE
+    ) {
+      return {
+        bg: 'bg-[#0A66C2]',
+        icon: 'in',
+        typeName:
+          account.accountType === SocialAccountType.LINKEDIN_PAGE
+            ? 'LinkedIn Company Page'
+            : 'LinkedIn Profile',
+      };
+    }
+    if (
+      account.provider === SocialProvider.TWITTER_X ||
+      account.accountType === SocialAccountType.TWITTER_PROFILE
+    ) {
+      return {
+        bg: 'bg-slate-900',
+        icon: '𝕏',
+        typeName: 'Twitter / X Profile',
+      };
+    }
+    if (account.accountType === SocialAccountType.FACEBOOK_PAGE) {
+      return {
+        bg: 'bg-blue-600',
+        icon: 'f',
+        typeName: 'Facebook Page',
+      };
+    }
+    return {
+      bg: 'bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600',
+      icon: 'IG',
+      typeName: 'Instagram Professional',
+    };
+  };
+
   if (isLoading) {
     return (
       <div className="max-w-2xl mx-auto py-16 text-center space-y-3">
         <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto" />
-        <p className="text-xs text-slate-500 font-medium">Discovering authorized Facebook &amp; Instagram channels...</p>
+        <p className="text-xs text-slate-500 font-medium">Discovering authorized social channels...</p>
       </div>
     );
   }
@@ -151,7 +190,7 @@ function ConnectCandidateAccountsContent() {
         </div>
         <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Select Channels to Connect</h1>
         <p className="text-xs text-slate-500">
-          We found the following accounts authorized by your Meta login. Choose which channels to connect to your workspace.
+          We found the following accounts authorized by your login. Choose which channels to connect to your workspace.
         </p>
       </div>
 
@@ -197,17 +236,17 @@ function ConnectCandidateAccountsContent() {
             {candidates.length === 0 ? (
               <div className="py-8 text-center space-y-2">
                 <p className="text-xs text-slate-500">
-                  No Facebook Pages or Instagram Professional accounts were found for your Meta user.
+                  No compatible social accounts were discovered for this login session.
                 </p>
                 <p className="text-[11px] text-slate-400">
-                  Make sure you are an administrator of at least one Facebook Page or have connected an Instagram Professional account.
+                  Please verify that you granted permissions for your personal profile, company pages, or business accounts.
                 </p>
               </div>
             ) : (
               candidates.map((account) => {
                 const key = `${account.provider}:${account.id}`;
                 const isSelected = selectedIds.has(key);
-                const isFacebook = account.accountType === SocialAccountType.FACEBOOK_PAGE;
+                const info = getCandidateInfo(account);
 
                 return (
                   <div
@@ -223,11 +262,9 @@ function ConnectCandidateAccountsContent() {
                   >
                     <div className="flex items-center gap-3">
                       <div
-                        className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white shadow-xs ${
-                          isFacebook ? 'bg-blue-600' : 'bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600'
-                        }`}
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white shadow-xs ${info.bg}`}
                       >
-                        {isFacebook ? 'f' : 'IG'}
+                        {info.icon}
                       </div>
                       <div>
                         <div className="font-semibold text-slate-900 text-sm flex items-center gap-2">
@@ -239,7 +276,7 @@ function ConnectCandidateAccountsContent() {
                           )}
                         </div>
                         <div className="text-[11px] text-slate-400 flex items-center gap-2">
-                          <span>{isFacebook ? 'Facebook Page' : 'Instagram Professional'}</span>
+                          <span>{info.typeName}</span>
                           {account.username && <span>• @{account.username}</span>}
                           {account.category && <span>• {account.category}</span>}
                         </div>

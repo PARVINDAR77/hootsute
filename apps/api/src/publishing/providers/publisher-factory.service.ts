@@ -4,6 +4,8 @@ import { SocialPlatform, SocialProvider } from '@prisma/client';
 import { SocialPublisher } from './social-publisher.interface';
 import { MetaFacebookPublisherService } from './meta-facebook-publisher.service';
 import { MetaInstagramPublisherService } from './meta-instagram-publisher.service';
+import { LinkedInPublisherService } from './linkedin-publisher.service';
+import { TwitterPublisherService } from './twitter-publisher.service';
 import { MockSocialPublisherService } from './mock-social-publisher.service';
 
 @Injectable()
@@ -15,6 +17,8 @@ export class PublisherFactoryService {
     private readonly configService: ConfigService,
     private readonly facebookPublisher: MetaFacebookPublisherService,
     private readonly instagramPublisher: MetaInstagramPublisherService,
+    private readonly linkedinPublisher: LinkedInPublisherService,
+    private readonly twitterPublisher: TwitterPublisherService,
     private readonly mockPublisher: MockSocialPublisherService,
   ) {
     const nodeEnv = this.configService.get<string>('nodeEnv', 'development');
@@ -35,8 +39,16 @@ export class PublisherFactoryService {
       return this.instagramPublisher;
     }
 
-    // Fallback for currently unconnected platforms (LinkedIn, X)
+    if (platform === SocialPlatform.LINKEDIN || provider === SocialProvider.LINKEDIN) {
+      return this.linkedinPublisher;
+    }
+
+    if (platform === SocialPlatform.TWITTER_X || provider === SocialProvider.TWITTER_X) {
+      return this.twitterPublisher;
+    }
+
     this.logger.warn(`No live publisher configured for platform [${platform}], using mock adapter`);
     return this.mockPublisher;
   }
 }
+

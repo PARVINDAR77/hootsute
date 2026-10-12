@@ -58,6 +58,49 @@ export class SocialAccountsController {
     return this.socialAccountsService.initiateMetaOAuth(workspaceId, user.id, dto?.redirectUri);
   }
 
+  @Post('linkedin/connect')
+  @RequireWorkspaceRole(WorkspaceRole.ADMIN)
+  @ApiOperation({ summary: 'Initiate LinkedIn OAuth 2.0 flow (ADMIN or OWNER only)' })
+  @ApiParam({ name: 'workspaceId', description: 'Workspace UUID' })
+  @ApiResponse({ status: 201, description: 'OAuth authorization URL and state returned' })
+  async initiateLinkedIn(
+    @Param('workspaceId') workspaceId: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: InitiateOAuthDto,
+  ) {
+    return this.socialAccountsService.initiateLinkedInOAuth(workspaceId, user.id, dto?.redirectUri);
+  }
+
+  @Post('twitter/connect')
+  @RequireWorkspaceRole(WorkspaceRole.ADMIN)
+  @ApiOperation({ summary: 'Initiate Twitter / X OAuth 2.0 flow (ADMIN or OWNER only)' })
+  @ApiParam({ name: 'workspaceId', description: 'Workspace UUID' })
+  @ApiResponse({ status: 201, description: 'OAuth authorization URL and state returned' })
+  async initiateTwitter(
+    @Param('workspaceId') workspaceId: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: InitiateOAuthDto,
+  ) {
+    return this.socialAccountsService.initiateTwitterOAuth(workspaceId, user.id, dto?.redirectUri);
+  }
+
+  @Get('candidates')
+  @RequireWorkspaceRole(WorkspaceRole.ADMIN)
+  @ApiOperation({ summary: 'Retrieve discovered candidate accounts awaiting selection' })
+  @ApiParam({ name: 'workspaceId', description: 'Workspace UUID' })
+  @ApiQuery({ name: 'sessionToken', description: 'Ephemeral OAuth session token' })
+  @ApiResponse({ status: 200, description: 'Discovered candidate social accounts' })
+  async getDiscoveredCandidates(
+    @Param('workspaceId') workspaceId: string,
+    @Query('sessionToken') sessionToken: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    if (!sessionToken) {
+      throw new BadRequestException('Query parameter sessionToken is required');
+    }
+    return this.socialAccountsService.getCandidateAccounts(workspaceId, sessionToken, user.id);
+  }
+
   @Get('meta/candidates')
   @RequireWorkspaceRole(WorkspaceRole.ADMIN)
   @ApiOperation({ summary: 'Retrieve discovered Meta candidate accounts awaiting selection' })
@@ -73,6 +116,19 @@ export class SocialAccountsController {
       throw new BadRequestException('Query parameter sessionToken is required');
     }
     return this.socialAccountsService.getCandidateAccounts(workspaceId, sessionToken, user.id);
+  }
+
+  @Post('select')
+  @RequireWorkspaceRole(WorkspaceRole.ADMIN)
+  @ApiOperation({ summary: 'Save selected social accounts' })
+  @ApiParam({ name: 'workspaceId', description: 'Workspace UUID' })
+  @ApiResponse({ status: 201, description: 'Accounts connected with encrypted credentials' })
+  async selectDiscoveredAccounts(
+    @Param('workspaceId') workspaceId: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: SelectAccountsDto,
+  ) {
+    return this.socialAccountsService.selectAccounts(workspaceId, user.id, dto);
   }
 
   @Post('meta/select')

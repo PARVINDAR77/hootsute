@@ -7,6 +7,8 @@ import { ScheduledPostsService } from './services/scheduled-posts.service';
 import { ScheduledPostsController } from './controllers/scheduled-posts.controller';
 import { MetaFacebookPublisherService } from './providers/meta-facebook-publisher.service';
 import { MetaInstagramPublisherService } from './providers/meta-instagram-publisher.service';
+import { LinkedInPublisherService } from './providers/linkedin-publisher.service';
+import { TwitterPublisherService } from './providers/twitter-publisher.service';
 import { MockSocialPublisherService } from './providers/mock-social-publisher.service';
 import { PublisherFactoryService } from './providers/publisher-factory.service';
 import { PublishingReconcilerService } from './services/publishing-reconciler.service';
@@ -25,6 +27,8 @@ import { ScheduledPostSweeperService } from './services/scheduled-post-sweeper.s
     ScheduledPostsService,
     MetaFacebookPublisherService,
     MetaInstagramPublisherService,
+    LinkedInPublisherService,
+    TwitterPublisherService,
     MockSocialPublisherService,
     PublisherFactoryService,
     PublishingReconcilerService,
@@ -36,6 +40,8 @@ import { ScheduledPostSweeperService } from './services/scheduled-post-sweeper.s
     ScheduledPostsService,
     PublishingDispatcherService,
     PublishingReconcilerService,
+    LinkedInPublisherService,
+    TwitterPublisherService,
     MockSocialPublisherService,
   ],
 })
