@@ -19,6 +19,7 @@ import {
   Shield,
   Inbox,
   Image as ImageIcon,
+  CreditCard,
 } from 'lucide-react';
 import { ROUTES } from '@/lib/constants';
 import { useWorkspace } from '@/lib/workspace-context';
@@ -32,6 +33,7 @@ export function Sidebar() {
     { name: 'Social Accounts', href: ROUTES.SETTINGS_SOCIAL_ACCOUNTS, icon: Share2 },
     { name: 'WhatsApp Approval', href: ROUTES.SETTINGS_WHATSAPP, icon: MessageSquare },
     { name: 'Workspace Settings', href: ROUTES.SETTINGS_WORKSPACE, icon: Building2 },
+    { name: 'Billing & Plan', href: ROUTES.SETTINGS_BILLING, icon: CreditCard },
     { name: 'Team Members', href: ROUTES.SETTINGS_MEMBERS, icon: Users },
     { name: 'Invitations', href: ROUTES.SETTINGS_INVITATIONS, icon: Mail },
   ];

@@ -942,3 +942,90 @@ export interface WorkspaceStorageUsageDto {
   };
 }
 
+export enum SubscriptionPlan {
+  FREE = 'FREE',
+  PRO = 'PRO',
+  ENTERPRISE = 'ENTERPRISE',
+}
+
+export enum SubscriptionStatus {
+  TRIALING = 'TRIALING',
+  ACTIVE = 'ACTIVE',
+  PAST_DUE = 'PAST_DUE',
+  CANCELED = 'CANCELED',
+  UNPAID = 'UNPAID',
+  INCOMPLETE = 'INCOMPLETE',
+}
+
+export enum BillingInterval {
+  MONTHLY = 'MONTHLY',
+  YEARLY = 'YEARLY',
+}
+
+export interface PlanFeature {
+  name: string;
+  included: boolean;
+  limitText?: string;
+}
+
+export interface PricingPlanDto {
+  plan: SubscriptionPlan;
+  displayName: string;
+  description: string;
+  monthlyPriceCents: number;
+  yearlyPriceCents: number;
+  storageQuotaBytes: number;
+  maxMediaAssets: number;
+  maxSocialAccounts: number;
+  monthlyAiTokens: number;
+  features: PlanFeature[];
+  isPopular?: boolean;
+}
+
+export interface WorkspaceSubscriptionDto {
+  id: string;
+  workspaceId: string;
+  plan: SubscriptionPlan;
+  status: SubscriptionStatus;
+  billingInterval: BillingInterval;
+  currentPeriodStart?: string | null;
+  currentPeriodEnd?: string | null;
+  cancelAtPeriodEnd: boolean;
+  canceledAt?: string | null;
+  trialEndsAt?: string | null;
+  stripeCustomerId?: string | null;
+  hasPaymentMethod: boolean;
+}
+
+export interface BillingInvoiceDto {
+  id: string;
+  workspaceId: string;
+  stripeInvoiceId: string;
+  amountDue: number;
+  amountPaid: number;
+  currency: string;
+  status: string;
+  invoicePdfUrl?: string | null;
+  hostedInvoiceUrl?: string | null;
+  periodStart: string;
+  periodEnd: string;
+  createdAt: string;
+}
+
+export interface CreateCheckoutSessionDto {
+  plan: SubscriptionPlan;
+  billingInterval: BillingInterval;
+  successUrl: string;
+  cancelUrl: string;
+}
+
+export interface CheckoutSessionResponseDto {
+  sessionId: string;
+  checkoutUrl: string;
+}
+
+export interface CustomerPortalResponseDto {
+  portalUrl: string;
+}
+
+

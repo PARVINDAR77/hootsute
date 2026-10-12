@@ -130,6 +130,26 @@ enum MediaStorageProvider {
   LOCAL_MOCK
 }
 
+enum SubscriptionPlan {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+  INCOMPLETE
+}
+
+enum BillingInterval {
+  MONTHLY
+  YEARLY
+}
+
 model User {
   id              String           @id @default(uuid())
   email           String           @unique
@@ -232,6 +252,8 @@ model Workspace {
   inboxSyncCheckpoints      InboxSyncCheckpoint[]
   inboxNotifications        InboxNotification[]
   mediaAssets               MediaAsset[]
+  subscription              WorkspaceSubscription?
+  invoices                  BillingInvoice[]
 
   @@index([slug])
   @@index([status])
@@ -1075,6 +1097,51 @@ model MediaAsset {
   @@index([workspaceId, deletedAt])
   @@index([storageKey])
   @@map("media_assets")
+}
+
+model WorkspaceSubscription {
+  id                   String             @id @default(uuid())
+  workspaceId          String             @unique
+  stripeCustomerId     String?            @unique
+  stripeSubscriptionId String?            @unique
+  stripePriceId        String?
+  plan                 SubscriptionPlan   @default(FREE)
+  status               SubscriptionStatus @default(ACTIVE)
+  billingInterval      BillingInterval    @default(MONTHLY)
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean            @default(false)
+  canceledAt           DateTime?
+  trialEndsAt          DateTime?
+  metadata             Json?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([plan, status])
+  @@map("workspace_subscriptions")
+}
+
+model BillingInvoice {
+  id               String   @id @default(uuid())
+  workspaceId      String
+  stripeInvoiceId  String   @unique
+  amountDue        Int
+  amountPaid       Int
+  currency         String   @default("usd")
+  status           String
+  invoicePdfUrl    String?
+  hostedInvoiceUrl String?
+  periodStart      DateTime
+  periodEnd        DateTime
+  createdAt        DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, createdAt])
+  @@map("billing_invoices")
 }
 
 

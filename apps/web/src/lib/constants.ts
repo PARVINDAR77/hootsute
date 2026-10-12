@@ -16,6 +16,7 @@ export const ROUTES = {
   SETTINGS_SOCIAL_ACCOUNTS_CONNECT: '/settings/social-accounts/connect',
   BRAND_KIT: '/settings/brand-kit',
   SETTINGS_WHATSAPP: '/settings/whatsapp',
+  SETTINGS_BILLING: '/settings/billing',
   CONTENT_STUDIO: '/content/studio',
   CONTENT_DRAFTS: '/content/drafts',
   MEDIA: '/media',
