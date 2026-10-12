@@ -20,6 +20,7 @@ import {
   Inbox,
   Image as ImageIcon,
   CreditCard,
+  Zap,
 } from 'lucide-react';
 import { ROUTES } from '@/lib/constants';
 import { useWorkspace } from '@/lib/workspace-context';
@@ -169,23 +170,29 @@ export function Sidebar() {
           </Link>
         </div>
 
-        {/* Future Modules */}
+        {/* Automations & Intelligence */}
         <div className="space-y-1">
-          <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-            Automations &amp; Intelligence
+          <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
+            <span>Automations</span>
+            <span className="text-[9px] bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-semibold">Active</span>
           </div>
-          <div
-            className="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-slate-400 cursor-not-allowed group opacity-70"
-            title="Smart Workflows will be introduced in Stage 8"
+          <Link
+            href={ROUTES.AUTOMATIONS}
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+              pathname === ROUTES.AUTOMATIONS || pathname.startsWith(`${ROUTES.AUTOMATIONS}/`)
+                ? 'bg-indigo-50 text-indigo-700 font-semibold shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+            }`}
           >
-            <div className="flex items-center gap-3">
-              <Sparkles className="w-4 h-4 text-slate-400" />
-              <span>Smart Workflows</span>
-            </div>
-            <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200">
-              Stage 8
-            </span>
-          </div>
+            <Zap
+              className={`w-4 h-4 ${
+                pathname === ROUTES.AUTOMATIONS || pathname.startsWith(`${ROUTES.AUTOMATIONS}/`)
+                  ? 'text-indigo-600'
+                  : 'text-slate-400'
+              }`}
+            />
+            <span>Smart Workflows</span>
+          </Link>
         </div>
 
         {/* Account / Personal */}

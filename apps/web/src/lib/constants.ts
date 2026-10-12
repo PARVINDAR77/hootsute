@@ -23,6 +23,7 @@ export const ROUTES = {
   CALENDAR: '/calendar',
   ANALYTICS: '/analytics',
   INBOX: '/inbox',
+  AUTOMATIONS: '/automations',
   WORKSPACE_ONBOARDING: '/onboarding/workspace',
   INVITATIONS_ACCEPT: '/invitations/accept',
   UNAUTHORIZED: '/unauthorized',

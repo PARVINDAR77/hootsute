@@ -150,6 +150,27 @@ enum BillingInterval {
   YEARLY
 }
 
+enum AutomationTriggerType {
+  INBOX_NEW_MESSAGE
+  OCCASION_UPCOMING
+  POST_PUBLISHED
+  POST_HIGH_PERFORMANCE
+}
+
+enum AutomationActionType {
+  AUTO_REPLY
+  AUTO_HIDE_SPAM
+  GENERATE_AI_DRAFT
+  DISPATCH_WEBHOOK
+  RECYCLE_POST
+}
+
+enum AutomationExecutionStatus {
+  SUCCESS
+  FAILED
+  SKIPPED
+}
+
 model User {
   id              String           @id @default(uuid())
   email           String           @unique
@@ -254,6 +275,8 @@ model Workspace {
   mediaAssets               MediaAsset[]
   subscription              WorkspaceSubscription?
   invoices                  BillingInvoice[]
+  automationRules           AutomationRule[]
+  automationLogs            AutomationExecutionLog[]
 
   @@index([slug])
   @@index([status])
@@ -1142,6 +1165,48 @@ model BillingInvoice {
 
   @@index([workspaceId, createdAt])
   @@map("billing_invoices")
+}
+
+model AutomationRule {
+  id             String                @id @default(uuid())
+  workspaceId    String
+  name           String
+  description    String?
+  triggerType    AutomationTriggerType
+  conditions     Json                  @default("{}")
+  actionType     AutomationActionType
+  actionConfig   Json                  @default("{}")
+  isEnabled      Boolean               @default(true)
+  executionCount Int                   @default(0)
+  lastExecutedAt DateTime?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  workspace      Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  executions     AutomationExecutionLog[]
+
+  @@index([workspaceId, isEnabled])
+  @@index([workspaceId, triggerType])
+  @@map("automation_rules")
+}
+
+model AutomationExecutionLog {
+  id           String                    @id @default(uuid())
+  ruleId       String
+  workspaceId  String
+  triggerEvent String
+  status       AutomationExecutionStatus
+  inputPayload Json?
+  outputResult Json?
+  errorMessage String?
+  executedAt   DateTime                  @default(now())
+
+  rule         AutomationRule            @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+  workspace    Workspace                 @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, executedAt])
+  @@index([ruleId, executedAt])
+  @@map("automation_execution_logs")
 }
 
 

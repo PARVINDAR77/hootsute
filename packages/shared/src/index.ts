@@ -1028,4 +1028,114 @@ export interface CustomerPortalResponseDto {
   portalUrl: string;
 }
 
+export enum AutomationTriggerType {
+  INBOX_NEW_MESSAGE = 'INBOX_NEW_MESSAGE',
+  OCCASION_UPCOMING = 'OCCASION_UPCOMING',
+  POST_PUBLISHED = 'POST_PUBLISHED',
+  POST_HIGH_PERFORMANCE = 'POST_HIGH_PERFORMANCE',
+}
+
+export enum AutomationActionType {
+  AUTO_REPLY = 'AUTO_REPLY',
+  AUTO_HIDE_SPAM = 'AUTO_HIDE_SPAM',
+  GENERATE_AI_DRAFT = 'GENERATE_AI_DRAFT',
+  DISPATCH_WEBHOOK = 'DISPATCH_WEBHOOK',
+  RECYCLE_POST = 'RECYCLE_POST',
+}
+
+export enum AutomationExecutionStatus {
+  SUCCESS = 'SUCCESS',
+  FAILED = 'FAILED',
+  SKIPPED = 'SKIPPED',
+}
+
+export interface AutomationConditions {
+  keywords?: string[];
+  platform?: string;
+  daysBefore?: number;
+  minEngagementRate?: number;
+  matchType?: 'ANY' | 'ALL' | 'REGEX';
+}
+
+export interface AutomationActionConfig {
+  replyTemplate?: string;
+  webhookUrl?: string;
+  webhookSecret?: string;
+  aiPromptPrefix?: string;
+  recycleDelayDays?: number;
+  notifyRoles?: string[];
+}
+
+export interface AutomationRuleDto {
+  id: string;
+  workspaceId: string;
+  name: string;
+  description?: string | null;
+  triggerType: AutomationTriggerType;
+  conditions: AutomationConditions;
+  actionType: AutomationActionType;
+  actionConfig: AutomationActionConfig;
+  isEnabled: boolean;
+  executionCount: number;
+  lastExecutedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateAutomationRuleDto {
+  name: string;
+  description?: string;
+  triggerType: AutomationTriggerType;
+  conditions: AutomationConditions;
+  actionType: AutomationActionType;
+  actionConfig: AutomationActionConfig;
+  isEnabled?: boolean;
+}
+
+export interface UpdateAutomationRuleDto {
+  name?: string;
+  description?: string;
+  triggerType?: AutomationTriggerType;
+  conditions?: AutomationConditions;
+  actionType?: AutomationActionType;
+  actionConfig?: AutomationActionConfig;
+  isEnabled?: boolean;
+}
+
+export interface AutomationExecutionLogDto {
+  id: string;
+  ruleId: string;
+  workspaceId: string;
+  triggerEvent: string;
+  status: AutomationExecutionStatus;
+  inputPayload?: any;
+  outputResult?: any;
+  errorMessage?: string | null;
+  executedAt: string;
+}
+
+export interface AutomationRecipeDto {
+  id: string;
+  name: string;
+  description: string;
+  category: 'MODERATION' | 'ENGAGEMENT' | 'AI_MARKETING' | 'INTEGRATION';
+  triggerType: AutomationTriggerType;
+  actionType: AutomationActionType;
+  defaultConditions: AutomationConditions;
+  defaultActionConfig: AutomationActionConfig;
+}
+
+export interface TriggerRuleTestDto {
+  sampleText?: string;
+  platform?: string;
+  senderName?: string;
+}
+
+export interface TriggerRuleTestResultDto {
+  matched: boolean;
+  actionType: AutomationActionType;
+  simulatedOutput: any;
+  reason?: string;
+}
+
 
