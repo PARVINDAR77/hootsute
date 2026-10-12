@@ -17,6 +17,7 @@ import {
   MediaAssetDto,
   UploadSessionResponseDto,
   MediaAccessUrlDto,
+  WorkspaceStorageUsageDto,
 } from '@packages/shared';
 import { CreateUploadSessionDto } from './dto/create-upload-session.dto';
 import { CompleteUploadDto } from './dto/complete-upload.dto';
@@ -72,6 +73,9 @@ export class MediaService {
         `File size exceeds maximum allowed for ${mediaType} (${Math.round(maxAllowed / (1024 * 1024))}MB)`,
       );
     }
+
+    // Enforce workspace storage quota and asset capacity limits
+    await this.assertStorageQuota(workspaceId, dto.sizeBytes);
 
     const sanitizedExt = this.sanitizeExtension(dto.filename, dto.mimeType);
     const assetId = randomUUID();
@@ -215,6 +219,9 @@ export class MediaService {
     if (file.size > maxAllowed) {
       throw new BadRequestException(`File size exceeds maximum allowed (${Math.round(maxAllowed / (1024 * 1024))}MB)`);
     }
+
+    // Enforce workspace storage quota and asset capacity limits
+    await this.assertStorageQuota(workspaceId, file.size);
 
     // Inspect buffer directly
     const inspection = FileSignatureValidator.inspectBuffer(file.buffer, file.mimetype);
@@ -525,6 +532,109 @@ export class MediaService {
       deletedAt: asset.deletedAt ? asset.deletedAt.toISOString() : null,
       uploadedBy: asset.uploadedBy,
     };
+  }
+
+  /**
+   * Retrieves workspace storage quota and metering statistics
+   */
+  async getStorageUsage(workspaceId: string): Promise<WorkspaceStorageUsageDto> {
+    const workspace = await this.prisma.workspace.findUnique({
+      where: { id: workspaceId },
+      select: {
+        id: true,
+        planTier: true,
+        storageQuotaBytes: true,
+        maxMediaAssets: true,
+      },
+    });
+
+    if (!workspace) {
+      throw new NotFoundException(`Workspace [${workspaceId}] not found`);
+    }
+
+    const quotaBytes = Number(workspace.storageQuotaBytes || 5368709120);
+    const maxAssets = workspace.maxMediaAssets || 500;
+
+    // Aggregate storage used by active media assets
+    const [aggregate, totalCount, imageCount, videoCount] = await Promise.all([
+      this.prisma.mediaAsset.aggregate({
+        where: {
+          workspaceId,
+          deletedAt: null,
+          processingStatus: { not: MediaProcessingStatus.FAILED },
+        },
+        _sum: {
+          sizeBytes: true,
+        },
+      }),
+      this.prisma.mediaAsset.count({
+        where: {
+          workspaceId,
+          deletedAt: null,
+          processingStatus: { not: MediaProcessingStatus.FAILED },
+        },
+      }),
+      this.prisma.mediaAsset.count({
+        where: {
+          workspaceId,
+          mediaType: MediaType.IMAGE,
+          deletedAt: null,
+          processingStatus: { not: MediaProcessingStatus.FAILED },
+        },
+      }),
+      this.prisma.mediaAsset.count({
+        where: {
+          workspaceId,
+          mediaType: MediaType.VIDEO,
+          deletedAt: null,
+          processingStatus: { not: MediaProcessingStatus.FAILED },
+        },
+      }),
+    ]);
+
+    const usedBytes = aggregate._sum.sizeBytes || 0;
+    const remainingBytes = Math.max(0, quotaBytes - usedBytes);
+    const usagePercentage = quotaBytes > 0
+      ? Math.min(100, Math.round((usedBytes / quotaBytes) * 1000) / 10)
+      : 0;
+    const isQuotaExceeded = usedBytes >= quotaBytes || totalCount >= maxAssets;
+
+    return {
+      workspaceId,
+      planTier: workspace.planTier || 'FREE',
+      usedBytes,
+      quotaBytes,
+      usagePercentage,
+      isQuotaExceeded,
+      remainingBytes,
+      assetCounts: {
+        total: totalCount,
+        images: imageCount,
+        videos: videoCount,
+        maxAssets,
+      },
+    };
+  }
+
+  /**
+   * Asserts that the workspace has sufficient storage and asset capacity
+   */
+  async assertStorageQuota(workspaceId: string, incomingBytes: number): Promise<void> {
+    const usage = await this.getStorageUsage(workspaceId);
+
+    if (usage.assetCounts.total + 1 > usage.assetCounts.maxAssets) {
+      throw new ForbiddenException(
+        `Workspace asset limit reached (${usage.assetCounts.total}/${usage.assetCounts.maxAssets} assets). Upgrade your plan to upload more assets.`,
+      );
+    }
+
+    if (usage.usedBytes + incomingBytes > usage.quotaBytes) {
+      const usedMb = (usage.usedBytes / (1024 * 1024)).toFixed(1);
+      const quotaMb = (usage.quotaBytes / (1024 * 1024)).toFixed(0);
+      throw new ForbiddenException(
+        `Workspace storage quota exceeded (${usedMb}MB used of ${quotaMb}MB limit). Upgrade your plan to increase media storage capacity.`,
+      );
+    }
   }
 
   private sanitizeExtension(filename: string, mimeType: string): string {

@@ -194,4 +194,40 @@ describe('MediaLibraryPage Component', () => {
       expect(screen.getByText('1920 x 1080')).toBeInTheDocument();
     });
   });
+
+  it('renders storage quota usage card when metrics are loaded', async () => {
+    mockApiClient
+      .mockResolvedValueOnce({
+        success: true,
+        data: mockAssets,
+      })
+      .mockResolvedValueOnce({
+        success: true,
+        data: {
+          workspaceId: 'ws-test-123',
+          planTier: 'PRO',
+          usedBytes: 104857600,
+          quotaBytes: 10737418240,
+          usagePercentage: 1.0,
+          isQuotaExceeded: false,
+          remainingBytes: 10632560640,
+          assetCounts: {
+            total: 15,
+            images: 10,
+            videos: 5,
+            maxAssets: 1000,
+          },
+        },
+      });
+
+    render(<MediaLibraryPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Storage Usage')).toBeInTheDocument();
+      expect(screen.getByText('PRO Plan')).toBeInTheDocument();
+      expect(screen.getByText('Asset Capacity')).toBeInTheDocument();
+      expect(screen.getByText('10 Images')).toBeInTheDocument();
+      expect(screen.getByText('5 Videos')).toBeInTheDocument();
+    });
+  });
 });

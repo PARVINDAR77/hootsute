@@ -347,6 +347,41 @@ describe('Stage 11: Media Asset Management & Cloud Storage (e2e)', () => {
       expect(res.body.data.url).toBeDefined();
       expect(res.body.data.expiresInSeconds).toBe(3600);
     });
+
+    it('should retrieve workspace storage quota and metering usage', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/api/v1/workspaces/${workspaceId}/media/storage-usage`)
+        .set('Authorization', `Bearer ${editorToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.workspaceId).toBe(workspaceId);
+      expect(res.body.data.planTier).toBe('FREE');
+      expect(res.body.data.quotaBytes).toBe(5368709120);
+      expect(res.body.data.usedBytes).toBeGreaterThanOrEqual(1);
+      expect(res.body.data.assetCounts.total).toBeGreaterThanOrEqual(1);
+      expect(res.body.data.isQuotaExceeded).toBe(false);
+    });
+
+    it('should block upload session when workspace storage quota is exceeded', async () => {
+      // Set storageQuotaBytes to 10 bytes on foreign workspace
+      await prisma.workspace.update({
+        where: { id: foreignWorkspaceId },
+        data: { storageQuotaBytes: BigInt(10) },
+      });
+
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/workspaces/${foreignWorkspaceId}/media/upload-session`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({
+          filename: 'quota-test.png',
+          mimeType: 'image/png',
+          sizeBytes: 1024,
+        });
+
+      expect(res.status).toBe(403);
+      expect(res.body.message).toContain('storage quota exceeded');
+    });
   });
 
   describe('4. Cross-Workspace & RBAC Isolation', () => {

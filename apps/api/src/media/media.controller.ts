@@ -107,6 +107,17 @@ export class MediaController {
     };
   }
 
+  @Get('storage-usage')
+  @RequireWorkspaceRoles(WorkspaceRole.VIEWER, WorkspaceRole.EDITOR, WorkspaceRole.ADMIN, WorkspaceRole.OWNER)
+  @ApiOperation({ summary: 'Get workspace storage quota, usage metrics, and asset counts' })
+  async getStorageUsage(@Param('workspaceId') workspaceId: string) {
+    const usage = await this.mediaService.getStorageUsage(workspaceId);
+    return {
+      success: true,
+      data: usage,
+    };
+  }
+
   @Get(':assetId')
   @RequireWorkspaceRoles(WorkspaceRole.VIEWER, WorkspaceRole.EDITOR, WorkspaceRole.ADMIN, WorkspaceRole.OWNER)
   @ApiOperation({ summary: 'Get single media asset details by ID' })

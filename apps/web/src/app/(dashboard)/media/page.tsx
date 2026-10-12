@@ -8,6 +8,7 @@ import {
   MediaType,
   MediaProcessingStatus,
   UploadSessionResponseDto,
+  WorkspaceStorageUsageDto,
 } from '@packages/shared';
 import {
   UploadCloud,
@@ -37,6 +38,7 @@ import { Badge } from '@/components/ui/Badge';
 export default function MediaLibraryPage() {
   const { currentWorkspace } = useWorkspace();
   const [assets, setAssets] = useState<MediaAssetDto[]>([]);
+  const [storageUsage, setStorageUsage] = useState<WorkspaceStorageUsageDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [alertMsg, setAlertMsg] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
@@ -80,8 +82,22 @@ export default function MediaLibraryPage() {
       if (statusFilter !== 'ALL') queryUrl += `&status=${statusFilter}`;
       if (search.trim()) queryUrl += `&search=${encodeURIComponent(search.trim())}`;
 
-      const res = await apiClient<{ success: boolean; data: MediaAssetDto[] }>(queryUrl);
-      setAssets(res.data || []);
+      const mediaRes = await apiClient<{ success: boolean; data: MediaAssetDto[] }>(queryUrl);
+      setAssets(mediaRes.data || []);
+
+      try {
+        const usagePromise = apiClient<{ success: boolean; data: WorkspaceStorageUsageDto }>(
+          `/workspaces/${currentWorkspace.id}/media/storage-usage`,
+        );
+        if (usagePromise && typeof usagePromise.then === 'function') {
+          const usageRes = await usagePromise;
+          if (usageRes?.data) {
+            setStorageUsage(usageRes.data);
+          }
+        }
+      } catch {
+        // Optional quota metric fetch
+      }
     } catch (err: any) {
       setAlertMsg({ type: 'error', message: err.message || 'Failed to load media assets' });
     } finally {
@@ -229,7 +245,8 @@ export default function MediaLibraryPage() {
   const formatBytes = (bytes: number) => {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
   };
 
   return (
@@ -273,6 +290,78 @@ export default function MediaLibraryPage() {
           message={alertMsg.message}
           onClose={() => setAlertMsg(null)}
         />
+      )}
+
+      {/* Storage Quota & Capacity Overview Card */}
+      {storageUsage && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Storage Meter Card */}
+          <div className="md:col-span-2 p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-slate-700">Storage Usage</span>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                  storageUsage.planTier === 'ENTERPRISE'
+                    ? 'bg-purple-100 text-purple-700 border border-purple-200'
+                    : storageUsage.planTier === 'PRO'
+                    ? 'bg-indigo-100 text-indigo-700 border border-indigo-200'
+                    : 'bg-slate-100 text-slate-700 border border-slate-200'
+                }`}>
+                  {storageUsage.planTier} Plan
+                </span>
+              </div>
+              <span className="text-xs font-medium text-slate-500">
+                {formatBytes(storageUsage.usedBytes)} of {formatBytes(storageUsage.quotaBytes)} ({storageUsage.usagePercentage}%)
+              </span>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden mb-2">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${
+                  storageUsage.usagePercentage >= 90
+                    ? 'bg-rose-500'
+                    : storageUsage.usagePercentage >= 75
+                    ? 'bg-amber-500'
+                    : 'bg-indigo-600'
+                }`}
+                style={{ width: `${Math.min(100, Math.max(2, storageUsage.usagePercentage))}%` }}
+              />
+            </div>
+
+            <div className="flex items-center justify-between text-[11px] text-slate-400">
+              <span>{formatBytes(storageUsage.remainingBytes)} free space remaining</span>
+              {storageUsage.isQuotaExceeded && (
+                <span className="text-rose-600 font-bold flex items-center gap-1">
+                  <AlertCircle className="w-3.5 h-3.5" /> Storage quota limit reached
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Asset Count & Breakdown Card */}
+          <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold text-slate-700">Asset Capacity</span>
+              <span className="text-xs font-medium text-slate-500">
+                {storageUsage.assetCounts.total} / {storageUsage.assetCounts.maxAssets} limit
+              </span>
+            </div>
+            <div className="flex items-center gap-4 py-1">
+              <div className="flex items-center gap-1.5 text-xs text-slate-600">
+                <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                <span>{storageUsage.assetCounts.images} Images</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-slate-600">
+                <span className="w-2.5 h-2.5 rounded-full bg-purple-500" />
+                <span>{storageUsage.assetCounts.videos} Videos</span>
+              </div>
+            </div>
+            <div className="text-[11px] text-slate-400">
+              Max {storageUsage.assetCounts.maxAssets} assets per workspace
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Drag & Drop Upload Zone */}

@@ -925,3 +925,20 @@ export interface MediaAccessUrlDto {
   url: string;
   expiresInSeconds: number;
 }
+
+export interface WorkspaceStorageUsageDto {
+  workspaceId: string;
+  planTier: string;
+  usedBytes: number;
+  quotaBytes: number;
+  usagePercentage: number;
+  isQuotaExceeded: boolean;
+  remainingBytes: number;
+  assetCounts: {
+    total: number;
+    images: number;
+    videos: number;
+    maxAssets: number;
+  };
+}
+

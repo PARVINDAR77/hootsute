@@ -18,11 +18,20 @@ describe('MediaService', () => {
     mockStorage = new MockStorageProvider();
 
     prisma = {
+      workspace: {
+        findUnique: jest.fn().mockResolvedValue({
+          id: 'ws-1',
+          planTier: 'FREE',
+          storageQuotaBytes: BigInt(5368709120),
+          maxMediaAssets: 500,
+        }),
+      },
       mediaAsset: {
         create: jest.fn(),
         findFirst: jest.fn(),
         findMany: jest.fn(),
-        count: jest.fn(),
+        count: jest.fn().mockResolvedValue(5),
+        aggregate: jest.fn().mockResolvedValue({ _sum: { sizeBytes: 1048576 } }),
         update: jest.fn(),
       },
       contentVariant: {
@@ -281,4 +290,72 @@ describe('MediaService', () => {
       expect(res.data[0].accessUrl).toBeDefined();
     });
   });
+
+  describe('getStorageUsage & quota enforcement', () => {
+    it('returns accurate usage metrics and breakdown', async () => {
+      prisma.workspace.findUnique.mockResolvedValue({
+        id: 'ws-1',
+        planTier: 'PRO',
+        storageQuotaBytes: BigInt(10737418240), // 10GB
+        maxMediaAssets: 1000,
+      });
+
+      prisma.mediaAsset.aggregate.mockResolvedValue({ _sum: { sizeBytes: 1073741824 } }); // 1GB
+      prisma.mediaAsset.count
+        .mockResolvedValueOnce(50) // total
+        .mockResolvedValueOnce(40) // images
+        .mockResolvedValueOnce(10); // videos
+
+      const usage = await service.getStorageUsage('ws-1');
+
+      expect(usage.workspaceId).toBe('ws-1');
+      expect(usage.planTier).toBe('PRO');
+      expect(usage.usedBytes).toBe(1073741824);
+      expect(usage.quotaBytes).toBe(10737418240);
+      expect(usage.usagePercentage).toBe(10);
+      expect(usage.isQuotaExceeded).toBe(false);
+      expect(usage.assetCounts.total).toBe(50);
+      expect(usage.assetCounts.images).toBe(40);
+      expect(usage.assetCounts.videos).toBe(10);
+    });
+
+    it('blocks upload session when storage quota is exceeded', async () => {
+      prisma.workspace.findUnique.mockResolvedValue({
+        id: 'ws-1',
+        planTier: 'FREE',
+        storageQuotaBytes: BigInt(1000000), // 1MB quota
+        maxMediaAssets: 500,
+      });
+
+      prisma.mediaAsset.aggregate.mockResolvedValue({ _sum: { sizeBytes: 950000 } }); // 950KB used
+
+      await expect(
+        service.createUploadSession('ws-1', 'user-1', {
+          filename: 'photo.jpg',
+          mimeType: 'image/jpeg',
+          sizeBytes: 100000, // 100KB exceeds 1MB limit
+        }),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('blocks upload session when max assets limit is reached', async () => {
+      prisma.workspace.findUnique.mockResolvedValue({
+        id: 'ws-1',
+        planTier: 'FREE',
+        storageQuotaBytes: BigInt(5368709120),
+        maxMediaAssets: 5,
+      });
+
+      prisma.mediaAsset.count.mockResolvedValue(5); // 5 assets already exist
+
+      await expect(
+        service.createUploadSession('ws-1', 'user-1', {
+          filename: 'photo.jpg',
+          mimeType: 'image/jpeg',
+          sizeBytes: 10000,
+        }),
+      ).rejects.toThrow(ForbiddenException);
+    });
+  });
 });
+
