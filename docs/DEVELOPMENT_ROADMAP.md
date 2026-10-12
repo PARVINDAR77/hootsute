@@ -327,5 +327,60 @@
   - 17 Web test suites (114 tests passed)
   - Zero-error monorepo Next.js production build across all 35 static and dynamic routes
 
+---
+
+## Phase 23: Enterprise Transactional Mail & Notification Transport Service (Stage 23)
+- [x] Shared TypeScript contracts & DTOs in `@packages/shared`:
+  - `EmailTemplateType` (`WORKSPACE_INVITATION`, `EXECUTIVE_REPORT`, `APPROVAL_REQUIRED`, `APPROVAL_DECISION`, `WEBHOOK_FAILURE_ALERT`, `GENERIC_ALERT`)
+  - `SendEmailRequestDto`, `EmailDeliveryResultDto`
+- [x] Backend Transactional Mail Engine (`apps/api/src/mail/`):
+  - `MailService`: Pluggable multi-provider architecture supporting `ConsoleMailProvider` (dev/test), `ResendMailProvider`, and `SmtpMailProvider`
+  - Responsive HTML email templates with modern typography, dark slate styling, and mobile-friendly CTAs:
+    - Workspace Invitation template (with inviter details, role assignment, and expiry notice)
+    - Executive Performance Report template (with KPI badges, agency branding, and direct link)
+    - Content Approval Notification template (alerting approvers when a draft requires review)
+    - Approval Decision template (alerting draft authors when approved or changes are requested with notes)
+    - Outbound Webhook Failure Alert template (alerting developers of endpoint outages)
+  - Seamless integration into:
+    - `WorkspacesService`: automated email dispatch upon member invitation creation
+    - `ExecutiveReportsService`: automated email dispatch to report recipient lists
+    - `ApprovalWorkflowsService`: automated email dispatch to draft creators upon review decisions
+  - Unit test suite (`mail.service.spec.ts`) passing with 100% coverage
+
+---
+
+## Phase 24: Custom CNAME SSL Automation & White-Label Domain Verification (Stage 24)
+- [x] Caddy On-Demand TLS Automated Architecture (`deploy/caddy/Caddyfile`):
+  - Global `on_demand_tls` directive with automated Let's Encrypt certificate issuance
+  - API validation gate integration (`ask http://127.0.0.1:4000/api/v1/white-label/caddy-ask`) preventing TLS certificate rate-limit exhaustion
+  - Wildcard HTTPS reverse proxy terminating SSL for custom agency CNAMEs with preserved `Host` and `X-Custom-Domain` headers
+- [x] Backend CNAME Verification & Caddy Ask Gate (`apps/api/src/reports/`):
+  - `GET /api/v1/white-label/caddy-ask`: Public hook returning HTTP 200 for active agency custom domains, HTTP 404 for unauthorized domains
+  - `GET /api/v1/workspaces/:workspaceId/white-label/verify-cname`: Authenticated diagnostic endpoint resolving live DNS CNAME records and testing against target
+- [x] Frontend Live CNAME Diagnostic Suite (`apps/web/src/app/(dashboard)/settings/white-label/page.tsx`):
+  - Live "Verify DNS" trigger with spinner animation
+  - Instant status card showing DNS resolution details and SSL readiness feedback
+  - Unit tests covering `validateCaddyAsk` and `verifyCnameDns` in `white-label.service.spec.ts`
+
+---
+
+## Phase 25: Progressive Web App (PWA) & Web Push Notification Infrastructure (Stage 25)
+- [x] Web Push Backend Engine (`apps/api/src/push-notifications/`):
+  - `PushNotificationsService`: Secure subscription registration, user mapping, device tracking, and stale endpoint eviction
+  - VAPID key pair configuration & retrieval (`GET /api/v1/notifications/push/vapid-public-key`)
+  - Subscription management endpoints (`POST /subscribe`, `POST /unsubscribe`, `GET /subscriptions`, `POST /test`)
+  - Multi-tenant push broadcast capability (`sendNotificationToWorkspace`)
+  - Registered globally in `AppModule` with 100% unit test coverage (`push-notifications.service.spec.ts`)
+- [x] Frontend PWA & Service Worker Suite (`apps/web/`):
+  - Web App Manifest (`apps/web/public/manifest.json`) configuring standalone mobile mode, icons, and branding
+  - Service Worker (`apps/web/public/sw.js`) handling background push events and native system notifications with window focus actions
+  - `ServiceWorkerRegister.tsx` client component integrated into root layout
+  - `PushNotificationToggle.tsx` interactive button in main header bar with permission request handling, active subscription toggle, and live status badges
+- [x] Monorepo Quality Gate:
+  - 60 API unit test suites (474 tests passed)
+  - 17 Web test suites (114 tests passed)
+  - Monorepo production build clean across all 35 routes
+
+
 
 

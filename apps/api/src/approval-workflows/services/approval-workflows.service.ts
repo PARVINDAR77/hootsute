@@ -4,8 +4,10 @@ import {
   BadRequestException,
   ForbiddenException,
   Logger,
+  Optional,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { MailService } from '../../mail/mail.service';
 import {
   ApprovalWorkflowDto,
   ApprovalWorkflowStepDto,
@@ -24,7 +26,10 @@ import { CreateApprovalWorkflowDto } from '../dto/create-approval-workflow.dto';
 export class ApprovalWorkflowsService {
   private readonly logger = new Logger(ApprovalWorkflowsService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly mailService?: MailService,
+  ) {}
 
   /**
    * Creates a new approval workflow with ordered review steps
@@ -439,6 +444,44 @@ export class ApprovalWorkflowsService {
             approvedAt: now,
           },
         });
+      }
+    }
+
+    if (this.mailService) {
+      try {
+        const fullDraft = await this.prisma.contentDraft.findUnique({
+          where: { id: draftId },
+          include: {
+            createdBy: { select: { email: true, name: true } },
+            workspace: { select: { name: true } },
+          },
+        });
+
+        if (fullDraft?.createdBy?.email) {
+          const appUrl = process.env.CORS_ORIGIN || 'http://localhost:3000';
+          const reviewer = await this.prisma.user.findUnique({
+            where: { id: userId },
+            select: { name: true },
+          });
+
+          const mappedDecision =
+            dto.decision === 'APPROVE' ? 'APPROVED' : 'CHANGES_REQUESTED';
+
+          this.mailService
+            .sendApprovalDecisionEmail(fullDraft.createdBy.email, {
+              workspaceName: fullDraft.workspace.name,
+              draftTitle: fullDraft.title || 'Untitled Draft',
+              decision: mappedDecision,
+              reviewerName: reviewer?.name || 'Reviewer',
+              notes: dto.notes,
+              draftUrl: `${appUrl}/content/drafts/${draftId}`,
+            })
+            .catch((err) => {
+              this.logger.error(`Failed to dispatch decision email: ${err.message}`);
+            });
+        }
+      } catch (err: any) {
+        this.logger.error(`Error notifying draft author: ${err.message}`);
       }
     }
 

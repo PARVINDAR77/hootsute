@@ -3,6 +3,7 @@
 import React from 'react';
 import { WorkspaceSelector } from './WorkspaceSelector';
 import { UserMenu } from './UserMenu';
+import { PushNotificationToggle } from '../notifications/PushNotificationToggle';
 import { ShieldCheck, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 
@@ -14,6 +15,8 @@ export function Header() {
       </div>
 
       <div className="flex items-center gap-3">
+        <PushNotificationToggle />
+
         <a
           href="http://localhost:4000/api/docs"
           target="_blank"

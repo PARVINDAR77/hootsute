@@ -5,8 +5,10 @@ import {
   ForbiddenException,
   BadRequestException,
   Logger,
+  Optional,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { MailService } from '../mail/mail.service';
 import {
   WorkspaceRole,
   WorkspaceStatus,
@@ -22,7 +24,10 @@ import * as crypto from 'crypto';
 export class WorkspacesService {
   private readonly logger = new Logger(WorkspacesService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly mailService?: MailService,
+  ) {}
 
   private hashToken(token: string): string {
     return crypto.createHash('sha256').update(token).digest('hex');
@@ -489,6 +494,27 @@ export class WorkspacesService {
     const isDevelopment = process.env.NODE_ENV !== 'production';
     const appUrl = process.env.CORS_ORIGIN || 'http://localhost:3000';
     const invitationUrl = isDevelopment ? `${appUrl}/invitations/accept?token=${rawToken}` : undefined;
+
+    if (this.mailService) {
+      const workspace = await this.prisma.workspace.findUnique({
+        where: { id: workspaceId },
+        select: { name: true },
+      });
+      const deliveryUrl = `${appUrl}/invitations/accept?token=${rawToken}`;
+      this.mailService
+        .sendInvitationEmail(normalizedEmail, {
+          workspaceName: workspace?.name || 'OmniSocial Workspace',
+          inviterName: invitation.invitedBy?.name || 'A team member',
+          role: dto.role,
+          acceptUrl: deliveryUrl,
+          expiresAt,
+        })
+        .catch((err) => {
+          this.logger.error(
+            `Failed to dispatch invitation email to ${normalizedEmail}: ${err.message}`,
+          );
+        });
+    }
 
     return {
       ...invitation,

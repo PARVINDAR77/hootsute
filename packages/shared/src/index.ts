@@ -1937,6 +1937,85 @@ export interface WebhookSecretRotateResponseDto {
   rotatedAt: string;
 }
 
+// ==========================================
+// Operational: Transactional Mail & Notifications
+// ==========================================
 
+export type EmailTemplateType =
+  | 'WORKSPACE_INVITATION'
+  | 'EXECUTIVE_REPORT'
+  | 'APPROVAL_REQUIRED'
+  | 'APPROVAL_DECISION'
+  | 'WEBHOOK_FAILURE_ALERT'
+  | 'GENERIC_ALERT';
 
+export interface SendEmailRequestDto {
+  to: string | string[];
+  subject: string;
+  template: EmailTemplateType;
+  templateData: Record<string, any>;
+  from?: string;
+  replyTo?: string;
+  cc?: string[];
+  attachments?: Array<{
+    filename: string;
+    content: string;
+    contentType?: string;
+  }>;
+}
 
+export interface EmailDeliveryResultDto {
+  success: boolean;
+  messageId?: string;
+  provider: string;
+  recipientCount: number;
+  timestamp: string;
+  error?: string;
+}
+
+// ==========================================
+// Operational: CNAME SSL & Custom Domain
+// ==========================================
+
+export interface CnameVerificationResultDto {
+  domain: string;
+  configured: boolean;
+  expectedTarget: string;
+  resolvedTarget?: string | null;
+  matches: boolean;
+  message: string;
+  verifiedAt: string;
+}
+
+// ==========================================
+// Operational: Web Push Notifications & PWA
+// ==========================================
+
+export interface PushSubscriptionKeysDto {
+  p256dh: string;
+  auth: string;
+}
+
+export interface PushSubscriptionDto {
+  endpoint: string;
+  expirationTime?: number | null;
+  keys: PushSubscriptionKeysDto;
+}
+
+export interface PushNotificationPayloadDto {
+  title: string;
+  body: string;
+  icon?: string;
+  badge?: string;
+  url?: string;
+  tag?: string;
+  data?: Record<string, any>;
+}
+
+export interface PushSubscriptionRecordDto {
+  id: string;
+  userId: string;
+  endpoint: string;
+  deviceType?: string;
+  createdAt: string;
+}

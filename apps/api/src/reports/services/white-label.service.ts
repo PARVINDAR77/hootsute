@@ -118,6 +118,70 @@ export class WhiteLabelService {
     return { success: true };
   }
 
+  async validateCaddyAsk(domain: string): Promise<boolean> {
+    if (!domain) return false;
+    const clean = domain.trim().toLowerCase();
+    const found = await this.prisma.whiteLabelConfig.findFirst({
+      where: {
+        customDomain: clean,
+        isEnabled: true,
+      },
+    });
+    return !!found;
+  }
+
+  async verifyCnameDns(workspaceId: string) {
+    const config = await this.prisma.whiteLabelConfig.findUnique({
+      where: { workspaceId },
+    });
+
+    const expectedTarget = process.env.APP_HOSTNAME || 'app.omnisocial.ai';
+
+    if (!config || !config.customDomain) {
+      return {
+        domain: '',
+        configured: false,
+        expectedTarget,
+        resolvedTarget: null,
+        matches: false,
+        message: 'No custom domain configured for this workspace.',
+        verifiedAt: new Date().toISOString(),
+      };
+    }
+
+    const domain = config.customDomain;
+
+    try {
+      const dns = await import('dns/promises');
+      const records = await dns.resolveCname(domain);
+      const matches = records.some(
+        (r) => r.toLowerCase().replace(/\.$/, '') === expectedTarget.toLowerCase(),
+      );
+
+      return {
+        domain,
+        configured: true,
+        expectedTarget,
+        resolvedTarget: records[0] || null,
+        matches,
+        message: matches
+          ? `CNAME is correctly configured and points to ${expectedTarget}.`
+          : `CNAME resolves to "${records.join(', ')}", but is expected to point to ${expectedTarget}.`,
+        verifiedAt: new Date().toISOString(),
+      };
+    } catch (err: any) {
+      return {
+        domain,
+        configured: true,
+        expectedTarget,
+        resolvedTarget: null,
+        matches: false,
+        message: `DNS lookup failed for ${domain}: ${err.message}. Please allow up to 24-48 hours for DNS propagation.`,
+        verifiedAt: new Date().toISOString(),
+      };
+    }
+  }
+
   private mapToDto(raw: any): WhiteLabelConfigDto {
     return {
       id: raw.id,

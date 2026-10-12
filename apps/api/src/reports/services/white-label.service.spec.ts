@@ -156,4 +156,41 @@ describe('WhiteLabelService', () => {
       expect(result).toEqual({ success: true });
     });
   });
+
+  describe('validateCaddyAsk', () => {
+    it('returns true if domain is configured on an active workspace', async () => {
+      prisma.whiteLabelConfig.findFirst.mockResolvedValue(mockConfig);
+      const allowed = await service.validateCaddyAsk('client.agency.com');
+      expect(allowed).toBe(true);
+      expect(prisma.whiteLabelConfig.findFirst).toHaveBeenCalledWith({
+        where: { customDomain: 'client.agency.com', isEnabled: true },
+      });
+    });
+
+    it('returns false if domain is empty or not found', async () => {
+      prisma.whiteLabelConfig.findFirst.mockResolvedValue(null);
+      const allowed = await service.validateCaddyAsk('random-unauthorized.com');
+      expect(allowed).toBe(false);
+
+      const emptyAllowed = await service.validateCaddyAsk('');
+      expect(emptyAllowed).toBe(false);
+    });
+  });
+
+  describe('verifyCnameDns', () => {
+    it('returns unconfigured status if workspace has no custom domain', async () => {
+      prisma.whiteLabelConfig.findUnique.mockResolvedValue(null);
+      const res = await service.verifyCnameDns(mockWorkspaceId);
+      expect(res.configured).toBe(false);
+      expect(res.matches).toBe(false);
+    });
+
+    it('returns diagnostic result when custom domain is set', async () => {
+      prisma.whiteLabelConfig.findUnique.mockResolvedValue(mockConfig);
+      const res = await service.verifyCnameDns(mockWorkspaceId);
+      expect(res.configured).toBe(true);
+      expect(res.domain).toBe(mockConfig.customDomain);
+      expect(res.expectedTarget).toBeDefined();
+    });
+  });
 });

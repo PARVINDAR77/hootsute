@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger, Optional } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { MailService } from '../../mail/mail.service';
 import { CreateReportScheduleDto } from '../dto/create-report-schedule.dto';
 import { UpdateReportScheduleDto } from '../dto/update-report-schedule.dto';
 import { GenerateReportDto } from '../dto/generate-report.dto';
@@ -12,7 +13,12 @@ import {
 
 @Injectable()
 export class ExecutiveReportsService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(ExecutiveReportsService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly mailService?: MailService,
+  ) {}
 
   // ----------------------------------------------------
   // Schedule Management
@@ -278,15 +284,31 @@ export class ExecutiveReportsService {
       },
     });
 
-    // Update schedule's last run timestamp if applicable
-    if (dto.scheduleId) {
-      await this.prisma.executiveReportSchedule.update({
-        where: { id: dto.scheduleId },
-        data: {
-          lastRunAt: new Date(),
-          nextRunAt: this.calculateNextRun('WEEKLY'),
-        },
-      });
+    // Dispatch email to recipients if specified
+    if (this.mailService && dto.recipients && dto.recipients.length > 0) {
+      const appUrl = process.env.CORS_ORIGIN || 'http://localhost:3000';
+      const reportUrl = `${appUrl}/reports?reportId=${generated.id}`;
+      const periodText = `${periodStart.toLocaleDateString()} - ${periodEnd.toLocaleDateString()}`;
+
+      this.mailService
+        .sendExecutiveReportEmail(dto.recipients, {
+          workspaceName: workspace.name,
+          reportTitle,
+          periodText,
+          reportUrl,
+          agencyName: brandName,
+          metrics: {
+            totalImpressions: metricsSummary.totalImpressions,
+            totalReach: metricsSummary.totalReach,
+            netFollowerGrowth: metricsSummary.netFollowerGrowth,
+            avgEngagementRate: (metricsSummary.topPosts[0]?.engagement || 0) / 100,
+          },
+        })
+        .catch((err) => {
+          this.logger.error(
+            `Failed to dispatch executive report email to ${dto.recipients?.join(', ')}: ${err.message}`,
+          );
+        });
     }
 
     return this.mapReportToDto(generated);

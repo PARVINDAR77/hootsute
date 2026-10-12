@@ -4,10 +4,12 @@ import {
   Put,
   Delete,
   Param,
+  Query,
   Body,
   UseGuards,
   HttpCode,
   HttpStatus,
+  NotFoundException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -55,6 +57,27 @@ export class WhiteLabelController {
   @ApiParam({ name: 'workspaceId', description: 'Workspace UUID' })
   async resetConfig(@Param('workspaceId') workspaceId: string) {
     return this.whiteLabelService.resetConfig(workspaceId);
+  }
+
+  @Get('workspaces/:workspaceId/white-label/verify-cname')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, WorkspaceAuthGuard)
+  @RequireWorkspaceRoles(WorkspaceRole.VIEWER)
+  @ApiOperation({ summary: 'Verify CNAME DNS routing for workspace custom domain' })
+  @ApiParam({ name: 'workspaceId', description: 'Workspace UUID' })
+  async verifyCname(@Param('workspaceId') workspaceId: string) {
+    return this.whiteLabelService.verifyCnameDns(workspaceId);
+  }
+
+  @Public()
+  @Get('white-label/caddy-ask')
+  @ApiOperation({ summary: 'Caddy On-Demand TLS verification hook' })
+  async caddyAsk(@Query('domain') domain: string) {
+    const isAllowed = await this.whiteLabelService.validateCaddyAsk(domain);
+    if (!isAllowed) {
+      throw new NotFoundException(`Domain ${domain} is not authorized for TLS`);
+    }
+    return { allowed: true, domain };
   }
 
   @Public()
