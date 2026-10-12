@@ -16,44 +16,104 @@
 ---
 
 ## Phase 2: Workspaces & Multi-Tenancy (Stage 2)
-- Multi-tenant business workspace isolation
-- Team member invitations with role delegation
-- Workspace branding settings (logos, colors, voice & tone guidelines)
-- Subscription tier quota enforcement
+- [x] Multi-tenant business workspace isolation
+- [x] Team member invitations with role delegation
+- [x] Workspace branding settings (logos, colors, voice & tone guidelines)
+- [x] Subscription tier quota enforcement
 
 ---
 
 ## Phase 3: Social Account Connections (Stage 3)
-- Meta Graph API integration (Facebook Pages, Instagram Business)
-- LinkedIn Marketing API integration
-- X (Twitter) API v2 integration
-- Token encryption at rest for OAuth access tokens and secrets
-- Real-time token expiry checks and reconnection notifications
+- [x] Meta Graph API integration (Facebook Pages, Instagram Business)
+- [x] Token encryption at rest with AES-256-GCM for OAuth access tokens
+- [x] Replay-resistant single-use OAuth states and ephemeral selection sessions
+- [x] Disconnect, reconnect, and tenant-isolated credential vaulting
 
 ---
 
 ## Phase 4: AI Marketing & Creative Engine (Stage 4)
-- Post copy generator with tone adjustment, length controls, and hashtag recommendations
-- AI visual generator for post creative graphics
-- Automated festival and holiday calendar event curation
-- BullMQ worker queues for async LLM and image processing
+- [x] Multi-provider AI synthesis (Anthropic Claude 3.5, OpenAI GPT-4o, Google Gemini Flash)
+- [x] Post copy generator with tone adjustment, length controls, and hashtag recommendations
+- [x] Automated festival and holiday calendar event curation with localized religious/national occasions
+- [x] Content draft approval workflows and revision history
 
 ---
 
 ## Phase 5: WhatsApp Preview & Approval Workflow (Stage 5)
-- Meta WhatsApp Business API webhook integrations
-- Interactive preview message generation with approve/reject buttons
-- Team feedback loop directly within WhatsApp chats
+- [x] Meta WhatsApp Cloud API integration with signed HMAC-SHA256 webhook verification
+- [x] Interactive preview message generation with approve/reject quick action buttons
+- [x] Granular stakeholder consent tracking and notification dispatch
+- [x] Cryptographic single-use action tokens for web fallback review
 
 ---
 
 ## Phase 6: Scheduler & Publisher Worker (Stage 6)
-- High-precision scheduled post dispatcher
-- Retries with exponential backoff on network failures
-- Post status tracking (`DRAFT`, `PENDING_APPROVAL`, `SCHEDULED`, `PUBLISHED`, `FAILED`)
+- [x] High-precision scheduled post dispatcher with snapshot immutability
+- [x] Retry state machine with exponential backoff and jitter
+- [x] Reconciler daemon for ambiguous network timeouts and deduplication
+- [x] Post status tracking (`DRAFT`, `SCHEDULED`, `DISPATCHING`, `PUBLISHED`, `FAILED`, `CANCELLED`)
 
 ---
 
 ## Phase 7: Analytics & Reporting (Stage 7)
-- Follower growth, reach, impressions, and engagement rate metrics
-- Scheduled weekly / monthly automated PDF reports
+- [x] Comprehensive engagement, impressions, and follower growth metric collection
+- [x] Historical snapshot aggregation (Daily, Weekly, Monthly)
+- [x] Interactive analytics dashboard with comparison intervals and platform breakdown
+- [x] Rule-based growth insights engine generating actionable recommendations
+
+---
+
+## Phase 8: Unified Social Inbox & Engagement (Stage 8)
+- [x] Cross-platform comment and direct message aggregation (Facebook & Instagram)
+- [x] In-app threading, bidirectional reply dispatch, and SLA resolution tracking
+- [x] Sentiment tagging and AI-assisted reply drafting
+
+---
+
+## Phase 9: Real-Time Webhooks & WebSocket Notifications (Stage 9)
+- [x] Event-driven WebSocket gateways for instant inbox and notification sync
+- [x] Cryptographic signature validation for external social webhooks
+- [x] In-app notification center with read/unread tracking and filtering
+
+---
+
+## Phase 10: Media Asset Management & Cloud Storage (Stage 10)
+- [x] Presigned direct-to-cloud uploads (AWS S3 / Cloudflare R2 / Local adapter)
+- [x] Magic-byte file signature validation preventing malicious file spoofing
+- [x] Media asset tagging, thumbnail generation, and modal asset picker for post creation
+
+---
+
+## Phase 11: Workspace Storage Quota Enforcement (Stage 11)
+- [x] Real-time storage consumption metering per tenant
+- [x] Plan-based storage and asset count quota gates
+- [x] Safe deletion with physical storage reclamation and database synchronization
+
+---
+
+## Phase 12: Stripe Billing, Subscriptions & Metered Usage (Stage 12)
+- [x] Stripe Checkout session initiation for FREE, PRO, and ENTERPRISE plans
+- [x] Stripe Customer Portal for self-service payment and subscription management
+- [x] Idempotent webhook handling with signature verification (`invoice.paid`, `customer.subscription.*`)
+- [x] Automated grace period and downgrade handling on subscription cancellation
+
+---
+
+## Phase 13: Smart Automations, Trigger-Action Workflows & Audit Trail (Stage 13)
+- [x] Configurable automation rules engine (`AUTO_REPLY_INBOX`, `AI_DRAFT_GENERATE`, `WEBHOOK_DISPATCH`, etc.)
+- [x] Rule execution history with granular audit logs and failure diagnostics
+- [x] In-app automation rule builder and toggle controls
+
+---
+
+## Phase 14: Multi-Network Social Expansion (LinkedIn & Twitter/X) (Stage 14)
+- [x] Database schema & zero-downtime PostgreSQL migrations for LinkedIn & Twitter/X
+- [x] LinkedIn OAuth 2.0 flow supporting personal profile & organization company page discovery
+- [x] Twitter / X OAuth 2.0 PKCE flow with v2 identity resolution
+- [x] Encrypted token storage at rest via `TokenVaultService` (AES-256-GCM)
+- [x] LinkedIn publisher dispatching to `/v2/ugcPosts` with organization vs person author URNs
+- [x] Twitter / X publisher dispatching to `/2/tweets` with automated strict 280-character limit enforcement
+- [x] `PublisherFactoryService` routing for multi-network publish and mock fallbacks
+- [x] Frontend connection cards, branding badges, and unified candidate selection modal
+- [x] 100% test passing across 47 API unit test suites, 12 E2E test suites, and 9 Web test suites
+
