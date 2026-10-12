@@ -310,6 +310,8 @@ model Workspace {
   whiteLabelConfig          WhiteLabelConfig?
   reportSchedules           ExecutiveReportSchedule[]
   generatedReports          GeneratedExecutiveReport[]
+  moderationRules           InboxModerationRule[]
+  autoReplyTemplates        InboxAutoReplyTemplate[]
 
   @@index([slug])
   @@index([status])
@@ -1512,4 +1514,53 @@ model GeneratedExecutiveReport {
   @@index([workspaceId])
   @@index([workspaceId, createdAt])
   @@map("generated_executive_reports")
+}
+
+enum InboxModerationAction {
+  AUTO_HIDE
+  AUTO_FLAG
+  ASSIGN_TO_ROLE
+  AUTO_REPLY
+  CLOSE_INTERACTION
+}
+
+model InboxModerationRule {
+  id              String                @id @default(uuid())
+  workspaceId     String
+  name            String
+  description     String?
+  triggerSentiment String               @default("ALL")
+  keywords        String[]              @default([])
+  action          InboxModerationAction @default(AUTO_FLAG)
+  actionPayload   Json                  @default("{}")
+  isEnabled       Boolean               @default(true)
+  priority        Int                   @default(0)
+  executionCount  Int                   @default(0)
+  lastTriggeredAt DateTime?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  workspace       Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([workspaceId, isEnabled])
+  @@map("inbox_moderation_rules")
+}
+
+model InboxAutoReplyTemplate {
+  id             String    @id @default(uuid())
+  workspaceId    String
+  title          String
+  content        String
+  category       String    @default("GENERAL")
+  sentimentMatch String?
+  usageCount     Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([workspaceId, category])
+  @@map("inbox_auto_reply_templates")
 }

@@ -13,18 +13,28 @@ import { InboxAdapterFactory } from './adapters/inbox-adapter.factory';
 
 import { InboxReplyReconcilerService } from './services/inbox-reply-reconciler.service';
 
+import { InboxModerationController } from './controllers/inbox-moderation.controller';
+import { InboxModerationService } from './services/inbox-moderation.service';
+
 @Module({
   imports: [ConfigModule, PrismaModule, SocialAccountsModule],
-  controllers: [InboxController, MetaSocialWebhookController],
+  controllers: [InboxController, MetaSocialWebhookController, InboxModerationController],
   providers: [
     InboxService,
     InboxSyncService,
     MetaSocialWebhookService,
     InboxReplyReconcilerService,
+    InboxModerationService,
     MetaFacebookInboxAdapter,
     MetaInstagramInboxAdapter,
     InboxAdapterFactory,
   ],
-  exports: [InboxService, InboxSyncService, MetaSocialWebhookService, InboxReplyReconcilerService],
+  exports: [
+    InboxService,
+    InboxSyncService,
+    MetaSocialWebhookService,
+    InboxReplyReconcilerService,
+    InboxModerationService,
+  ],
 })
 export class InboxModule {}

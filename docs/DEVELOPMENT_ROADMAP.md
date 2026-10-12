@@ -246,3 +246,29 @@
   - 17 API E2E test suites (238 tests passed)
   - 14 Web test suites (105 tests passed)
   - Zero-error monorepo production build across all 32 static and dynamic routes
+
+---
+
+## Phase 20: AI Smart Auto-Moderation & Sentiment-Driven Triage in Unified Inbox (Stage 20)
+- [x] Database schema & zero-downtime PostgreSQL migrations:
+  - `InboxModerationAction` enum (`AUTO_HIDE`, `AUTO_FLAG`, `ASSIGN_TO_ROLE`, `AUTO_REPLY`, `CLOSE_INTERACTION`)
+  - `InboxModerationRule` model (name, description, active status, priority, triggerKeywords, negativeKeywords, sentimentFilter, minSentimentScore, action, actionPayload, assignedRole, matchesCount, lastTriggeredAt)
+  - `InboxAutoReplyTemplate` model (name, category, body, tone, tags, usageCount, isActive)
+  - Workspace relations and indexing (`[workspaceId, isActive]`, `[workspaceId, category]`)
+- [x] Shared TypeScript contracts & DTOs in `@packages/shared`:
+  - `InboxModerationAction`, `InboxModerationRuleDto`, `CreateInboxModerationRuleDto`, `UpdateInboxModerationRuleDto`
+  - `InboxAutoReplyTemplateDto`, `CreateInboxAutoReplyTemplateDto`, `UpdateInboxAutoReplyTemplateDto`, `InboxTriageResultDto`
+- [x] Inbox Auto-Moderation & Triage Engine (`apps/api/src/inbox/`)
+  - `InboxModerationService`: Full CRUD for moderation rules and auto-reply templates
+  - Rule evaluation & triage engine: Keyword matching (case-insensitive boundary matching with negation exclusions), sentiment analysis filtering, and automated actions (auto-hide, flag, auto-reply, role assignment, ticket closing)
+  - `InboxModerationController`: REST endpoints under `/api/v1/workspaces/:workspaceId/inbox/` with RBAC authorization
+  - Registered in `InboxModule`
+- [x] Frontend Inbox Moderation & Triage Management (`apps/web/`)
+  - `InboxModerationPage` (`/settings/inbox-moderation`): KPI statistics banner, Moderation Rules tab, Rule Creation/Edit Modal with test-simulator, Auto-Reply Template Library tab, Template Creation Modal
+  - Sidebar integration with `ShieldAlert` icon under Settings (`ROUTES.SETTINGS_INBOX_MODERATION`)
+- [x] 100% test pass rates across all test suites:
+  - 56 API unit test suites (438 tests passed)
+  - 18 API E2E test suites (247 tests passed)
+  - 15 Web test suites (108 tests passed)
+  - Zero-error monorepo Next.js production build across all 33 static and dynamic routes
+

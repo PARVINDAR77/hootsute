@@ -1622,4 +1622,92 @@ export interface GenerateReportRequestDto {
   includeListening?: boolean;
 }
 
+// ==========================================
+// Phase 20: AI Smart Auto-Moderation & Sentiment-Driven Triage in Unified Inbox
+// ==========================================
+
+export enum InboxModerationAction {
+  AUTO_HIDE = 'AUTO_HIDE',
+  AUTO_FLAG = 'AUTO_FLAG',
+  ASSIGN_TO_ROLE = 'ASSIGN_TO_ROLE',
+  AUTO_REPLY = 'AUTO_REPLY',
+  CLOSE_INTERACTION = 'CLOSE_INTERACTION',
+}
+
+export interface InboxModerationRuleDto {
+  id: string;
+  workspaceId: string;
+  name: string;
+  description?: string | null;
+  triggerSentiment: string;
+  keywords: string[];
+  action: InboxModerationAction;
+  actionPayload: Record<string, any>;
+  isEnabled: boolean;
+  priority: number;
+  executionCount: number;
+  lastTriggeredAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateInboxModerationRuleDto {
+  name: string;
+  description?: string;
+  triggerSentiment?: string;
+  keywords?: string[];
+  action: InboxModerationAction;
+  actionPayload?: Record<string, any>;
+  isEnabled?: boolean;
+  priority?: number;
+}
+
+export interface UpdateInboxModerationRuleDto {
+  name?: string;
+  description?: string;
+  triggerSentiment?: string;
+  keywords?: string[];
+  action?: InboxModerationAction;
+  actionPayload?: Record<string, any>;
+  isEnabled?: boolean;
+  priority?: number;
+}
+
+export interface InboxAutoReplyTemplateDto {
+  id: string;
+  workspaceId: string;
+  title: string;
+  content: string;
+  category: string;
+  sentimentMatch?: string | null;
+  usageCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateInboxAutoReplyTemplateDto {
+  title: string;
+  content: string;
+  category?: string;
+  sentimentMatch?: string;
+}
+
+export interface UpdateInboxAutoReplyTemplateDto {
+  title?: string;
+  content?: string;
+  category?: string;
+  sentimentMatch?: string;
+}
+
+export interface InboxTriageResultDto {
+  matchedRuleId?: string | null;
+  matchedRuleName?: string | null;
+  actionTaken: InboxModerationAction | 'NONE';
+  actionDetails?: string | null;
+  autoReplied: boolean;
+  flagged: boolean;
+  hidden: boolean;
+  assignedUserId?: string | null;
+}
+
 
