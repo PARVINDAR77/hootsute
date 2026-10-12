@@ -32,7 +32,7 @@ import { QueryMediaDto } from './dto/query-media.dto';
 export class MediaController {
   constructor(private readonly mediaService: MediaService) {}
 
-  @Post('upload-sessions')
+  @Post(['upload-sessions', 'upload-session'])
   @RequireWorkspaceRoles(WorkspaceRole.EDITOR, WorkspaceRole.ADMIN, WorkspaceRole.OWNER)
   @ApiOperation({ summary: 'Initiate a secure media upload session and obtain a signed upload URL' })
   @ApiResponse({ status: 201, description: 'Upload session initialized successfully' })
@@ -52,6 +52,7 @@ export class MediaController {
 
   @Post(':assetId/complete')
   @RequireWorkspaceRoles(WorkspaceRole.EDITOR, WorkspaceRole.ADMIN, WorkspaceRole.OWNER)
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Verify and finalize an uploaded media asset' })
   @ApiResponse({ status: 200, description: 'Media asset verified and marked READY' })
   async completeUpload(
@@ -120,7 +121,7 @@ export class MediaController {
     };
   }
 
-  @Get(':assetId/access-url')
+  @Get([':assetId/access-url', ':assetId/download-url'])
   @RequireWorkspaceRoles(WorkspaceRole.VIEWER, WorkspaceRole.EDITOR, WorkspaceRole.ADMIN, WorkspaceRole.OWNER)
   @ApiOperation({ summary: 'Generate a short-lived download or preview signed URL' })
   async getAccessUrl(
