@@ -112,6 +112,24 @@ enum RecipientConsentStatus {
   PENDING_VERIFICATION
 }
 
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+enum MediaProcessingStatus {
+  PENDING
+  UPLOADING
+  PROCESSING
+  READY
+  FAILED
+}
+
+enum MediaStorageProvider {
+  S3
+  LOCAL_MOCK
+}
+
 model User {
   id              String           @id @default(uuid())
   email           String           @unique
@@ -146,6 +164,7 @@ model User {
   interactionReplyAttempts InteractionReplyAttempt[] @relation("ReplyAttemptAuthor")
   interactionNotes         InteractionNote[]     @relation("InteractionNoteAuthor")
   inboxNotifications       InboxNotification[]   @relation("InboxNotificationRecipient")
+  uploadedMediaAssets      MediaAsset[]          @relation("MediaAssetUploadedBy")
 
   @@index([email])
   @@index([role])
@@ -209,6 +228,7 @@ model Workspace {
   interactionNotes          InteractionNote[]
   inboxSyncCheckpoints      InboxSyncCheckpoint[]
   inboxNotifications        InboxNotification[]
+  mediaAssets               MediaAsset[]
 
   @@index([slug])
   @@index([status])
@@ -409,13 +429,16 @@ model ContentVariant {
   linkUrl        String?
   mediaBrief     String?
   mediaAssetUrl  String?
+  mediaAssetId   String?
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
-  draft     ContentDraft      @relation(fields: [draftId], references: [id], onDelete: Cascade)
-  revisions ContentRevision[]
+  draft      ContentDraft      @relation(fields: [draftId], references: [id], onDelete: Cascade)
+  mediaAsset MediaAsset?       @relation("VariantMediaAsset", fields: [mediaAssetId], references: [id], onDelete: SetNull)
+  revisions  ContentRevision[]
 
   @@index([draftId])
+  @@index([mediaAssetId])
   @@index([platform])
   @@map("content_variants")
 }
@@ -1017,6 +1040,38 @@ model InboxNotification {
   @@index([workspaceId, recipientUserId, isRead])
   @@index([interactionId])
   @@map("inbox_notifications")
+}
+
+model MediaAsset {
+  id               String                @id @default(uuid())
+  workspaceId      String
+  uploadedByUserId String
+  originalFilename String
+  storageKey       String                @unique
+  storageProvider  MediaStorageProvider  @default(S3)
+  mimeType         String
+  mediaType        MediaType
+  sizeBytes        Int
+  width            Int?
+  height           Int?
+  durationSeconds  Float?
+  processingStatus MediaProcessingStatus @default(PENDING)
+  errorMessage     String?
+  checksumSha256   String?
+  metadata         Json?
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  deletedAt        DateTime?
+
+  workspace  Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  uploadedBy User             @relation("MediaAssetUploadedBy", fields: [uploadedByUserId], references: [id], onDelete: Restrict)
+  variants   ContentVariant[] @relation("VariantMediaAsset")
+
+  @@index([workspaceId, processingStatus])
+  @@index([workspaceId, createdAt])
+  @@index([workspaceId, deletedAt])
+  @@index([storageKey])
+  @@map("media_assets")
 }
 
 

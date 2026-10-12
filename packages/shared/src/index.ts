@@ -843,7 +843,85 @@ export interface InboxSyncCheckpointDto {
   updatedAt: string;
 }
 
+// Phase 11: Media Asset Management & Cloud Storage
 
+export enum MediaType {
+  IMAGE = 'IMAGE',
+  VIDEO = 'VIDEO',
+}
 
+export enum MediaProcessingStatus {
+  PENDING = 'PENDING',
+  UPLOADING = 'UPLOADING',
+  PROCESSING = 'PROCESSING',
+  READY = 'READY',
+  FAILED = 'FAILED',
+}
 
+export enum MediaStorageProvider {
+  S3 = 'S3',
+  LOCAL_MOCK = 'LOCAL_MOCK',
+}
 
+export interface MediaAssetDto {
+  id: string;
+  workspaceId: string;
+  uploadedByUserId: string;
+  originalFilename: string;
+  storageKey: string;
+  storageProvider: MediaStorageProvider;
+  mimeType: string;
+  mediaType: MediaType;
+  sizeBytes: number;
+  width?: number | null;
+  height?: number | null;
+  durationSeconds?: number | null;
+  processingStatus: MediaProcessingStatus;
+  errorMessage?: string | null;
+  checksumSha256?: string | null;
+  metadata?: Record<string, any> | null;
+  accessUrl?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string | null;
+  uploadedBy?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  usageCount?: number;
+}
+
+export interface CreateUploadSessionDto {
+  filename: string;
+  mimeType: string;
+  sizeBytes: number;
+}
+
+export interface UploadSessionResponseDto {
+  assetId: string;
+  storageKey: string;
+  uploadUrl: string;
+  method: 'PUT' | 'POST';
+  headers?: Record<string, string>;
+  expiresInSeconds: number;
+  maxSizeBytes: number;
+}
+
+export interface CompleteUploadDto {
+  etag?: string;
+}
+
+export interface QueryMediaDto {
+  page?: number;
+  limit?: number;
+  mediaType?: MediaType;
+  status?: MediaProcessingStatus;
+  search?: string;
+}
+
+export interface MediaAccessUrlDto {
+  assetId: string;
+  url: string;
+  expiresInSeconds: number;
+}

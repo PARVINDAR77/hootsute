@@ -18,6 +18,7 @@ export const ROUTES = {
   SETTINGS_WHATSAPP: '/settings/whatsapp',
   CONTENT_STUDIO: '/content/studio',
   CONTENT_DRAFTS: '/content/drafts',
+  MEDIA: '/media',
   CALENDAR: '/calendar',
   ANALYTICS: '/analytics',
   INBOX: '/inbox',

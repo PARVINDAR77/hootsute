@@ -171,6 +171,39 @@ export function validateEnvironment(config: Record<string, any>): Record<string,
         reason: 'CORS_ORIGIN must not be wildcard "*" or reference "localhost" in production.',
       });
     }
+
+    // 6. Validate Media Storage in Production
+    const storageProvider = (config.MEDIA_STORAGE_PROVIDER || 's3').toLowerCase();
+    if (storageProvider === 'local_mock' || storageProvider === 'mock') {
+      issues.push({
+        variable: 'MEDIA_STORAGE_PROVIDER',
+        reason: 'Mock storage is strictly prohibited in production. Configure a verified cloud storage provider (e.g., "s3").',
+      });
+    } else if (storageProvider === 's3') {
+      if (!config.AWS_S3_BUCKET || config.AWS_S3_BUCKET.trim().length === 0) {
+        issues.push({
+          variable: 'AWS_S3_BUCKET',
+          reason: 'AWS_S3_BUCKET is required when MEDIA_STORAGE_PROVIDER is "s3" in production.',
+        });
+      }
+      if (!config.AWS_REGION || config.AWS_REGION.trim().length === 0) {
+        issues.push({
+          variable: 'AWS_REGION',
+          reason: 'AWS_REGION is required when MEDIA_STORAGE_PROVIDER is "s3" in production.',
+        });
+      }
+    }
+  }
+
+  // General checks across all environments when S3 is explicitly chosen
+  const activeProvider = (config.MEDIA_STORAGE_PROVIDER || '').toLowerCase();
+  if (activeProvider === 's3' && !isProduction) {
+    if (!config.AWS_S3_BUCKET || config.AWS_S3_BUCKET.trim().length === 0) {
+      issues.push({
+        variable: 'AWS_S3_BUCKET',
+        reason: 'AWS_S3_BUCKET must not be empty when MEDIA_STORAGE_PROVIDER is set to "s3".',
+      });
+    }
   }
 
   if (issues.length > 0) {

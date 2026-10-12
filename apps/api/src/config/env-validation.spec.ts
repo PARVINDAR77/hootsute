@@ -20,6 +20,8 @@ describe('validateEnvironment', () => {
     META_APP_SECRET: 'prod_meta_secret_abcdef123456',
     META_WEBHOOK_VERIFY_TOKEN: 'prod_meta_webhook_secret_entropy_token',
     CORS_ORIGIN: 'https://app.omnisocial.ai',
+    AWS_S3_BUCKET: 'omnisocial-prod-media',
+    AWS_REGION: 'us-east-1',
   };
 
   it('passes for a valid development configuration', () => {
@@ -139,4 +141,25 @@ describe('validateEnvironment', () => {
       /DATABASE_URL is required and must not be empty/,
     );
   });
+
+  it('fails in production if MEDIA_STORAGE_PROVIDER is local_mock', () => {
+    const config = {
+      ...validProdConfig,
+      MEDIA_STORAGE_PROVIDER: 'local_mock',
+    };
+    expect(() => validateEnvironment(config)).toThrow(
+      /Mock storage is strictly prohibited in production/,
+    );
+  });
+
+  it('fails in production if AWS_S3_BUCKET is missing when using S3 provider', () => {
+    const config = {
+      ...validProdConfig,
+      AWS_S3_BUCKET: '',
+    };
+    expect(() => validateEnvironment(config)).toThrow(
+      /AWS_S3_BUCKET is required when MEDIA_STORAGE_PROVIDER is "s3"/,
+    );
+  });
 });
+

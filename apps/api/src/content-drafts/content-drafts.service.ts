@@ -90,12 +90,17 @@ export class ContentDraftsService {
                   linkUrl: v.linkUrl?.trim() || null,
                   mediaBrief: v.mediaBrief?.trim() || null,
                   mediaAssetUrl: v.mediaAssetUrl?.trim() || null,
+                  mediaAssetId: v.mediaAssetId || null,
                 })),
               }
             : undefined,
         },
         include: {
-          variants: true,
+          variants: {
+            include: {
+              mediaAsset: true,
+            },
+          },
         },
       });
 
@@ -200,7 +205,11 @@ export class ContentDraftsService {
     const draft = await this.prisma.contentDraft.findUnique({
       where: { id: draftId },
       include: {
-        variants: true,
+        variants: {
+          include: {
+            mediaAsset: true,
+          },
+        },
         revisions: {
           orderBy: { revisionNumber: 'desc' },
           take: 20,
@@ -283,6 +292,7 @@ export class ContentDraftsService {
                 linkUrl: v.linkUrl !== undefined ? v.linkUrl?.trim() || null : undefined,
                 mediaBrief: v.mediaBrief !== undefined ? v.mediaBrief?.trim() || null : undefined,
                 mediaAssetUrl: v.mediaAssetUrl !== undefined ? v.mediaAssetUrl?.trim() || null : undefined,
+                mediaAssetId: v.mediaAssetId !== undefined ? v.mediaAssetId || null : undefined,
               },
             });
           } else if (v.platform && v.body) {
@@ -297,6 +307,7 @@ export class ContentDraftsService {
                 linkUrl: v.linkUrl?.trim() || null,
                 mediaBrief: v.mediaBrief?.trim() || null,
                 mediaAssetUrl: v.mediaAssetUrl?.trim() || null,
+                mediaAssetId: v.mediaAssetId || null,
               },
             });
           }
@@ -341,7 +352,13 @@ export class ContentDraftsService {
 
       return tx.contentDraft.findUnique({
         where: { id: draftId },
-        include: { variants: true },
+        include: {
+          variants: {
+            include: {
+              mediaAsset: true,
+            },
+          },
+        },
       });
     });
   }

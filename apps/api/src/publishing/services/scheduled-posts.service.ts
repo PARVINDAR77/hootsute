@@ -99,6 +99,23 @@ export class ScheduledPostsService {
       }
     }
 
+    // 4b. Verify any referenced media assets are in READY status and belong to workspace
+    for (const v of draft.variants) {
+      if (v.mediaAssetId) {
+        const media = await this.prisma.mediaAsset.findFirst({
+          where: { id: v.mediaAssetId, workspaceId, deletedAt: null },
+        });
+        if (!media) {
+          throw new BadRequestException(`Referenced media asset [${v.mediaAssetId}] not found in this workspace`);
+        }
+        if (media.processingStatus !== 'READY') {
+          throw new BadRequestException(
+            `Referenced media asset [${media.originalFilename}] is not ready for publishing (status: ${media.processingStatus})`,
+          );
+        }
+      }
+    }
+
     // 5. Resolve approved revision and build immutable content snapshot
     const approvedRevision =
       draft.revisions.find((r) => r.action === 'APPROVE') || draft.revisions[0];
@@ -114,6 +131,7 @@ export class ScheduledPostsService {
       hashtags: v.hashtags || [],
       linkUrl: v.linkUrl || null,
       mediaAssetUrl: v.mediaAssetUrl || null,
+      mediaAssetId: v.mediaAssetId || null,
     }));
 
     const contentSnapshot = {

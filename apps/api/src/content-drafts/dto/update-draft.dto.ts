@@ -74,6 +74,11 @@ export class UpdateVariantDto {
     { message: 'Media asset URL must be a valid HTTP or HTTPS URL' },
   )
   mediaAssetUrl?: string;
+
+  @ApiPropertyOptional({ description: 'ID of verified workspace media asset', example: 'uuid-media-123' })
+  @IsOptional()
+  @IsString()
+  mediaAssetId?: string;
 }
 
 export class UpdateContentDraftDto {

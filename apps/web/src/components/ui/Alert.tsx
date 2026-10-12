@@ -1,5 +1,4 @@
-import React from 'react';
-import { AlertCircle, CheckCircle2, Info, AlertTriangle } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Info, AlertTriangle, X } from 'lucide-react';
 
 export interface AlertProps {
   type?: 'error' | 'success' | 'warning' | 'info';
@@ -8,6 +7,7 @@ export interface AlertProps {
   message?: string;
   children?: React.ReactNode;
   className?: string;
+  onClose?: () => void;
 }
 
 export function Alert({
@@ -17,6 +17,7 @@ export function Alert({
   message,
   children,
   className = '',
+  onClose,
 }: AlertProps) {
   const resolvedType = (variant === 'danger' ? 'error' : variant) || type || 'error';
   const configs = {
@@ -48,6 +49,16 @@ export function Alert({
         {message && <p className="text-sm leading-relaxed">{message}</p>}
         {children}
       </div>
+      {onClose && (
+        <button
+          type="button"
+          onClick={onClose}
+          className="p-1 rounded-lg hover:bg-black/5 transition-colors text-inherit opacity-70 hover:opacity-100 shrink-0 self-start"
+          title="Dismiss"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      )}
     </div>
   );
 }

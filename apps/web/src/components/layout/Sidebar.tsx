@@ -18,6 +18,7 @@ import {
   Settings,
   Shield,
   Inbox,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { ROUTES } from '@/lib/constants';
 import { useWorkspace } from '@/lib/workspace-context';
@@ -38,6 +39,7 @@ export function Sidebar() {
   const aiContentNav = [
     { name: 'AI Studio', href: ROUTES.CONTENT_STUDIO, icon: Sparkles },
     { name: 'Drafts & Review', href: ROUTES.CONTENT_DRAFTS, icon: FileText },
+    { name: 'Media Library', href: ROUTES.MEDIA, icon: ImageIcon },
     { name: 'Publishing Calendar', href: ROUTES.CALENDAR, icon: Calendar },
     { name: 'Brand Kit', href: ROUTES.BRAND_KIT, icon: Palette },
   ];
