@@ -222,3 +222,27 @@
   - 16 API E2E test suites (115 tests passed)
   - 13 Web test suites (100 tests passed)
   - Clean production builds for shared package, NestJS backend, and Next.js frontend
+
+---
+
+## Phase 19: White-Label Agency Portals & Automated PDF/Email Executive Reports (Stage 19)
+- [x] Database schema & zero-downtime PostgreSQL migrations:
+  - `WhiteLabelConfig` model (brand name, custom domain CNAME, logo, favicon, primary/secondary/accent palettes, support email, portal title, custom CSS overrides, hidePoweredBy watermark toggle)
+  - `ExecutiveReportSchedule` model (cadence frequency, recipient emails, metric domain toggles, next run scheduling)
+  - `GeneratedExecutiveReport` model (period start/end, synthesized metrics summary JSON, responsive HTML template, delivery logs, status)
+- [x] Shared TypeScript contracts & DTOs in `@packages/shared` (`ReportFrequency`, `WhiteLabelConfigDto`, `UpsertWhiteLabelConfigDto`, `ExecutiveReportScheduleDto`, `CreateReportScheduleDto`, `UpdateReportScheduleDto`, `GeneratedExecutiveReportDto`, `ExecutiveReportSummaryDto`, `GenerateReportRequestDto`)
+- [x] Reports & White-Label Backend Module (`apps/api/src/reports/`)
+  - `WhiteLabelService`: Custom portal branding per workspace, public resolution by custom domain/subdomain or workspace slug
+  - `ExecutiveReportsService`: Multi-network analytics aggregation (impressions, reach, net follower growth, top 5 published posts, UTM link conversion attribution, and brand listening sentiment polarity breakdown)
+  - Responsive HTML executive report synthesizer with dynamic agency brand colors, logo header, and KPI tables
+  - Public unauthenticated portal branding discovery endpoint (`GET /api/v1/white-label/public/:domainOrSlug`)
+  - Full schedule management and on-demand report runner
+- [x] Frontend Agency White-Label & Reports Suite (`apps/web/`)
+  - `WhiteLabelPage` (`/settings/white-label`): Agency identity form, CNAME DNS instructions, color picker swatches, custom CSS editor, and real-time interactive live portal preview card
+  - `ExecutiveReportsPage` (`/reports`): Top KPI summary banner, reports archive grid with metric chips, automated schedules table, on-demand synthesis modal, schedule configuration modal, and full-screen HTML report viewer drawer with print/PDF export
+  - Navigation links added to `Sidebar.tsx` under Workspace and Analytics sections
+- [x] 100% test pass rates across all test suites:
+  - 55 API unit test suites (430 tests passed)
+  - 17 API E2E test suites (238 tests passed)
+  - 14 Web test suites (105 tests passed)
+  - Zero-error monorepo production build across all 32 static and dynamic routes

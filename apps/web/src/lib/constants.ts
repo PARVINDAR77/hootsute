@@ -26,6 +26,8 @@ export const ROUTES = {
   AUTOMATIONS: '/automations',
   LINKS: '/links',
   LISTENING: '/listening',
+  REPORTS: '/reports',
+  SETTINGS_WHITE_LABEL: '/settings/white-label',
   WORKSPACE_ONBOARDING: '/onboarding/workspace',
   INVITATIONS_ACCEPT: '/invitations/accept',
   UNAUTHORIZED: '/unauthorized',

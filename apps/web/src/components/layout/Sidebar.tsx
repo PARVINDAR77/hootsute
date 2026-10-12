@@ -23,6 +23,8 @@ import {
   Zap,
   Link2,
   Radio,
+  Globe,
+  PieChart,
 } from 'lucide-react';
 import { ROUTES } from '@/lib/constants';
 import { useWorkspace } from '@/lib/workspace-context';
@@ -36,6 +38,7 @@ export function Sidebar() {
     { name: 'Social Accounts', href: ROUTES.SETTINGS_SOCIAL_ACCOUNTS, icon: Share2 },
     { name: 'WhatsApp Approval', href: ROUTES.SETTINGS_WHATSAPP, icon: MessageSquare },
     { name: 'Workspace Settings', href: ROUTES.SETTINGS_WORKSPACE, icon: Building2 },
+    { name: 'White-Label Portal', href: ROUTES.SETTINGS_WHITE_LABEL, icon: Globe },
     { name: 'Billing & Plan', href: ROUTES.SETTINGS_BILLING, icon: CreditCard },
     { name: 'Team Members', href: ROUTES.SETTINGS_MEMBERS, icon: Users },
     { name: 'Invitations', href: ROUTES.SETTINGS_INVITATIONS, icon: Mail },
@@ -145,6 +148,23 @@ export function Sidebar() {
               }`}
             />
             <span>Growth Analytics</span>
+          </Link>
+          <Link
+            href={ROUTES.REPORTS}
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+              pathname === ROUTES.REPORTS || pathname.startsWith(`${ROUTES.REPORTS}/`)
+                ? 'bg-indigo-50 text-indigo-700 font-semibold shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+            }`}
+          >
+            <PieChart
+              className={`w-4 h-4 ${
+                pathname === ROUTES.REPORTS || pathname.startsWith(`${ROUTES.REPORTS}/`)
+                  ? 'text-indigo-600'
+                  : 'text-slate-400'
+              }`}
+            />
+            <span>Executive Reports</span>
           </Link>
         </div>
 

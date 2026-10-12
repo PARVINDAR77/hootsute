@@ -1490,4 +1490,136 @@ export interface CreateDraftCommentDto {
   parentCommentId?: string;
 }
 
+// ==========================================
+// Phase 19: White-Label Agency Portals & Automated PDF/Email Executive Reports
+// ==========================================
+
+export enum ReportFrequency {
+  WEEKLY = 'WEEKLY',
+  MONTHLY = 'MONTHLY',
+  ON_DEMAND = 'ON_DEMAND',
+}
+
+export interface WhiteLabelConfigDto {
+  id: string;
+  workspaceId: string;
+  brandName: string;
+  customDomain?: string | null;
+  logoUrl?: string | null;
+  faviconUrl?: string | null;
+  primaryColor: string;
+  secondaryColor: string;
+  accentColor: string;
+  supportEmail?: string | null;
+  portalTitle?: string | null;
+  customCss?: string | null;
+  hidePoweredBy: boolean;
+  clientAccessUrl?: string | null;
+  isEnabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UpsertWhiteLabelConfigDto {
+  brandName: string;
+  customDomain?: string;
+  logoUrl?: string;
+  faviconUrl?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  accentColor?: string;
+  supportEmail?: string;
+  portalTitle?: string;
+  customCss?: string;
+  hidePoweredBy?: boolean;
+  clientAccessUrl?: string;
+  isEnabled?: boolean;
+}
+
+export interface ExecutiveReportScheduleDto {
+  id: string;
+  workspaceId: string;
+  createdById: string;
+  name: string;
+  frequency: ReportFrequency;
+  recipients: string[];
+  includeSocial: boolean;
+  includeLinks: boolean;
+  includeListening: boolean;
+  isActive: boolean;
+  lastRunAt?: string | null;
+  nextRunAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateReportScheduleDto {
+  name: string;
+  frequency: ReportFrequency;
+  recipients: string[];
+  includeSocial?: boolean;
+  includeLinks?: boolean;
+  includeListening?: boolean;
+  isActive?: boolean;
+}
+
+export interface UpdateReportScheduleDto {
+  name?: string;
+  frequency?: ReportFrequency;
+  recipients?: string[];
+  includeSocial?: boolean;
+  includeLinks?: boolean;
+  includeListening?: boolean;
+  isActive?: boolean;
+}
+
+export interface ExecutiveReportTopPostDto {
+  id: string;
+  content: string;
+  platform: string;
+  impressions: number;
+  engagement: number;
+}
+
+export interface ExecutiveReportSummaryDto {
+  totalImpressions: number;
+  totalReach: number;
+  netFollowerGrowth: number;
+  totalLinkClicks: number;
+  totalListeningMentions: number;
+  sentimentBreakdown: {
+    positive: number;
+    neutral: number;
+    negative: number;
+  };
+  topPosts: ExecutiveReportTopPostDto[];
+}
+
+export interface GeneratedExecutiveReportDto {
+  id: string;
+  workspaceId: string;
+  scheduleId?: string | null;
+  title: string;
+  frequency: ReportFrequency;
+  periodStart: string;
+  periodEnd: string;
+  metricsSummary: ExecutiveReportSummaryDto;
+  htmlContent: string;
+  pdfStorageUrl?: string | null;
+  recipientsSent: string[];
+  sentAt?: string | null;
+  status: string;
+  createdAt: string;
+}
+
+export interface GenerateReportRequestDto {
+  title?: string;
+  scheduleId?: string;
+  periodDays?: number;
+  recipients?: string[];
+  includeSocial?: boolean;
+  includeLinks?: boolean;
+  includeListening?: boolean;
+}
+
 

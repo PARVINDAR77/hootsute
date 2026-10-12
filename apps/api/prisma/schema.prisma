@@ -230,6 +230,7 @@ model User {
   draftComments            DraftComment[]        @relation("DraftCommentAuthor")
   resolvedComments         DraftComment[]        @relation("DraftCommentResolvedBy")
   reviewedDraftSteps       DraftStepReview[]     @relation("DraftStepReviewer")
+  createdReportSchedules   ExecutiveReportSchedule[] @relation("ReportScheduleCreatedBy")
 
   @@index([email])
   @@index([role])
@@ -306,6 +307,9 @@ model Workspace {
   listeningMentions         ListeningMention[]
   approvalWorkflows         ApprovalWorkflow[]
   draftComments             DraftComment[]
+  whiteLabelConfig          WhiteLabelConfig?
+  reportSchedules           ExecutiveReportSchedule[]
+  generatedReports          GeneratedExecutiveReport[]
 
   @@index([slug])
   @@index([status])
@@ -1429,4 +1433,83 @@ model DraftComment {
   @@map("draft_comments")
 }
 
+enum ReportFrequency {
+  WEEKLY
+  MONTHLY
+  ON_DEMAND
+}
 
+model WhiteLabelConfig {
+  id              String    @id @default(uuid())
+  workspaceId     String    @unique
+  brandName       String
+  customDomain    String?   @unique
+  logoUrl         String?
+  faviconUrl      String?
+  primaryColor    String    @default("#6366f1")
+  secondaryColor  String    @default("#4f46e5")
+  accentColor     String    @default("#06b6d4")
+  supportEmail    String?
+  portalTitle     String?
+  customCss       String?
+  hidePoweredBy   Boolean   @default(false)
+  clientAccessUrl String?
+  isEnabled       Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([customDomain])
+  @@map("white_label_configs")
+}
+
+model ExecutiveReportSchedule {
+  id               String                    @id @default(uuid())
+  workspaceId      String
+  createdById      String
+  name             String
+  frequency        ReportFrequency           @default(WEEKLY)
+  recipients       String[]                  @default([])
+  includeSocial    Boolean                   @default(true)
+  includeLinks     Boolean                   @default(true)
+  includeListening Boolean                   @default(true)
+  isActive         Boolean                   @default(true)
+  lastRunAt        DateTime?
+  nextRunAt        DateTime?
+  createdAt        DateTime                  @default(now())
+  updatedAt        DateTime                  @updatedAt
+
+  workspace        Workspace                 @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy        User                      @relation("ReportScheduleCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  reports          GeneratedExecutiveReport[]
+
+  @@index([workspaceId])
+  @@index([workspaceId, isActive])
+  @@map("executive_report_schedules")
+}
+
+model GeneratedExecutiveReport {
+  id             String                   @id @default(uuid())
+  workspaceId    String
+  scheduleId     String?
+  title          String
+  frequency      ReportFrequency          @default(ON_DEMAND)
+  periodStart    DateTime
+  periodEnd      DateTime
+  metricsSummary Json                     @default("{}")
+  htmlContent    String                   @db.Text
+  pdfStorageUrl  String?
+  recipientsSent String[]                 @default([])
+  sentAt         DateTime?
+  status         String                   @default("GENERATED")
+  createdAt      DateTime                 @default(now())
+
+  workspace      Workspace                @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  schedule       ExecutiveReportSchedule? @relation(fields: [scheduleId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([workspaceId, createdAt])
+  @@map("generated_executive_reports")
+}

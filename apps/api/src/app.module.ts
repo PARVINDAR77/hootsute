@@ -26,6 +26,7 @@ import { AutomationsModule } from './automations/automations.module';
 import { LinksModule } from './links/links.module';
 import { ListeningModule } from './listening/listening.module';
 import { ApprovalWorkflowsModule } from './approval-workflows/approval-workflows.module';
+import { ReportsModule } from './reports/reports.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -74,6 +75,7 @@ import { RedisThrottlerStorage } from './common/throttler/redis-throttler-storag
     LinksModule,
     ListeningModule,
     ApprovalWorkflowsModule,
+    ReportsModule,
   ],
   providers: [
     {
