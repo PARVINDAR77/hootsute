@@ -211,6 +211,7 @@ model User {
   interactionNotes         InteractionNote[]     @relation("InteractionNoteAuthor")
   inboxNotifications       InboxNotification[]   @relation("InboxNotificationRecipient")
   uploadedMediaAssets      MediaAsset[]          @relation("MediaAssetUploadedBy")
+  shortenedLinks           ShortenedLink[]       @relation("ShortenedLinkCreatedBy")
 
   @@index([email])
   @@index([role])
@@ -282,6 +283,7 @@ model Workspace {
   invoices                  BillingInvoice[]
   automationRules           AutomationRule[]
   automationLogs            AutomationExecutionLog[]
+  shortenedLinks            ShortenedLink[]
 
   @@index([slug])
   @@index([status])
@@ -1212,6 +1214,54 @@ model AutomationExecutionLog {
   @@index([workspaceId, executedAt])
   @@index([ruleId, executedAt])
   @@map("automation_execution_logs")
+}
+
+model ShortenedLink {
+  id               String           @id @default(uuid())
+  workspaceId      String
+  createdById      String
+  originalUrl      String
+  shortCode        String           @unique
+  title            String?
+  utmSource        String?
+  utmMedium        String?
+  utmCampaign      String?
+  utmTerm          String?
+  utmContent       String?
+  destinationUrl   String
+  totalClicks      Int              @default(0)
+  lastClickedAt    DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  deletedAt        DateTime?
+
+  workspace        Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy        User             @relation("ShortenedLinkCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  clickEvents      LinkClickEvent[]
+
+  @@index([workspaceId])
+  @@index([shortCode])
+  @@index([workspaceId, createdAt])
+  @@map("shortened_links")
+}
+
+model LinkClickEvent {
+  id              String         @id @default(uuid())
+  shortenedLinkId String
+  clickedAt       DateTime       @default(now())
+  ipHash          String?
+  referrer        String?
+  userAgent       String?
+  deviceType      String         @default("DESKTOP")
+  browser         String?
+  os              String?
+  countryCode     String?
+
+  shortenedLink   ShortenedLink  @relation(fields: [shortenedLinkId], references: [id], onDelete: Cascade)
+
+  @@index([shortenedLinkId])
+  @@index([shortenedLinkId, clickedAt])
+  @@map("link_click_events")
 }
 
 

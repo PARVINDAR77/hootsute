@@ -1200,4 +1200,74 @@ export interface BulkScheduleImportResponse {
   errors?: { rowNumber: number; error: string }[];
 }
 
+// ==========================================
+// Phase 16: Branded Link Shortener & UTM Attribution
+// ==========================================
+
+export interface UtmParametersDto {
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
+  utmTerm?: string;
+  utmContent?: string;
+}
+
+export interface CreateShortenedLinkDto {
+  originalUrl: string;
+  customCode?: string;
+  title?: string;
+  utmParameters?: UtmParametersDto;
+}
+
+export interface ShortenedLinkDto {
+  id: string;
+  workspaceId: string;
+  createdById: string;
+  originalUrl: string;
+  shortCode: string;
+  shortUrl: string;
+  title?: string | null;
+  utmSource?: string | null;
+  utmMedium?: string | null;
+  utmCampaign?: string | null;
+  utmTerm?: string | null;
+  utmContent?: string | null;
+  destinationUrl: string;
+  totalClicks: number;
+  lastClickedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LinkClickEventDto {
+  id: string;
+  shortenedLinkId: string;
+  clickedAt: string;
+  referrer?: string | null;
+  deviceType: 'DESKTOP' | 'MOBILE' | 'TABLET' | 'OTHER';
+  browser?: string | null;
+  os?: string | null;
+  countryCode?: string | null;
+}
+
+export interface LinkClickAnalyticsDto {
+  link: ShortenedLinkDto;
+  totalClicks: number;
+  uniqueClicksEstimate: number;
+  clicksOverTime: {
+    date: string;
+    clicks: number;
+  }[];
+  deviceBreakdown: {
+    deviceType: string;
+    count: number;
+    percentage: number;
+  }[];
+  topReferrers: {
+    referrer: string;
+    count: number;
+  }[];
+  recentEvents: LinkClickEventDto[];
+}
+
 

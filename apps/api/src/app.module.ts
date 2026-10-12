@@ -23,6 +23,7 @@ import { InboxModule } from './inbox/inbox.module';
 import { MediaModule } from './media/media.module';
 import { BillingModule } from './billing/billing.module';
 import { AutomationsModule } from './automations/automations.module';
+import { LinksModule } from './links/links.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -68,6 +69,7 @@ import { RedisThrottlerStorage } from './common/throttler/redis-throttler-storag
     MediaModule,
     BillingModule,
     AutomationsModule,
+    LinksModule,
   ],
   providers: [
     {

@@ -138,4 +138,30 @@
   - "Bulk CSV Import" entry point directly integrated into Publishing Calendar
 - [x] 100% test passing across 48 API unit test suites (373 tests), 13 E2E test suites (188 tests), and 10 Web test suites (86 tests)
 
+---
 
+## Phase 16: Branded Link Shortener, UTM Campaign Tagging & Click Attribution Engine (Stage 16)
+- [x] Database schema & zero-downtime PostgreSQL migrations for `ShortenedLink` and `LinkClickEvent`
+  - Relational ties to `Workspace` and `User`
+  - Indexed unique `shortCode` and per-workspace link collections
+  - Cascading telemetry logs recording IP hash, User-Agent, device type, browser, OS, referrer, and timestamps
+- [x] Shared TypeScript contracts & DTOs in `@packages/shared` (`UtmParametersDto`, `CreateShortenedLinkDto`, `ShortenedLinkDto`, `LinkClickEventDto`, `LinkClickAnalyticsDto`)
+- [x] Backend Link Shortener Service (`apps/api/src/links/services/links.service.ts`)
+  - Collision-resistant Base62 nano-slug generation and custom slug availability validation
+  - Deterministic UTM parameter query string synthesis (`utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`)
+  - Fast telemetry ingestion and privacy-preserving SHA-256 IP hashing
+  - Aggregated link analytics engine (total clicks, unique estimated visitors, device breakdowns, top referrers, and daily time series)
+- [x] Public Link Redirection & Workspace Controller (`apps/api/src/links/controllers/`)
+  - Public `@Public()` HTTP 302 redirect controller (`/api/v1/links/r/:code`) with graceful 404 fallback
+  - Authenticated CRUD workspace controller (`POST /links`, `GET /links`, `DELETE /links/:id`, `GET /links/:id/analytics`)
+- [x] Frontend Link Shortener Dashboard & UTM Builder (`apps/web/src/app/(dashboard)/links/page.tsx`)
+  - KPI overview metrics bar (Total Links, Total Clicks, Avg Clicks/Link, Top Referrer)
+  - Quick search and copy-to-clipboard actions
+  - `CreateLinkModal.tsx`: One-click UTM network presets (LinkedIn, Twitter/X, Facebook, Instagram), live URL preview, custom slug configuration
+  - `LinkAnalyticsDrawer.tsx`: Detailed analytics drawer with device breakdown progress bars, top referrer table, and recent telemetry events
+  - Sidebar navigation entry (`ROUTES.LINKS`)
+- [x] 100% test pass rate across all suites:
+  - 49 API unit test suites (384 tests passed)
+  - 14 API E2E test suites (197 tests passed)
+  - 11 Web test suites (92 tests passed)
+  - Clean production builds for shared package, NestJS backend, and Next.js frontend

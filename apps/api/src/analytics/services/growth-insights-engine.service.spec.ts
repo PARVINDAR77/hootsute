@@ -163,18 +163,17 @@ describe('GrowthInsightsEngineService', () => {
 
   describe('Rule 3: Optimal Timing (evaluateOptimalTiming)', () => {
     it('analyzes time windows with correlational framing when sample size >= 8 posts', () => {
-      const now = Date.now();
       const posts: any[] = [
-        // 4 Afternoon posts (14:00 UTC) with high interactions
-        { publishedAt: new Date(now - 2 * 86400000 - 14 * 3600000), likesCount: 50, commentsCount: 15, sharesCount: 5, savesCount: 5 },
-        { publishedAt: new Date(now - 4 * 86400000 - 14 * 3600000), likesCount: 45, commentsCount: 20, sharesCount: 5, savesCount: 5 },
-        { publishedAt: new Date(now - 6 * 86400000 - 15 * 3600000), likesCount: 55, commentsCount: 10, sharesCount: 5, savesCount: 5 },
-        { publishedAt: new Date(now - 8 * 86400000 - 16 * 3600000), likesCount: 60, commentsCount: 15, sharesCount: 5, savesCount: 5 },
-        // 4 Morning posts (08:00 UTC) with lower interactions
-        { publishedAt: new Date(now - 3 * 86400000 - 8 * 3600000), likesCount: 15, commentsCount: 5, sharesCount: 1, savesCount: 1 },
-        { publishedAt: new Date(now - 5 * 86400000 - 8 * 3600000), likesCount: 18, commentsCount: 4, sharesCount: 1, savesCount: 1 },
-        { publishedAt: new Date(now - 7 * 86400000 - 9 * 3600000), likesCount: 12, commentsCount: 3, sharesCount: 1, savesCount: 1 },
-        { publishedAt: new Date(now - 9 * 86400000 - 9 * 3600000), likesCount: 15, commentsCount: 3, sharesCount: 1, savesCount: 1 },
+        // 4 Afternoon posts (14:00-16:00 UTC) with high interactions
+        { publishedAt: new Date('2026-05-01T14:00:00Z'), likesCount: 50, commentsCount: 15, sharesCount: 5, savesCount: 5 },
+        { publishedAt: new Date('2026-05-02T14:30:00Z'), likesCount: 45, commentsCount: 20, sharesCount: 5, savesCount: 5 },
+        { publishedAt: new Date('2026-05-03T15:00:00Z'), likesCount: 55, commentsCount: 10, sharesCount: 5, savesCount: 5 },
+        { publishedAt: new Date('2026-05-04T16:00:00Z'), likesCount: 60, commentsCount: 15, sharesCount: 5, savesCount: 5 },
+        // 4 Morning posts (08:00-09:00 UTC) with lower interactions
+        { publishedAt: new Date('2026-05-05T08:00:00Z'), likesCount: 15, commentsCount: 5, sharesCount: 1, savesCount: 1 },
+        { publishedAt: new Date('2026-05-06T08:30:00Z'), likesCount: 18, commentsCount: 4, sharesCount: 1, savesCount: 1 },
+        { publishedAt: new Date('2026-05-07T09:00:00Z'), likesCount: 12, commentsCount: 3, sharesCount: 1, savesCount: 1 },
+        { publishedAt: new Date('2026-05-08T09:30:00Z'), likesCount: 15, commentsCount: 3, sharesCount: 1, savesCount: 1 },
       ];
 
       const res = service.evaluateOptimalTiming(posts);

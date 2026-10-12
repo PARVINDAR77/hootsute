@@ -21,6 +21,7 @@ import {
   Image as ImageIcon,
   CreditCard,
   Zap,
+  Link2,
 } from 'lucide-react';
 import { ROUTES } from '@/lib/constants';
 import { useWorkspace } from '@/lib/workspace-context';
@@ -44,6 +45,7 @@ export function Sidebar() {
     { name: 'Drafts & Review', href: ROUTES.CONTENT_DRAFTS, icon: FileText },
     { name: 'Media Library', href: ROUTES.MEDIA, icon: ImageIcon },
     { name: 'Publishing Calendar', href: ROUTES.CALENDAR, icon: Calendar },
+    { name: 'Link Shortener & UTM', href: ROUTES.LINKS, icon: Link2 },
     { name: 'Brand Kit', href: ROUTES.BRAND_KIT, icon: Palette },
   ];
 
