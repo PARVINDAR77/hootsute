@@ -197,3 +197,28 @@
   - 15 API E2E test suites (101 tests passed)
   - 12 Web test suites (96 tests passed)
   - Zero-error Next.js production build with 26 static pages
+
+---
+
+## Phase 18: Multi-Level Approval Matrix & Collaborative Content Review Workflow (Stage 18)
+- [x] Database schema & zero-downtime PostgreSQL migrations:
+  - `ApprovalWorkflow` & `ApprovalWorkflowStep` models with required role requirements (`EDITOR`, `ADMIN`, `OWNER`)
+  - `DraftStepReview` model recording decision notes, reviewers, decidedAt timestamps, and status transitions
+  - `DraftComment` model enabling hierarchical in-line discussion threads with resolution tracking
+  - State machine support for `CHANGES_REQUESTED` and automatic draft resolution upon mandatory step sign-offs
+- [x] Shared TypeScript contracts & DTOs in `@packages/shared` (`ApprovalStepStatus`, `ApprovalWorkflowDto`, `ApprovalWorkflowStepDto`, `CreateApprovalWorkflowDto`, `DraftStepReviewDto`, `DraftApprovalProgressDto`, `RecordReviewDecisionDto`, `DraftCommentDto`, `CreateDraftCommentDto`)
+- [x] Approval Workflows Backend Engine (`apps/api/src/approval-workflows/`)
+  - Workflow CRUD with default workspace assignment
+  - Auto-initialization of approval step matrix upon draft submission for review
+  - State transition engine: changes requested automatically flags draft; all mandatory approvals automatically approve draft
+  - Role hierarchy enforcement preventing unauthorized reviews
+  - Threaded draft comments with resolve/unresolve and ownership-based deletion
+- [x] Frontend Collaborative Review Interface (`apps/web/`)
+  - `ApprovalMatrixStepper.tsx`: Visual multi-stage review progress stepper, role badges, reviewer notes, and decision panels (Approve / Request Changes)
+  - `DraftCommentsDrawer.tsx`: In-line discussion drawer with threaded replies, resolution status toggles, and deletion
+  - Full integration into Draft Details page (`apps/web/src/app/(dashboard)/content/drafts/[id]/page.tsx`)
+- [x] 100% test pass rates across all test suites:
+  - 53 API unit test suites (416 tests passed)
+  - 16 API E2E test suites (115 tests passed)
+  - 13 Web test suites (100 tests passed)
+  - Clean production builds for shared package, NestJS backend, and Next.js frontend

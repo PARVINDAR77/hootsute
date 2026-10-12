@@ -64,8 +64,16 @@ enum SocialConnectionStatus {
 enum DraftStatus {
   DRAFT
   IN_REVIEW
+  CHANGES_REQUESTED
   APPROVED
   REJECTED
+}
+
+enum ApprovalStepStatus {
+  PENDING
+  APPROVED
+  CHANGES_REQUESTED
+  SKIPPED
 }
 
 enum CampaignObjective {
@@ -219,6 +227,9 @@ model User {
   uploadedMediaAssets      MediaAsset[]          @relation("MediaAssetUploadedBy")
   shortenedLinks           ShortenedLink[]       @relation("ShortenedLinkCreatedBy")
   createdListeningQueries  ListeningQuery[]      @relation("ListeningQueryCreatedBy")
+  draftComments            DraftComment[]        @relation("DraftCommentAuthor")
+  resolvedComments         DraftComment[]        @relation("DraftCommentResolvedBy")
+  reviewedDraftSteps       DraftStepReview[]     @relation("DraftStepReviewer")
 
   @@index([email])
   @@index([role])
@@ -293,6 +304,8 @@ model Workspace {
   shortenedLinks            ShortenedLink[]
   listeningQueries          ListeningQuery[]
   listeningMentions         ListeningMention[]
+  approvalWorkflows         ApprovalWorkflow[]
+  draftComments             DraftComment[]
 
   @@index([slug])
   @@index([status])
@@ -469,6 +482,10 @@ model ContentDraft {
   updatedBy           User?             @relation("DraftUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: SetNull)
   approvalRequestedBy User?             @relation("DraftApprovalRequestedBy", fields: [approvalRequestedByUserId], references: [id], onDelete: SetNull)
   approvedBy          User?             @relation("DraftApprovedBy", fields: [approvedByUserId], references: [id], onDelete: SetNull)
+  approvalWorkflowId  String?
+  approvalWorkflow    ApprovalWorkflow? @relation(fields: [approvalWorkflowId], references: [id], onDelete: SetNull)
+  stepReviews         DraftStepReview[]
+  comments            DraftComment[]
   variants            ContentVariant[]
   revisions           ContentRevision[]
   whatsAppMessages    WhatsAppNotificationMessage[]
@@ -1325,6 +1342,91 @@ model ListeningMention {
   @@index([queryId])
   @@index([workspaceId, sentiment])
   @@map("listening_mentions")
+}
+
+model ApprovalWorkflow {
+  id          String                 @id @default(uuid())
+  workspaceId String
+  name        String
+  description String?
+  isDefault   Boolean                @default(false)
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+
+  workspace   Workspace              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  steps       ApprovalWorkflowStep[]
+  drafts      ContentDraft[]
+
+  @@index([workspaceId])
+  @@index([workspaceId, isDefault])
+  @@map("approval_workflows")
+}
+
+model ApprovalWorkflowStep {
+  id           String             @id @default(uuid())
+  workflowId   String
+  stepOrder    Int
+  name         String
+  requiredRole WorkspaceRole      @default(EDITOR)
+  isMandatory  Boolean            @default(true)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  workflow     ApprovalWorkflow   @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  stepReviews  DraftStepReview[]
+
+  @@unique([workflowId, stepOrder])
+  @@index([workflowId])
+  @@map("approval_workflow_steps")
+}
+
+model DraftStepReview {
+  id             String               @id @default(uuid())
+  draftId        String
+  stepId         String
+  reviewerUserId String?
+  status         ApprovalStepStatus   @default(PENDING)
+  decisionNotes  String?
+  decidedAt      DateTime?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  draft          ContentDraft         @relation(fields: [draftId], references: [id], onDelete: Cascade)
+  step           ApprovalWorkflowStep @relation(fields: [stepId], references: [id], onDelete: Cascade)
+  reviewer       User?                @relation("DraftStepReviewer", fields: [reviewerUserId], references: [id], onDelete: SetNull)
+
+  @@unique([draftId, stepId])
+  @@index([draftId])
+  @@index([stepId])
+  @@index([reviewerUserId])
+  @@map("draft_step_reviews")
+}
+
+model DraftComment {
+  id               String         @id @default(uuid())
+  draftId          String
+  workspaceId      String
+  authorUserId     String
+  content          String
+  parentCommentId  String?
+  isResolved       Boolean        @default(false)
+  resolvedByUserId String?
+  resolvedAt       DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  draft            ContentDraft   @relation(fields: [draftId], references: [id], onDelete: Cascade)
+  workspace        Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  author           User           @relation("DraftCommentAuthor", fields: [authorUserId], references: [id], onDelete: Restrict)
+  resolvedBy       User?          @relation("DraftCommentResolvedBy", fields: [resolvedByUserId], references: [id], onDelete: SetNull)
+  parentComment    DraftComment?  @relation("ThreadedReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
+  replies          DraftComment[] @relation("ThreadedReplies")
+
+  @@index([draftId])
+  @@index([workspaceId])
+  @@index([parentCommentId])
+  @@index([draftId, isResolved])
+  @@map("draft_comments")
 }
 
 

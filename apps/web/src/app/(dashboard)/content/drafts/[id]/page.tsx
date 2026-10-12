@@ -19,7 +19,10 @@ import {
   BrandTone,
   ContentRevisionDto,
   MediaAssetDto,
+  DraftApprovalProgressDto,
 } from '@packages/shared';
+import { ApprovalMatrixStepper } from '@/components/approvals/ApprovalMatrixStepper';
+import { DraftCommentsDrawer } from '@/components/approvals/DraftCommentsDrawer';
 import { MediaPickerModal } from '@/components/media/MediaPickerModal';
 import {
   FileText,
@@ -220,12 +223,28 @@ export default function DraftDetailPage() {
           setActiveVariant(res.data.variants[activeVariantIndex] || res.data.variants[0]);
         }
       }
+      loadApprovalProgress();
     } catch (err: any) {
       setAlertMsg({ type: 'error', message: err.message || 'Failed to load draft' });
     } finally {
       setIsLoading(false);
     }
   };
+
+  const loadApprovalProgress = async () => {
+    if (!currentWorkspace?.id || !draftId) return;
+    try {
+      const res = await apiClient<{ success: boolean; data: DraftApprovalProgressDto }>(
+        `/workspaces/${currentWorkspace.id}/drafts/${draftId}/approval/progress`,
+      );
+      setApprovalProgress(res.data || null);
+    } catch {
+      setApprovalProgress(null);
+    }
+  };
+
+  const [approvalProgress, setApprovalProgress] = useState<DraftApprovalProgressDto | null>(null);
+  const [showComments, setShowComments] = useState(false);
 
   const isApproved = draft?.status === DraftStatus.APPROVED;
   const isEditable = draft?.status === DraftStatus.DRAFT || draft?.status === DraftStatus.REJECTED;
@@ -572,6 +591,17 @@ export default function DraftDetailPage() {
             <span>WhatsApp Preview</span>
           </Button>
 
+          {/* Collaborative Review Comments */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowComments(true)}
+            className="gap-1.5 text-xs text-indigo-700 bg-indigo-50/50 border-indigo-200 hover:bg-indigo-100/60"
+          >
+            <MessageSquare className="w-3.5 h-3.5 text-indigo-600" />
+            <span>Review Discussion</span>
+          </Button>
+
           {/* Submit for Review (if DRAFT or REJECTED) */}
           {isEditable && (
             <Button
@@ -654,6 +684,17 @@ export default function DraftDetailPage() {
           type={alertMsg.type}
           title={alertMsg.type === 'error' ? 'Error' : 'Notice'}
           message={alertMsg.message}
+        />
+      )}
+
+      {/* Multi-Level Approval Stepper */}
+      {currentWorkspace && draft && (
+        <ApprovalMatrixStepper
+          workspaceId={currentWorkspace.id}
+          draftId={draft.id}
+          progress={approvalProgress}
+          onRefresh={loadApprovalProgress}
+          currentUserRole={userRole}
         />
       )}
 
@@ -1409,6 +1450,18 @@ export default function DraftDetailPage() {
         onSelect={handleSelectMedia}
         selectedAssetId={(activeVariant as any)?.mediaAssetId}
       />
+
+      {/* Collaborative Comments Drawer */}
+      {currentWorkspace && draft && (
+        <DraftCommentsDrawer
+          workspaceId={currentWorkspace.id}
+          draftId={draft.id}
+          isOpen={showComments}
+          onClose={() => setShowComments(false)}
+          currentUserId={user?.id}
+          currentUserRole={userRole}
+        />
+      )}
     </div>
   );
 }

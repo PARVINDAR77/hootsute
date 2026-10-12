@@ -1380,4 +1380,114 @@ export interface ListeningAnalyticsSummaryDto {
   }[];
 }
 
+// ==========================================
+// Phase 18: Multi-Level Approval Matrix & Collaborative Content Review Workflow
+// ==========================================
+
+export enum ApprovalStepStatus {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  CHANGES_REQUESTED = 'CHANGES_REQUESTED',
+  SKIPPED = 'SKIPPED',
+}
+
+export interface ApprovalWorkflowStepDto {
+  id: string;
+  workflowId: string;
+  stepOrder: number;
+  name: string;
+  requiredRole: WorkspaceRole;
+  isMandatory: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ApprovalWorkflowDto {
+  id: string;
+  workspaceId: string;
+  name: string;
+  description?: string | null;
+  isDefault: boolean;
+  steps: ApprovalWorkflowStepDto[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateApprovalWorkflowStepDto {
+  stepOrder: number;
+  name: string;
+  requiredRole: WorkspaceRole;
+  isMandatory?: boolean;
+}
+
+export interface CreateApprovalWorkflowDto {
+  name: string;
+  description?: string;
+  isDefault?: boolean;
+  steps: CreateApprovalWorkflowStepDto[];
+}
+
+export interface UpdateApprovalWorkflowDto {
+  name?: string;
+  description?: string;
+  isDefault?: boolean;
+  steps?: CreateApprovalWorkflowStepDto[];
+}
+
+export interface DraftStepReviewDto {
+  id: string;
+  draftId: string;
+  stepId: string;
+  stepName: string;
+  stepOrder: number;
+  requiredRole: WorkspaceRole;
+  isMandatory: boolean;
+  reviewerUserId?: string | null;
+  reviewerName?: string | null;
+  status: ApprovalStepStatus;
+  decisionNotes?: string | null;
+  decidedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DraftApprovalProgressDto {
+  draftId: string;
+  workflowId?: string | null;
+  workflowName?: string | null;
+  currentStepOrder: number;
+  totalSteps: number;
+  isFullyApproved: boolean;
+  isChangesRequested: boolean;
+  steps: DraftStepReviewDto[];
+}
+
+export interface RecordReviewDecisionDto {
+  decision: 'APPROVE' | 'REQUEST_CHANGES';
+  notes?: string;
+}
+
+export interface DraftCommentDto {
+  id: string;
+  draftId: string;
+  workspaceId: string;
+  authorUserId: string;
+  authorName: string;
+  authorEmail: string;
+  content: string;
+  parentCommentId?: string | null;
+  isResolved: boolean;
+  resolvedByUserId?: string | null;
+  resolvedByName?: string | null;
+  resolvedAt?: string | null;
+  replies?: DraftCommentDto[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateDraftCommentDto {
+  content: string;
+  parentCommentId?: string;
+}
+
 
