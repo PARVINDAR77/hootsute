@@ -1143,4 +1143,61 @@ export interface TriggerRuleTestResultDto {
   reason?: string;
 }
 
+// Stage 15: Bulk CSV / Batch Calendar Importer
+
+export interface BulkScheduleRowDto {
+  rowNumber: number;
+  scheduledAt: string;
+  timezone?: string;
+  title?: string;
+  caption: string;
+  platforms: SocialPlatform[];
+  socialAccountIds?: string[];
+  accountUsernames?: string[];
+  mediaUrls?: string[];
+  hashtags?: string[];
+  draftId?: string;
+}
+
+export interface BulkScheduleValidationRowResult {
+  rowNumber: number;
+  isValid: boolean;
+  errors: string[];
+  warnings: string[];
+  data: BulkScheduleRowDto;
+  targetAccounts: {
+    id: string;
+    name: string;
+    platform: SocialPlatform;
+    username?: string | null;
+  }[];
+}
+
+export interface BulkScheduleValidationResponse {
+  totalRows: number;
+  validCount: number;
+  invalidCount: number;
+  rows: BulkScheduleValidationRowResult[];
+}
+
+export interface BulkScheduleImportDto {
+  rows: BulkScheduleRowDto[];
+}
+
+export interface BulkScheduleImportItemResult {
+  rowNumber: number;
+  scheduledPostId: string;
+  draftId: string;
+  title: string;
+  scheduledAt: string;
+  targetCount: number;
+}
+
+export interface BulkScheduleImportResponse {
+  importedCount: number;
+  failedCount: number;
+  scheduledPosts: BulkScheduleImportItemResult[];
+  errors?: { rowNumber: number; error: string }[];
+}
+
 

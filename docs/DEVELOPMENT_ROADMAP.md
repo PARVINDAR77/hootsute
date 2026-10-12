@@ -117,3 +117,25 @@
 - [x] Frontend connection cards, branding badges, and unified candidate selection modal
 - [x] 100% test passing across 47 API unit test suites, 12 E2E test suites, and 9 Web test suites
 
+---
+
+## Phase 15: Bulk CSV / Batch Calendar Importer (Stage 15)
+- [x] Downloadable RFC 4180 CSV post template with standard headers and sample multi-platform posts
+- [x] Pre-flight dry-run validation engine (`POST /api/v1/workspaces/:workspaceId/bulk-schedule/validate`)
+  - Date format parsing & minimum future timestamp verification
+  - Platform-specific character length linting (Twitter/X <= 280, Instagram <= 2,200, LinkedIn <= 3,000)
+  - Account handle and workspace connection resolution with automatic platform fallback mapping
+  - Line-by-line linting and non-mutating preview diagnostics
+- [x] Batch committer (`POST /api/v1/workspaces/:workspaceId/bulk-schedule/import`)
+  - Creates approved `ContentDraft` records with multi-platform variants and initial revisions
+  - Generates canonical JSON snapshots with SHA-256 integrity hashes
+  - Spawns corresponding `ScheduledPost` records and `ScheduledPostTarget` rows
+  - Records full batch audit log trail
+- [x] Interactive Frontend Bulk Importer modal (`BulkScheduleModal.tsx`)
+  - Drag-and-drop CSV upload dropzone and raw text paste view
+  - Download template trigger
+  - Live pre-flight diagnostics table with KPI counters and validation error callouts
+  - "Bulk CSV Import" entry point directly integrated into Publishing Calendar
+- [x] 100% test passing across 48 API unit test suites (373 tests), 13 E2E test suites (188 tests), and 10 Web test suites (86 tests)
+
+

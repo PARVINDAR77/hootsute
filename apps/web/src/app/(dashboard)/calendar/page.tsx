@@ -34,6 +34,8 @@ import {
   Grid,
   CalendarDays,
   Loader2,
+  UploadCloud,
+  FileSpreadsheet,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -51,6 +53,7 @@ import {
 } from '@/lib/calendar-utils';
 import { SchedulePostModal } from '@/components/calendar/SchedulePostModal';
 import { PostInspectorModal } from '@/components/calendar/PostInspectorModal';
+import { BulkScheduleModal } from '@/components/calendar/BulkScheduleModal';
 
 type CalendarViewMode = 'month' | 'week' | 'list';
 
@@ -77,6 +80,7 @@ export default function CalendarPage() {
 
   // Modals
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState<boolean>(false);
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState<boolean>(false);
   const [preselectedDraftId, setPreselectedDraftId] = useState<string | null>(null);
   const [preselectedDate, setPreselectedDate] = useState<Date | null>(null);
 
@@ -323,6 +327,16 @@ export default function CalendarPage() {
 
         <div className="flex items-center gap-3">
           <Button
+            onClick={() => setIsBulkModalOpen(true)}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2 border-slate-200 text-slate-700 hover:bg-slate-50 shadow-2xs"
+            id="btn-open-bulk-import"
+          >
+            <UploadCloud className="w-4 h-4 text-indigo-600" />
+            <span>Bulk CSV Import</span>
+          </Button>
+          <Button
             onClick={() => {
               setPreselectedDate(null);
               setPreselectedDraftId(null);
@@ -330,6 +344,7 @@ export default function CalendarPage() {
             }}
             size="sm"
             className="flex items-center gap-2 shadow-xs"
+            id="btn-schedule-post"
           >
             <Plus className="w-4 h-4" />
             <span>Schedule Post</span>
@@ -831,6 +846,13 @@ export default function CalendarPage() {
           fetchCalendarPosts();
           setSelectedPostForInspection(null);
         }}
+      />
+
+      {/* Bulk CSV Schedule Modal */}
+      <BulkScheduleModal
+        isOpen={isBulkModalOpen}
+        onClose={() => setIsBulkModalOpen(false)}
+        onSuccess={() => fetchCalendarPosts()}
       />
     </div>
   );

@@ -5,6 +5,8 @@ import { SocialAccountsModule } from '../social-accounts/social-accounts.module'
 import { ScheduledPostsRepository } from './repositories/scheduled-posts.repository';
 import { ScheduledPostsService } from './services/scheduled-posts.service';
 import { ScheduledPostsController } from './controllers/scheduled-posts.controller';
+import { BulkScheduleController } from './controllers/bulk-schedule.controller';
+import { BulkScheduleService } from './services/bulk-schedule.service';
 import { MetaFacebookPublisherService } from './providers/meta-facebook-publisher.service';
 import { MetaInstagramPublisherService } from './providers/meta-instagram-publisher.service';
 import { LinkedInPublisherService } from './providers/linkedin-publisher.service';
@@ -21,10 +23,11 @@ import { ScheduledPostSweeperService } from './services/scheduled-post-sweeper.s
     SocialAccountsModule,
     ScheduleModule.forRoot(),
   ],
-  controllers: [ScheduledPostsController],
+  controllers: [ScheduledPostsController, BulkScheduleController],
   providers: [
     ScheduledPostsRepository,
     ScheduledPostsService,
+    BulkScheduleService,
     MetaFacebookPublisherService,
     MetaInstagramPublisherService,
     LinkedInPublisherService,
@@ -38,6 +41,7 @@ import { ScheduledPostSweeperService } from './services/scheduled-post-sweeper.s
   exports: [
     ScheduledPostsRepository,
     ScheduledPostsService,
+    BulkScheduleService,
     PublishingDispatcherService,
     PublishingReconcilerService,
     LinkedInPublisherService,
