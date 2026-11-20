@@ -131,15 +131,14 @@ export function SignupForm() {
               <div className="flex items-center justify-between text-[11px]">
                 <span className="text-slate-400 font-medium">Strength:</span>
                 <span
-                  className={`font-bold ${
-                    strengthScore <= 1
+                  className={`font-bold ${strengthScore <= 1
                       ? 'text-rose-500 dark:text-rose-400'
                       : strengthScore === 2
-                      ? 'text-amber-500 dark:text-amber-400'
-                      : strengthScore === 3
-                      ? 'text-cyan-500 dark:text-cyan-400'
-                      : 'text-emerald-500 dark:text-emerald-400'
-                  }`}
+                        ? 'text-amber-500 dark:text-amber-400'
+                        : strengthScore === 3
+                          ? 'text-cyan-500 dark:text-cyan-400'
+                          : 'text-emerald-500 dark:text-emerald-400'
+                    }`}
                 >
                   {strengthLabels[Math.max(0, strengthScore - 1)]}
                 </span>
@@ -148,11 +147,10 @@ export function SignupForm() {
                 {[0, 1, 2, 3].map((index) => (
                   <div
                     key={index}
-                    className={`h-full rounded-full transition-all duration-300 ${
-                      index < strengthScore
+                    className={`h-full rounded-full transition-all duration-300 ${index < strengthScore
                         ? strengthColors[strengthScore - 1]
                         : 'bg-slate-200 dark:bg-white/10'
-                    }`}
+                      }`}
                   />
                 ))}
               </div>
@@ -164,16 +162,14 @@ export function SignupForm() {
             {checks.map((c) => (
               <span
                 key={c.label}
-                className={`inline-flex items-center gap-1.5 text-[11px] font-medium transition-colors ${
-                  c.ok
+                className={`inline-flex items-center gap-1.5 text-[11px] font-medium transition-colors ${c.ok
                     ? 'text-emerald-600 dark:text-emerald-400'
                     : 'text-[#64748B] dark:text-slate-500'
-                }`}
+                  }`}
               >
                 <CheckCircle2
-                  className={`w-3.5 h-3.5 shrink-0 transition-transform ${
-                    c.ok ? 'scale-105 text-emerald-500' : 'opacity-40'
-                  }`}
+                  className={`w-3.5 h-3.5 shrink-0 transition-transform ${c.ok ? 'scale-105 text-emerald-500' : 'opacity-40'
+                    }`}
                 />
                 {c.label}
               </span>

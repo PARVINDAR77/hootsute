@@ -37,5 +37,8 @@ export default () => ({
     oauthRedirectUri: process.env.META_OAUTH_REDIRECT_URI || 'http://localhost:4000/api/v1/oauth/meta/callback',
     webhookVerifyToken: process.env.META_WEBHOOK_VERIFY_TOKEN || 'omnisocial_meta_social_verify_token',
   },
+  turnstile: {
+    secretKey: process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY || '',
+  },
 });
 

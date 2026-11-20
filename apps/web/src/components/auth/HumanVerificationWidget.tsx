@@ -43,9 +43,9 @@ export function HumanVerificationWidget({
   const [isVerified, setIsVerified] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Cloudflare Turnstile Sitekey (defaults to Cloudflare official test key on localhost)
+  // Cloudflare Turnstile Sitekey (official OmniSocial AI Cloudflare key)
   const siteKey =
-    process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA';
+    process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY || '0x4AAAAAAGJ0lRZqcrHPINVO';
 
   // 1. Load official Cloudflare Turnstile script
   useEffect(() => {

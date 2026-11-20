@@ -23,6 +23,7 @@ export class BotProtectionService {
       'omnisocial-bot-protection-secret-key-salt-2026';
 
     this.turnstileSecretKey =
+      this.configService.get<string>('turnstile.secretKey') ||
       this.configService.get<string>('CLOUDFLARE_TURNSTILE_SECRET_KEY') ||
       process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY ||
       (!this.isProduction ? '1x0000000000000000000000000000000AA' : '');
