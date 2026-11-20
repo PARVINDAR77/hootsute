@@ -25,7 +25,7 @@ export class BotProtectionService {
     this.turnstileSecretKey =
       this.configService.get<string>('CLOUDFLARE_TURNSTILE_SECRET_KEY') ||
       process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY ||
-      '';
+      (!this.isProduction ? '1x0000000000000000000000000000000AA' : '');
 
     this.isProduction = this.configService.get<string>('nodeEnv') === 'production';
   }
