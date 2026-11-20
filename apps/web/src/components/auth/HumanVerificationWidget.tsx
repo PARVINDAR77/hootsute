@@ -67,10 +67,12 @@ export function HumanVerificationWidget({
               setError(null);
               onVerify(`turnstile:${token}`);
             },
-            'error-callback': () => {
+            'error-callback': (err: any) => {
               if (!isMounted) return;
+              console.warn('Cloudflare Turnstile connection error:', err);
+              // If Cloudflare fails to connect on localhost, auto-switch to cryptographic fallback
+              setUseTurnstile(false);
               setIsVerified(false);
-              setError('Cloudflare verification failed. Click below for alternate verify.');
               onVerify(null);
             },
             'expired-callback': () => {
@@ -205,23 +207,33 @@ export function HumanVerificationWidget({
               <span>Connecting to Cloudflare Security...</span>
             </div>
           )}
+          <div className="pt-1 text-center">
+            <button
+              type="button"
+              onClick={() => setUseTurnstile(false)}
+              className="text-[11px] text-slate-400 hover:text-[#7138F5] transition-colors underline"
+            >
+              Having connection trouble? Use built-in verification
+            </button>
+          </div>
         </div>
       )}
 
       {/* 2. Built-in Cryptographic Fallback (if Cloudflare unreachable or adblock active) */}
       {!useTurnstile && (
-        <div
-          className={`rounded-xl border transition-all select-none p-3 ${
-            isVerified
-              ? 'bg-emerald-50/60 dark:bg-emerald-950/20 border-emerald-500/40 dark:border-emerald-500/30'
-              : error
-              ? 'bg-rose-50/50 dark:bg-rose-950/20 border-rose-500/30'
-              : 'bg-[#F8FAFC] dark:bg-white/[0.03] border-[#E2E8F0] dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20'
-          } ${disabled ? 'opacity-50 pointer-events-none cursor-not-allowed' : 'cursor-pointer'}`}
-          onClick={handleFallbackVerifyClick}
-          role="button"
-          tabIndex={0}
-        >
+        <div className="space-y-1.5">
+          <div
+            className={`rounded-xl border transition-all select-none p-3 ${
+              isVerified
+                ? 'bg-emerald-50/60 dark:bg-emerald-950/20 border-emerald-500/40 dark:border-emerald-500/30'
+                : error
+                ? 'bg-rose-50/50 dark:bg-rose-950/20 border-rose-500/30'
+                : 'bg-[#F8FAFC] dark:bg-white/[0.03] border-[#E2E8F0] dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20'
+            } ${disabled ? 'opacity-50 pointer-events-none cursor-not-allowed' : 'cursor-pointer'}`}
+            onClick={handleFallbackVerifyClick}
+            role="button"
+            tabIndex={0}
+          >
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <div
@@ -274,6 +286,19 @@ export function HumanVerificationWidget({
             </div>
           </div>
         </div>
+        <div className="text-center pt-0.5">
+          <button
+            type="button"
+            onClick={() => {
+              setUseTurnstile(true);
+              setError(null);
+            }}
+            className="text-[11px] text-slate-400 hover:text-[#7138F5] transition-colors underline"
+          >
+            Switch to Cloudflare Turnstile
+          </button>
+        </div>
+      </div>
       )}
     </div>
   );
