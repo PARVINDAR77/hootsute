@@ -305,7 +305,7 @@ export function SchedulePostModal({
       };
 
       const result = await apiClient<any>(
-        `publishing/workspaces/${workspaceId}/scheduled-posts`,
+        `/workspaces/${workspaceId}/scheduled-posts`,
         {
           method: 'POST',
           body: JSON.stringify(payload),
@@ -480,11 +480,10 @@ export function SchedulePostModal({
                       return (
                         <div
                           key={acc.id}
-                          className={`p-3 rounded-xl border transition-all ${
-                            isSelected
+                          className={`p-3 rounded-xl border transition-all ${isSelected
                               ? 'bg-indigo-50/40 border-indigo-300 ring-1 ring-indigo-200'
                               : 'bg-white border-slate-200 hover:border-slate-300'
-                          }`}
+                            }`}
                         >
                           <div className="flex items-center justify-between gap-3">
                             <label className="flex items-center gap-3 cursor-pointer min-w-0 flex-1">

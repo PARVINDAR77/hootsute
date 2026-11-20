@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useWorkspace } from '@/lib/workspace-context';
 import { apiClient } from '@/lib/api-client';
+import Link from 'next/link';
 import {
   Users,
   Eye,
@@ -15,9 +16,12 @@ import {
   RefreshCw,
   AlertCircle,
   BarChart3,
+  Sparkles,
+  ArrowRight,
 } from 'lucide-react';
 import { AnalyticsKPICard } from '@/components/analytics/AnalyticsKPICard';
 import { AnalyticsChart, TimeseriesPoint } from '@/components/analytics/AnalyticsChart';
+import { TopPlatformsDonut, PlatformShare } from '@/components/analytics/TopPlatformsDonut';
 import { PostPerformanceTable, PostPerformanceItem } from '@/components/analytics/PostPerformanceTable';
 import { TopPerformingWidget, TopPerformingItem } from '@/components/analytics/TopPerformingWidget';
 import { SyncStatusPanel, SyncStatusData } from '@/components/analytics/SyncStatusPanel';
@@ -25,7 +29,16 @@ import { GrowthInsightsPanel, GrowthInsightItem } from '@/components/analytics/G
 import { Button } from '@/components/ui/Button';
 
 type DatePreset = '7d' | '30d' | '90d' | 'custom';
-type PlatformFilter = 'ALL' | 'FACEBOOK' | 'INSTAGRAM';
+type PlatformFilter =
+  | 'ALL'
+  | 'FACEBOOK'
+  | 'INSTAGRAM'
+  | 'TWITTER'
+  | 'LINKEDIN'
+  | 'PINTEREST'
+  | 'YOUTUBE'
+  | 'TIKTOK'
+  | 'THREADS';
 
 export default function AnalyticsDashboardPage() {
   const { currentWorkspace } = useWorkspace();
@@ -101,11 +114,17 @@ export default function AnalyticsDashboardPage() {
         apiClient(`/workspaces/${workspaceId}/analytics/sync-status`),
       ]);
 
-      if (overviewRes?.data) setOverviewData(overviewRes.data);
-      if (timeseriesRes?.data?.dataPoints) setTimeseriesData(timeseriesRes.data.dataPoints);
-      if (topRes?.data?.items) setTopPerformingData(topRes.data.items);
-      if (insightsRes?.data) setInsightsData(insightsRes.data);
-      if (syncRes?.data) setSyncStatusData(syncRes.data);
+      const overview = overviewRes?.data ?? overviewRes;
+      const timeseries = timeseriesRes?.data ?? timeseriesRes;
+      const top = topRes?.data ?? topRes;
+      const insights = Array.isArray(insightsRes) ? insightsRes : (insightsRes?.data ?? []);
+      const sync = syncRes?.data ?? syncRes;
+
+      if (overview && typeof overview === 'object') setOverviewData(overview);
+      if (timeseries?.dataPoints) setTimeseriesData(timeseries.dataPoints);
+      if (top?.items) setTopPerformingData(top.items);
+      setInsightsData(insights);
+      if (sync && typeof sync === 'object') setSyncStatusData(sync);
     } catch (err: any) {
       setError(err?.message || 'Failed to load analytics dashboard data');
     } finally {
@@ -126,13 +145,12 @@ export default function AnalyticsDashboardPage() {
       const res = await apiClient(
         `/workspaces/${workspaceId}/analytics/posts?startDate=${startDate}&endDate=${endDate}&page=${page}&limit=10&sortBy=${sortBy}&sortOrder=${sortOrder}${platformParam}${postTypeParam}`
       );
-      if (res?.data) {
-        setPostsData({
-          items: res.data,
-          total: res.pagination?.total || 0,
-          totalPages: res.pagination?.totalPages || 1,
-        });
-      }
+      const items = Array.isArray(res) ? res : (res?.data ?? res?.items ?? []);
+      setPostsData({
+        items,
+        total: res?.pagination?.total ?? items.length,
+        totalPages: res?.pagination?.totalPages || 1,
+      });
     } catch (err: any) {
       console.error('Failed to load post performance records:', err);
     } finally {
@@ -148,15 +166,17 @@ export default function AnalyticsDashboardPage() {
       body: JSON.stringify({ force }),
     });
 
-    if (res?.success) {
+    const payload = res?.data ?? res;
+    const ok = res?.success !== false;
+    if (ok) {
       // Re-fetch all data
       await fetchDashboardData();
       await fetchPostsData();
     }
     return {
-      success: !!res?.success,
-      message: res?.message,
-      throttled: res?.data?.throttled,
+      success: ok,
+      message: res?.message || payload?.message,
+      throttled: payload?.throttled,
     };
   };
 
@@ -177,18 +197,19 @@ export default function AnalyticsDashboardPage() {
       body: JSON.stringify({ force }),
     });
 
-    if (res?.success) {
+    const payload = res?.data ?? res;
+    const ok = res?.success !== false;
+    if (ok) {
       const updatedInsights = await apiClient(`/workspaces/${workspaceId}/analytics/insights`);
-      if (updatedInsights?.data) {
-        setInsightsData(updatedInsights.data);
-      }
+      const list = Array.isArray(updatedInsights) ? updatedInsights : (updatedInsights?.data ?? []);
+      setInsightsData(list);
     }
 
     return {
-      success: !!res?.success,
-      message: res?.message,
-      count: res?.data?.generatedCount,
-      throttled: res?.data?.throttled,
+      success: ok,
+      message: res?.message || payload?.message,
+      count: payload?.generatedCount,
+      throttled: payload?.throttled,
     };
   };
 
@@ -229,45 +250,66 @@ export default function AnalyticsDashboardPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
       {/* Page Header & Global Filters */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-200/80">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-slate-800 transition-colors">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
               Analytics &amp; Performance
             </h1>
-            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-brand-purple/10 text-brand-purple dark:text-brand-cyan border border-brand-purple/20">
               {currentWorkspace.name}
             </span>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
-            Real cross-platform synchronization for Facebook Pages and Instagram Professional accounts.
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Real cross-platform telemetry, audience reach, and audience growth across all 8 social networks.
           </p>
         </div>
 
         {/* Global Control Bar: Date Presets & Platform Filters */}
         <div className="flex flex-wrap items-center gap-2.5">
+          <Link href="/analytics/insights">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs h-8 gap-1.5 border-brand-purple/30 text-brand-purple dark:text-brand-cyan hover:bg-brand-purple/5"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>AI Growth Insights</span>
+              <ArrowRight className="w-3 h-3 ml-0.5" />
+            </Button>
+          </Link>
+
           {/* Platform Selector */}
-          <div className="flex items-center bg-slate-100 p-1 rounded-lg">
-            {(['ALL', 'FACEBOOK', 'INSTAGRAM'] as PlatformFilter[]).map((p) => (
+          <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+            {(
+              [
+                { label: 'All', value: 'ALL' },
+                { label: 'Instagram', value: 'INSTAGRAM' },
+                { label: 'Facebook', value: 'FACEBOOK' },
+                { label: 'LinkedIn', value: 'LINKEDIN' },
+                { label: 'X', value: 'TWITTER' },
+                { label: 'YouTube', value: 'YOUTUBE' },
+              ] as { label: string; value: PlatformFilter }[]
+            ).map((p) => (
               <button
-                key={p}
+                key={p.value}
                 onClick={() => {
-                  setPlatform(p);
+                  setPlatform(p.value);
                   setPage(1);
                 }}
-                className={`px-3 py-1 rounded text-xs font-semibold transition-all ${
-                  platform === p
-                    ? 'bg-white text-indigo-700 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                  platform === p.value
+                    ? 'bg-white dark:bg-slate-900 text-brand-purple dark:text-brand-cyan shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                {p === 'ALL' ? 'All Platforms' : p === 'FACEBOOK' ? 'Facebook' : 'Instagram'}
+                {p.label}
               </button>
             ))}
           </div>
 
           {/* Date Presets */}
-          <div className="flex items-center bg-slate-100 p-1 rounded-lg">
+          <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
             {(['7d', '30d', '90d', 'custom'] as DatePreset[]).map((preset) => (
               <button
                 key={preset}
@@ -275,10 +317,10 @@ export default function AnalyticsDashboardPage() {
                   setDatePreset(preset);
                   setPage(1);
                 }}
-                className={`px-2.5 py-1 rounded text-xs font-semibold transition-all ${
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
                   datePreset === preset
-                    ? 'bg-white text-indigo-700 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-white dark:bg-slate-900 text-brand-purple dark:text-brand-cyan shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 {preset === '7d'
@@ -442,8 +484,15 @@ export default function AnalyticsDashboardPage() {
         />
       </div>
 
-      {/* Section 2: Historical Performance Curves Chart */}
-      <AnalyticsChart dataPoints={timeseriesData} isLoading={isLoading} />
+      {/* Section 2: Historical Curves & Top Platforms Donut */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <AnalyticsChart dataPoints={timeseriesData} isLoading={isLoading} />
+        </div>
+        <div className="lg:col-span-1">
+          <TopPlatformsDonut isLoading={isLoading} />
+        </div>
+      </div>
 
       {/* Section 3: Dual Column: Top Performing Content & Growth Insights */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

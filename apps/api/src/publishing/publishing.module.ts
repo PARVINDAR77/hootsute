@@ -11,6 +11,10 @@ import { MetaFacebookPublisherService } from './providers/meta-facebook-publishe
 import { MetaInstagramPublisherService } from './providers/meta-instagram-publisher.service';
 import { LinkedInPublisherService } from './providers/linkedin-publisher.service';
 import { TwitterPublisherService } from './providers/twitter-publisher.service';
+import { PinterestPublisherService } from './providers/pinterest-publisher.service';
+import { YouTubePublisherService } from './providers/youtube-publisher.service';
+import { TikTokPublisherService } from './providers/tiktok-publisher.service';
+import { ThreadsPublisherService } from './providers/threads-publisher.service';
 import { MockSocialPublisherService } from './providers/mock-social-publisher.service';
 import { PublisherFactoryService } from './providers/publisher-factory.service';
 import { PublishingReconcilerService } from './services/publishing-reconciler.service';
@@ -32,6 +36,10 @@ import { ScheduledPostSweeperService } from './services/scheduled-post-sweeper.s
     MetaInstagramPublisherService,
     LinkedInPublisherService,
     TwitterPublisherService,
+    PinterestPublisherService,
+    YouTubePublisherService,
+    TikTokPublisherService,
+    ThreadsPublisherService,
     MockSocialPublisherService,
     PublisherFactoryService,
     PublishingReconcilerService,
@@ -46,6 +54,10 @@ import { ScheduledPostSweeperService } from './services/scheduled-post-sweeper.s
     PublishingReconcilerService,
     LinkedInPublisherService,
     TwitterPublisherService,
+    PinterestPublisherService,
+    YouTubePublisherService,
+    TikTokPublisherService,
+    ThreadsPublisherService,
     MockSocialPublisherService,
   ],
 })

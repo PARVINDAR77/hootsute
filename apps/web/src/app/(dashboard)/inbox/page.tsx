@@ -59,16 +59,27 @@ export default function SocialInboxPage() {
 
     try {
       const res = await apiClient(`/workspaces/${workspaceId}/inbox/interactions?${params.toString()}`);
-      if (res?.data) {
-        setInteractions(res.data);
-        if (res.counts) setCounts(res.counts);
+      const list: any[] = Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []);
+      setInteractions(list);
 
-        // Keep or update selected interaction
-        if (selectedInteraction) {
-          const fresh = res.data.find((i: any) => i.id === selectedInteraction.id);
-          if (fresh) setSelectedInteraction(fresh);
-        }
+      if (res?.counts) {
+        setCounts(res.counts);
+      } else {
+        setCounts({
+          all: list.length,
+          open: list.filter((i: any) => i.workflowStatus === 'OPEN').length,
+          assigned: list.filter((i: any) => i.workflowStatus === 'ASSIGNED').length,
+          inProgress: list.filter((i: any) => i.workflowStatus === 'IN_PROGRESS').length,
+          resolved: list.filter((i: any) => i.workflowStatus === 'RESOLVED').length,
+          unread: list.filter((i: any) => i.isRead === false).length,
+        });
       }
+
+      setSelectedInteraction((prev) => {
+        if (!prev) return null;
+        const fresh = list.find((i: any) => i.id === prev.id);
+        return fresh || prev;
+      });
     } catch (err: any) {
       setError(err?.message || 'Failed to load social interactions');
     } finally {
@@ -82,22 +93,30 @@ export default function SocialInboxPage() {
     assignedToMe,
     isReadFilter,
     searchTerm,
-    selectedInteraction,
   ]);
 
   // Fetch members & accounts for selectors
   const fetchMetadata = useCallback(async () => {
     if (!workspaceId) return;
     try {
-      const [membersRes, accountsRes, syncRes] = await Promise.all([
+      const [membersRes, accountsRes, syncRes] = await Promise.allSettled([
         apiClient(`/workspaces/${workspaceId}/members`),
         apiClient(`/workspaces/${workspaceId}/social-accounts`),
         apiClient(`/workspaces/${workspaceId}/inbox/sync-status`),
       ]);
 
-      if (membersRes?.data) setMembers(membersRes.data.map((m: any) => m.user ? { ...m.user, role: m.role } : m));
-      if (accountsRes?.data) setAccounts(accountsRes.data);
-      if (syncRes?.data) setSyncStatuses(syncRes.data);
+      if (membersRes.status === 'fulfilled') {
+        const mList = Array.isArray(membersRes.value) ? membersRes.value : (membersRes.value?.data || []);
+        setMembers(mList.map((m: any) => (m.user ? { ...m.user, role: m.role } : m)));
+      }
+      if (accountsRes.status === 'fulfilled') {
+        const aList = Array.isArray(accountsRes.value) ? accountsRes.value : (accountsRes.value?.data || []);
+        setAccounts(aList);
+      }
+      if (syncRes.status === 'fulfilled') {
+        const sList = Array.isArray(syncRes.value) ? syncRes.value : (syncRes.value?.data || []);
+        setSyncStatuses(sList);
+      }
     } catch (err: any) {
       console.warn('Metadata fetch failed:', err);
     }
@@ -122,7 +141,8 @@ export default function SocialInboxPage() {
       },
     );
 
-    if (res?.success && res.data) {
+    const updated = res?.data ?? res;
+    if (updated) {
       setSelectedInteraction((prev) => (prev ? { ...prev, workflowStatus: newStatus as any } : null));
       setInteractions((prev) =>
         prev.map((i) => (i.id === selectedInteraction.id ? { ...i, workflowStatus: newStatus as any } : i)),
@@ -141,21 +161,27 @@ export default function SocialInboxPage() {
       },
     );
 
-    if (res?.success && res.data) {
+    const updated = res?.data ?? res;
+    if (updated) {
       setSelectedInteraction((prev) =>
         prev
           ? {
               ...prev,
               assignedToUserId: userId,
-              assignedTo: res.data.assignedTo,
-              workflowStatus: res.data.workflowStatus,
+              assignedTo: updated.assignedTo,
+              workflowStatus: updated.workflowStatus ?? prev.workflowStatus,
             }
           : null,
       );
       setInteractions((prev) =>
         prev.map((i) =>
           i.id === selectedInteraction.id
-            ? { ...i, assignedToUserId: userId, assignedTo: res.data.assignedTo, workflowStatus: res.data.workflowStatus }
+            ? {
+                ...i,
+                assignedToUserId: userId,
+                assignedTo: updated.assignedTo,
+                workflowStatus: updated.workflowStatus ?? i.workflowStatus,
+              }
             : i,
         ),
       );
@@ -173,7 +199,7 @@ export default function SocialInboxPage() {
       },
     );
 
-    if (res?.success) {
+    if (res !== undefined) {
       setSelectedInteraction((prev) => (prev ? { ...prev, isRead } : null));
       setInteractions((prev) =>
         prev.map((i) => (i.id === selectedInteraction.id ? { ...i, isRead } : i)),
@@ -196,15 +222,16 @@ export default function SocialInboxPage() {
       },
     );
 
-    if (res?.success) {
+    if (res && res.success !== false) {
       // Re-fetch interaction details
       const freshRes = await apiClient(
         `/workspaces/${workspaceId}/inbox/interactions/${selectedInteraction.id}`,
       );
-      if (freshRes?.data) {
-        setSelectedInteraction(freshRes.data);
+      const fresh = freshRes?.data ?? freshRes;
+      if (fresh) {
+        setSelectedInteraction(fresh);
       }
-      return { success: true, message: res.message };
+      return { success: true, message: res?.message || 'Reply sent' };
     }
 
     return { success: false, message: res?.message || 'Failed to publish reply' };
@@ -221,12 +248,13 @@ export default function SocialInboxPage() {
       },
     );
 
-    if (res?.success) {
+    if (res && res.success !== false) {
       const freshRes = await apiClient(
         `/workspaces/${workspaceId}/inbox/interactions/${selectedInteraction.id}`,
       );
-      if (freshRes?.data) {
-        setSelectedInteraction(freshRes.data);
+      const fresh = freshRes?.data ?? freshRes;
+      if (fresh) {
+        setSelectedInteraction(fresh);
       }
     }
   };
@@ -239,7 +267,7 @@ export default function SocialInboxPage() {
       body: JSON.stringify({ force }),
     });
 
-    if (res?.success) {
+    if (res && res.success !== false) {
       await fetchInteractions();
       await fetchMetadata();
     }
@@ -264,20 +292,20 @@ export default function SocialInboxPage() {
   }
 
   return (
-    <div className="space-y-4 max-w-7xl mx-auto pb-8">
+    <div className="space-y-5 max-w-7xl mx-auto pb-8">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/80">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/80 dark:border-slate-800 transition-colors">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
               Unified Social Inbox
             </h1>
-            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60">
               Community Hub
             </span>
           </div>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Manage customer comments, replies, and mentions across Facebook Pages and Instagram accounts.
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Manage customer comments, direct replies, and brand mentions across all 8 social media channels.
           </p>
         </div>
 
@@ -286,23 +314,23 @@ export default function SocialInboxPage() {
             variant="outline"
             size="sm"
             onClick={() => setIsSyncModalOpen(true)}
-            className="text-xs h-8 gap-1.5 border-slate-200"
+            className="text-xs h-8 gap-1.5 border-slate-200 dark:border-slate-800"
           >
-            <RefreshCw className="w-3.5 h-3.5 text-slate-500" />
+            <RefreshCw className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
             <span>Sync &amp; Health</span>
           </Button>
         </div>
       </div>
 
       {error && (
-        <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-800 flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+        <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 rounded-xl text-xs text-rose-800 dark:text-rose-300 flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {/* Main 3-Pane Responsive Layout */}
-      <div className="flex flex-col lg:flex-row border border-slate-200/80 rounded-2xl overflow-hidden bg-white shadow-xs min-h-[650px]">
+      <div className="flex flex-col lg:flex-row border border-slate-200/80 dark:border-slate-800 rounded-2xl overflow-hidden bg-white dark:bg-slate-900 shadow-sm min-h-[650px] transition-colors">
         {/* Pane 1: Filters */}
         <InboxSidebarFilters
           currentStatus={currentStatus}

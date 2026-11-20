@@ -6,12 +6,12 @@ OmniSocial AI is an enterprise-grade AI-powered Social Media Management platform
 
 The platform enables businesses to:
 1. Seamlessly onboard their brands, configure voice/tone guidelines, and invite team members.
-2. Connect multi-network social channels (Facebook, Instagram, LinkedIn, X/Twitter, Pinterest).
+2. Connect 8 official social networks (Instagram, Facebook, X/Twitter, LinkedIn, Pinterest, YouTube, TikTok, Threads).
 3. Generate AI-assisted post copy, contextual hashtags, and on-brand creative visuals.
 4. Auto-generate curated festival and holiday calendar campaigns.
-5. Review content drafts via interactive WhatsApp preview workflows for rapid stakeholder approval.
-6. Publish approved scheduled campaigns with real-time delivery and sync.
-7. Continuously monitor social analytics, follower growth, and campaign engagement.
+5. Review content drafts via multi-level collaborative approval matrix workflows for rapid stakeholder approval.
+6. Publish approved scheduled campaigns with real-time delivery and 3-step bulk dispatch.
+7. Continuously monitor social analytics, follower growth, audience retention, and campaign engagement.
 
 ## 2. Stage 1 Scope & Boundary
 

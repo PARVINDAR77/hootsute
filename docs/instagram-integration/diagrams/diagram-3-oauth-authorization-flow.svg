@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 460" width="100%" height="100%" style="background:#ffffff; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  
+    <defs>
+      <!-- Instagram Gradient -->
+      <linearGradient id="igGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#833AB4"/>
+        <stop offset="35%" stop-color="#C13584"/>
+        <stop offset="70%" stop-color="#E1306C"/>
+        <stop offset="90%" stop-color="#FD1D1D"/>
+        <stop offset="100%" stop-color="#FCAF45"/>
+      </linearGradient>
+
+      <!-- Primary Brand Gradient -->
+      <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#0F172A"/>
+        <stop offset="100%" stop-color="#1E293B"/>
+      </linearGradient>
+
+      <!-- Tech Cyan Gradient -->
+      <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#0284C7"/>
+        <stop offset="100%" stop-color="#0EA5E9"/>
+      </linearGradient>
+
+      <!-- Success Emerald Gradient -->
+      <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#059669"/>
+        <stop offset="100%" stop-color="#10B981"/>
+      </linearGradient>
+
+      <!-- Warning Amber Gradient -->
+      <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#D97706"/>
+        <stop offset="100%" stop-color="#F59E0B"/>
+      </linearGradient>
+
+      <!-- Purple Accent Gradient -->
+      <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#6D28D9"/>
+        <stop offset="100%" stop-color="#8B5CF6"/>
+      </linearGradient>
+
+      <!-- Card Subtle Drop Shadow -->
+      <filter id="cardShadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+        <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.06"/>
+      </filter>
+
+      <!-- Elevated Drop Shadow -->
+      <filter id="elevatedShadow" x="-8%" y="-8%" width="116%" height="120%" filterUnits="userSpaceOnUse">
+        <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0F172A" flood-opacity="0.10"/>
+      </filter>
+
+      <!-- Arrow Markers -->
+      <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748B"/>
+      </marker>
+      <marker id="arrowPrimary" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284C7"/>
+      </marker>
+      <marker id="arrowEmerald" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#059669"/>
+      </marker>
+      <marker id="arrowIg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#E1306C"/>
+      </marker>
+    </defs>
+  
+
+  <!-- Top Title -->
+  <rect x="20" y="10" width="840" height="40" rx="8" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <rect x="20" y="10" width="6" height="40" rx="3" fill="#E1306C"/>
+  <text x="38" y="32" font-size="14" font-weight="700" fill="#0F172A">INSTAGRAM OAUTH 2.0 PKCE &amp; ENCRYPTED TOKEN VAULT SEQUENCE</text>
+  <text x="38" y="44" font-size="10" fill="#64748B">Secure CSRF state validation, long-lived token exchange, and AES-256-GCM vaulting</text>
+
+  <!-- Swimlane Headers -->
+  <g transform="translate(30, 60)">
+    <rect x="0" y="0" width="130" height="32" rx="6" fill="#0F172A"/>
+    <text x="65" y="20" font-size="10.5" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Customer Browser</text>
+    <line x1="65" y1="32" x2="65" y2="385" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+    <rect x="170" y="0" width="130" height="32" rx="6" fill="#0284C7"/>
+    <text x="235" y="20" font-size="10.5" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Next.js 14 Frontend</text>
+    <line x1="235" y1="32" x2="235" y2="385" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+    <rect x="340" y="0" width="140" height="32" rx="6" fill="#6D28D9"/>
+    <text x="410" y="20" font-size="10.5" font-weight="bold" fill="#FFFFFF" text-anchor="middle">NestJS API &amp; Vault</text>
+    <line x1="410" y1="32" x2="410" y2="385" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+    <rect x="520" y="0" width="140" height="32" rx="6" fill="#E1306C"/>
+    <text x="590" y="20" font-size="10.5" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Meta OAuth Dialog</text>
+    <line x1="590" y1="32" x2="590" y2="385" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+    <rect x="690" y="0" width="140" height="32" rx="6" fill="#059669"/>
+    <text x="760" y="20" font-size="10.5" font-weight="bold" fill="#FFFFFF" text-anchor="middle">PostgreSQL + Prisma</text>
+    <line x1="760" y1="32" x2="760" y2="385" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="4,4"/>
+  </g>
+
+  <!-- Step 1: User clicks connect -->
+  <g transform="translate(0, 110)">
+    <path d="M 95 0 L 265 0" stroke="#0F172A" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="180" y="-6" font-size="9" font-weight="bold" fill="#0F172A" text-anchor="middle">1. Click "Connect Instagram"</text>
+  </g>
+
+  <!-- Step 2: Next.js requests auth URL from NestJS -->
+  <g transform="translate(0, 140)">
+    <path d="M 265 0 L 440 0" stroke="#0284C7" stroke-width="1.5" marker-end="url(#arrowPrimary)"/>
+    <text x="350" y="-6" font-size="9" font-weight="bold" fill="#0284C7" text-anchor="middle">2. POST /oauth/initiate { provider: META_INSTAGRAM }</text>
+  </g>
+
+  <!-- Step 3: NestJS generates state & saves in DB -->
+  <g transform="translate(0, 170)">
+    <path d="M 440 0 L 790 0" stroke="#6D28D9" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="615" y="-6" font-size="9" font-weight="bold" fill="#6D28D9" text-anchor="middle">3. Save OAuthState (UUID, workspaceId, expires in 10m)</text>
+  </g>
+
+  <!-- Step 4: NestJS returns Auth URL to Browser -->
+  <g transform="translate(0, 200)">
+    <path d="M 440 0 L 95 0" stroke="#6D28D9" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+    <text x="270" y="-6" font-size="9" font-weight="bold" fill="#6D28D9" text-anchor="middle">4. Return Meta Dialog URL with state &amp; required scopes</text>
+  </g>
+
+  <!-- Step 5: User redirects to Meta and approves -->
+  <g transform="translate(0, 235)">
+    <path d="M 95 0 L 620 0" stroke="#E1306C" stroke-width="1.5" marker-end="url(#arrowIg)"/>
+    <text x="355" y="-6" font-size="9" font-weight="bold" fill="#E1306C" text-anchor="middle">5. Redirect to Meta &bull; User selects Instagram Accounts &amp; Approves</text>
+  </g>
+
+  <!-- Step 6: Meta redirects to Callback with code & state -->
+  <g transform="translate(0, 270)">
+    <path d="M 620 0 L 440 0" stroke="#E1306C" stroke-width="1.5" marker-end="url(#arrowIg)"/>
+    <text x="530" y="-6" font-size="9" font-weight="bold" fill="#E1306C" text-anchor="middle">6. Callback GET /oauth/callback?code=AQD...&amp;state=xyz</text>
+  </g>
+
+  <!-- Step 7: NestJS validates state, exchanges short-lived & long-lived token -->
+  <g transform="translate(0, 305)">
+    <rect x="420" y="-12" width="220" height="24" rx="4" fill="#FDF2F8" stroke="#F472B6"/>
+    <text x="530" y="4" font-size="8.5" font-weight="bold" fill="#BE185D" text-anchor="middle">7. Exchange Code &gt; Short-Lived &gt; 60-Day Long-Lived Token</text>
+  </g>
+
+  <!-- Step 8: TokenVault encrypts token with AES-256-GCM -->
+  <g transform="translate(0, 340)">
+    <rect x="360" y="-12" width="220" height="24" rx="4" fill="#EDE9FE" stroke="#A78BFA"/>
+    <text x="470" y="4" font-size="8.5" font-weight="bold" fill="#5B21B6" text-anchor="middle">8. TokenVault.encrypt(token) -&gt; v1:iv:tag:cipher</text>
+  </g>
+
+  <!-- Step 9: Store in PostgreSQL & redirect to frontend -->
+  <g transform="translate(0, 380)">
+    <path d="M 440 0 L 790 0" stroke="#059669" stroke-width="1.5" marker-end="url(#arrowEmerald)"/>
+    <text x="615" y="-6" font-size="9" font-weight="bold" fill="#059669" text-anchor="middle">9. Upsert SocialAccount (workspaceId, encryptedAccessToken)</text>
+    <path d="M 440 20 L 95 20" stroke="#059669" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrowEmerald)"/>
+    <text x="260" y="14" font-size="9" font-weight="bold" fill="#059669" text-anchor="middle">10. 302 Redirect to /settings/social-accounts?connected=true</text>
+  </g>
+</svg>

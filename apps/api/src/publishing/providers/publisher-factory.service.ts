@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SocialPlatform, SocialProvider } from '@prisma/client';
 import { SocialPublisher } from './social-publisher.interface';
@@ -6,6 +6,10 @@ import { MetaFacebookPublisherService } from './meta-facebook-publisher.service'
 import { MetaInstagramPublisherService } from './meta-instagram-publisher.service';
 import { LinkedInPublisherService } from './linkedin-publisher.service';
 import { TwitterPublisherService } from './twitter-publisher.service';
+import { PinterestPublisherService } from './pinterest-publisher.service';
+import { YouTubePublisherService } from './youtube-publisher.service';
+import { TikTokPublisherService } from './tiktok-publisher.service';
+import { ThreadsPublisherService } from './threads-publisher.service';
 import { MockSocialPublisherService } from './mock-social-publisher.service';
 
 @Injectable()
@@ -20,6 +24,10 @@ export class PublisherFactoryService {
     private readonly linkedinPublisher: LinkedInPublisherService,
     private readonly twitterPublisher: TwitterPublisherService,
     private readonly mockPublisher: MockSocialPublisherService,
+    @Optional() private readonly pinterestPublisher?: PinterestPublisherService,
+    @Optional() private readonly youtubePublisher?: YouTubePublisherService,
+    @Optional() private readonly tiktokPublisher?: TikTokPublisherService,
+    @Optional() private readonly threadsPublisher?: ThreadsPublisherService,
   ) {
     const nodeEnv = this.configService.get<string>('nodeEnv', 'development');
     const providerSetting = (this.configService.get<string>('PUBLISHING_PROVIDER') || '').toLowerCase();
@@ -34,21 +42,29 @@ export class PublisherFactoryService {
     if (platform === SocialPlatform.FACEBOOK || provider === SocialProvider.META_FACEBOOK) {
       return this.facebookPublisher;
     }
-
     if (platform === SocialPlatform.INSTAGRAM || provider === SocialProvider.META_INSTAGRAM) {
       return this.instagramPublisher;
     }
-
     if (platform === SocialPlatform.LINKEDIN || provider === SocialProvider.LINKEDIN) {
       return this.linkedinPublisher;
     }
-
     if (platform === SocialPlatform.TWITTER_X || provider === SocialProvider.TWITTER_X) {
       return this.twitterPublisher;
+    }
+    if ((platform === SocialPlatform.PINTEREST || provider === SocialProvider.PINTEREST) && this.pinterestPublisher) {
+      return this.pinterestPublisher;
+    }
+    if ((platform === SocialPlatform.YOUTUBE || provider === SocialProvider.YOUTUBE) && this.youtubePublisher) {
+      return this.youtubePublisher;
+    }
+    if ((platform === SocialPlatform.TIKTOK || provider === SocialProvider.TIKTOK) && this.tiktokPublisher) {
+      return this.tiktokPublisher;
+    }
+    if ((platform === SocialPlatform.THREADS || provider === SocialProvider.THREADS) && this.threadsPublisher) {
+      return this.threadsPublisher;
     }
 
     this.logger.warn(`No live publisher configured for platform [${platform}], using mock adapter`);
     return this.mockPublisher;
   }
 }
-

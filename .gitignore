@@ -46,6 +46,12 @@ pnpm-debug.log*
 !.vscode/extensions.json
 !.vscode/settings.json
 
+# Build & Temp tools
+*.tsbuildinfo
+**/tmp_chrome*/
+**/tmp_prof*/
+**/scratch_test*
+
 # Backups and database dumps (NEVER COMMIT)
 backups/
 *.dump

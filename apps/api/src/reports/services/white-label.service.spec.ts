@@ -3,6 +3,10 @@ import { WhiteLabelService } from './white-label.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotFoundException } from '@nestjs/common';
 
+jest.mock('dns/promises', () => ({
+  resolveCname: jest.fn().mockResolvedValue(['cname.omnisocial.ai']),
+}));
+
 describe('WhiteLabelService', () => {
   let service: WhiteLabelService;
   let prisma: any;

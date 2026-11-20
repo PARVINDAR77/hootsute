@@ -1,0 +1,183 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 440" width="100%" height="100%" style="background:#ffffff; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  
+    <defs>
+      <!-- Instagram Gradient -->
+      <linearGradient id="igGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#833AB4"/>
+        <stop offset="35%" stop-color="#C13584"/>
+        <stop offset="70%" stop-color="#E1306C"/>
+        <stop offset="90%" stop-color="#FD1D1D"/>
+        <stop offset="100%" stop-color="#FCAF45"/>
+      </linearGradient>
+
+      <!-- Primary Brand Gradient -->
+      <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#0F172A"/>
+        <stop offset="100%" stop-color="#1E293B"/>
+      </linearGradient>
+
+      <!-- Tech Cyan Gradient -->
+      <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#0284C7"/>
+        <stop offset="100%" stop-color="#0EA5E9"/>
+      </linearGradient>
+
+      <!-- Success Emerald Gradient -->
+      <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#059669"/>
+        <stop offset="100%" stop-color="#10B981"/>
+      </linearGradient>
+
+      <!-- Warning Amber Gradient -->
+      <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#D97706"/>
+        <stop offset="100%" stop-color="#F59E0B"/>
+      </linearGradient>
+
+      <!-- Purple Accent Gradient -->
+      <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#6D28D9"/>
+        <stop offset="100%" stop-color="#8B5CF6"/>
+      </linearGradient>
+
+      <!-- Card Subtle Drop Shadow -->
+      <filter id="cardShadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+        <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.06"/>
+      </filter>
+
+      <!-- Elevated Drop Shadow -->
+      <filter id="elevatedShadow" x="-8%" y="-8%" width="116%" height="120%" filterUnits="userSpaceOnUse">
+        <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0F172A" flood-opacity="0.10"/>
+      </filter>
+
+      <!-- Arrow Markers -->
+      <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748B"/>
+      </marker>
+      <marker id="arrowPrimary" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284C7"/>
+      </marker>
+      <marker id="arrowEmerald" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#059669"/>
+      </marker>
+      <marker id="arrowIg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#E1306C"/>
+      </marker>
+    </defs>
+  
+
+  <!-- Top Title -->
+  <rect x="20" y="10" width="840" height="42" rx="8" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <rect x="20" y="10" width="6" height="42" rx="3" fill="#DC2626"/>
+  <text x="40" y="32" font-size="14" font-weight="700" fill="#0F172A">REDIS BULLMQ PUBLISHING WORKER &amp; RECONCILIATION PIPELINE</text>
+  <text x="40" y="46" font-size="10.5" fill="#64748B">Timezone resolution, idempotency locks, exponential backoff retries, and failure recovery</text>
+
+  <!-- Left: Scheduled Post Created -->
+  <g transform="translate(30, 75)" filter="url(#cardShadow)">
+    <rect width="170" height="180" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <rect width="170" height="4" rx="2" fill="#0284C7"/>
+    <circle cx="26" cy="26" r="11" fill="#E0F2FE"/>
+    <text x="26" y="30" font-size="10" font-weight="bold" fill="#0284C7" text-anchor="middle">1</text>
+    <text x="45" y="29" font-size="11" font-weight="bold" fill="#0F172A">Scheduled Post</text>
+    <text x="15" y="52" font-size="9" font-weight="600" fill="#334155">Draft Approved</text>
+    <text x="15" y="68" font-size="8.5" fill="#64748B">&bull; scheduledAt: 2026-11-20</text>
+    <text x="15" y="82" font-size="8.5" fill="#64748B">&bull; timezone: America/New_York</text>
+    <text x="15" y="96" font-size="8.5" fill="#64748B">&bull; status: SCHEDULED</text>
+    <text x="15" y="110" font-size="8.5" fill="#64748B">&bull; contentSnapshot + hash</text>
+    <rect x="15" y="130" width="140" height="35" rx="4" fill="#F1F5F9"/>
+    <text x="85" y="145" font-size="8" font-weight="bold" fill="#0284C7" text-anchor="middle">UTC Normalized: 15:00Z</text>
+    <text x="85" y="157" font-size="7.5" fill="#64748B" text-anchor="middle">Saved in PostgreSQL</text>
+  </g>
+
+  <!-- Arrow 1 -> 2 -->
+  <path d="M 205 165 L 230 165" stroke="#0284C7" stroke-width="2" marker-end="url(#arrowPrimary)"/>
+
+  <!-- Center: Redis BullMQ Queue -->
+  <g transform="translate(235, 75)" filter="url(#cardShadow)">
+    <rect width="190" height="180" rx="8" fill="#FFFFFF" stroke="#DC2626" stroke-width="1.5"/>
+    <rect width="190" height="4" rx="2" fill="#DC2626"/>
+    <circle cx="26" cy="26" r="11" fill="#FEE2E2"/>
+    <text x="26" y="30" font-size="10" font-weight="bold" fill="#DC2626" text-anchor="middle">2</text>
+    <text x="45" y="29" font-size="11" font-weight="bold" fill="#0F172A">BullMQ Redis Queue</text>
+    <text x="15" y="52" font-size="9" font-weight="600" fill="#334155">Queue: "social-publishing"</text>
+    <text x="15" y="68" font-size="8.5" fill="#64748B">&bull; Sweeper enqueues due jobs</text>
+    <text x="15" y="82" font-size="8.5" fill="#64748B">&bull; Job ID: post_{id}_{target_id}</text>
+    <text x="15" y="96" font-size="8.5" fill="#64748B">&bull; Deduplication key enforced</text>
+    <text x="15" y="110" font-size="8.5" fill="#64748B">&bull; Backoff: exponential 30s-15m</text>
+    <rect x="15" y="130" width="160" height="35" rx="4" fill="#FEF2F2"/>
+    <text x="95" y="145" font-size="8" font-weight="bold" fill="#DC2626" text-anchor="middle">Atomic Distributed Lock</text>
+    <text x="95" y="157" font-size="7.5" fill="#991B1B" text-anchor="middle">Prevents Double Posting</text>
+  </g>
+
+  <!-- Arrow 2 -> 3 -->
+  <path d="M 430 165 L 455 165" stroke="#DC2626" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Right: Worker Dispatcher -->
+  <g transform="translate(460, 75)" filter="url(#cardShadow)">
+    <rect width="190" height="180" rx="8" fill="#FFFFFF" stroke="#059669"/>
+    <rect width="190" height="4" rx="2" fill="#059669"/>
+    <circle cx="26" cy="26" r="11" fill="#D1FAE5"/>
+    <text x="26" y="30" font-size="10" font-weight="bold" fill="#059669" text-anchor="middle">3</text>
+    <text x="45" y="29" font-size="11" font-weight="bold" fill="#0F172A">Publish Worker</text>
+    <text x="15" y="52" font-size="9" font-weight="600" fill="#334155">Worker Execution Loop</text>
+    <text x="15" y="68" font-size="8.5" fill="#64748B">1. Decrypt token via TokenVault</text>
+    <text x="15" y="82" font-size="8.5" fill="#64748B">2. Check Instagram rate limits</text>
+    <text x="15" y="96" font-size="8.5" fill="#64748B">3. Create media container</text>
+    <text x="15" y="110" font-size="8.5" fill="#64748B">4. Publish container to IG</text>
+    <rect x="15" y="130" width="160" height="35" rx="4" fill="#ECFDF5"/>
+    <text x="95" y="145" font-size="8" font-weight="bold" fill="#059669" text-anchor="middle">Meta API: HTTP 200 OK</text>
+    <text x="95" y="157" font-size="7.5" fill="#065F46" text-anchor="middle">Live Post ID Generated</text>
+  </g>
+
+  <!-- Arrow 3 -> 4 (Reconciliation) -->
+  <path d="M 655 165 L 680 165" stroke="#059669" stroke-width="2" marker-end="url(#arrowEmerald)"/>
+
+  <!-- Far Right: Reconciler / Error Handler -->
+  <g transform="translate(685, 75)" filter="url(#cardShadow)">
+    <rect width="165" height="180" rx="8" fill="#FFFFFF" stroke="#F59E0B"/>
+    <rect width="165" height="4" rx="2" fill="#F59E0B"/>
+    <circle cx="26" cy="26" r="11" fill="#FEF3C7"/>
+    <text x="26" y="30" font-size="10" font-weight="bold" fill="#D97706" text-anchor="middle">4</text>
+    <text x="45" y="29" font-size="11" font-weight="bold" fill="#0F172A">Reconciler</text>
+    <text x="15" y="52" font-size="9" font-weight="600" fill="#334155">Fault Recovery</text>
+    <text x="15" y="68" font-size="8.5" fill="#64748B">&bull; Catches network drops</text>
+    <text x="15" y="82" font-size="8.5" fill="#64748B">&bull; Checks if post exists on IG</text>
+    <text x="15" y="96" font-size="8.5" fill="#64748B">&bull; Prevents duplicate retries</text>
+    <text x="15" y="110" font-size="8.5" fill="#64748B">&bull; Marks definitive fail on 400</text>
+    <rect x="15" y="130" width="135" height="35" rx="4" fill="#FFFBEB"/>
+    <text x="82" y="145" font-size="8" font-weight="bold" fill="#B45309" text-anchor="middle">Zero Lost Posts</text>
+    <text x="82" y="157" font-size="7.5" fill="#78350F" text-anchor="middle">Strict Consistency</text>
+  </g>
+
+  <!-- Bottom: Error Handling Matrix -->
+  <g transform="translate(30, 275)" filter="url(#cardShadow)">
+    <rect width="820" height="145" rx="8" fill="#F8FAFC" stroke="#E2E8F0"/>
+    <text x="20" y="24" font-size="11" font-weight="bold" fill="#0F172A">AUTOMATIC WORKER ERROR HANDLING &amp; RETRY SPECIFICATION</text>
+    
+    <g transform="translate(20, 36)">
+      <!-- Box A -->
+      <rect x="0" y="0" width="250" height="90" rx="6" fill="#FFFFFF" stroke="#E2E8F0"/>
+      <text x="15" y="18" font-size="10" font-weight="bold" fill="#059669">TRANSIENT NETWORK FAULT (5xx / TIMEOUT)</text>
+      <text x="15" y="34" font-size="8.5" fill="#475569">&bull; Action: Exponential backoff retry (3 attempts)</text>
+      <text x="15" y="48" font-size="8.5" fill="#475569">&bull; Delays: +60s, +300s, +900s</text>
+      <text x="15" y="62" font-size="8.5" fill="#475569">&bull; Target status remains IN_PROGRESS</text>
+      <text x="15" y="76" font-size="8.5" fill="#059669" font-weight="600">&bull; Reconciler verifies external status first</text>
+
+      <!-- Box B -->
+      <rect x="265" y="0" width="250" height="90" rx="6" fill="#FFFFFF" stroke="#E2E8F0"/>
+      <text x="15" y="18" font-size="10" font-weight="bold" fill="#DC2626">DEFINITIVE CLIENT ERROR (4xx / BAD MEDIA)</text>
+      <text x="15" y="34" font-size="8.5" fill="#475569">&bull; Action: Immediate abort &bull; NO RETRIES</text>
+      <text x="15" y="48" font-size="8.5" fill="#475569">&bull; Target status updated to FAILED</text>
+      <text x="15" y="62" font-size="8.5" fill="#475569">&bull; Sanitized error message saved in DB</text>
+      <text x="15" y="76" font-size="8.5" fill="#DC2626" font-weight="600">&bull; User notified in App with fix instructions</text>
+
+      <!-- Box C -->
+      <rect x="530" y="0" width="250" height="90" rx="6" fill="#FFFFFF" stroke="#E2E8F0"/>
+      <text x="15" y="18" font-size="10" font-weight="bold" fill="#D97706">RATE LIMIT (25 POSTS/24H OR BUC LIMIT)</text>
+      <text x="15" y="34" font-size="8.5" fill="#475569">&bull; Action: Delay job until rate limit window resets</text>
+      <text x="15" y="48" font-size="8.5" fill="#475569">&bull; Read X-Business-Use-Case-Usage header</text>
+      <text x="15" y="62" font-size="8.5" fill="#475569">&bull; Target status remains SCHEDULED_DELAYED</text>
+      <text x="15" y="76" font-size="8.5" fill="#D97706" font-weight="600">&bull; Workspace alert fired for admin</text>
+    </g>
+  </g>
+</svg>

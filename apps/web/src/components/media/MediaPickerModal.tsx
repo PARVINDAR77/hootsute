@@ -63,8 +63,8 @@ export function MediaPickerModal({
       if (allowedMediaType) queryUrl += `&mediaType=${allowedMediaType}`;
       if (search.trim()) queryUrl += `&search=${encodeURIComponent(search.trim())}`;
 
-      const res = await apiClient<{ success: boolean; data: MediaAssetDto[] }>(queryUrl);
-      const fetched = res.data || [];
+      const res = await apiClient<any>(queryUrl);
+      const fetched: MediaAssetDto[] = Array.isArray(res) ? res : (res?.data || []);
       setAssets(fetched);
 
       if (selectedAssetId) {
@@ -103,21 +103,22 @@ export function MediaPickerModal({
         // Direct upload fallback
         const formData = new FormData();
         formData.append('file', file);
-        const directRes = await apiClient<{ success: boolean; data: MediaAssetDto }>(
+        const directRes = await apiClient<any>(
           `/workspaces/${currentWorkspace.id}/media/direct-upload`,
           {
             method: 'POST',
             body: formData,
           },
         );
-        setSelectedAsset(directRes.data);
-        onSelect(directRes.data);
+        const directAsset: MediaAssetDto = directRes?.data ?? directRes;
+        setSelectedAsset(directAsset);
+        onSelect(directAsset);
         onClose();
         return;
       }
 
       setUploadProgress(50);
-      const session = sessionRes.data;
+      const session: UploadSessionResponseDto = (sessionRes as any)?.data ?? sessionRes;
 
       // 2. Direct PUT to signed URL
       const putRes = await fetch(session.uploadUrl, {
@@ -136,7 +137,7 @@ export function MediaPickerModal({
       setUploadProgress(85);
 
       // 3. Complete verification on backend
-      const completeRes = await apiClient<{ success: boolean; data: MediaAssetDto }>(
+      const completeRes = await apiClient<any>(
         `/workspaces/${currentWorkspace.id}/media/${session.assetId}/complete`,
         {
           method: 'POST',
@@ -144,9 +145,10 @@ export function MediaPickerModal({
         },
       );
 
+      const completedAsset: MediaAssetDto = completeRes?.data ?? completeRes;
       setUploadProgress(100);
-      setSelectedAsset(completeRes.data);
-      onSelect(completeRes.data);
+      setSelectedAsset(completedAsset);
+      onSelect(completedAsset);
       onClose();
     } catch (err: any) {
       setUploadError(err.message || 'Failed to upload media asset');

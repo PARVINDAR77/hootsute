@@ -114,7 +114,7 @@ export class BillingService {
           { name: 'Connected Social Accounts', included: true, limitText: '10 Accounts' },
           { name: 'AI Marketing Copy Generations', included: true, limitText: '1,000 / month' },
           { name: 'Priority Publishing Dispatcher', included: true },
-          { name: 'WhatsApp Approval Workflows', included: true },
+          { name: 'Multi-Platform Bulk Publishing (8 Networks)', included: true },
           { name: 'Dedicated Account Manager', included: false },
         ],
       },

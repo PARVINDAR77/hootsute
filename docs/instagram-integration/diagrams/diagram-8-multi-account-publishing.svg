@@ -1,0 +1,150 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 440" width="100%" height="100%" style="background:#ffffff; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  
+    <defs>
+      <!-- Instagram Gradient -->
+      <linearGradient id="igGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#833AB4"/>
+        <stop offset="35%" stop-color="#C13584"/>
+        <stop offset="70%" stop-color="#E1306C"/>
+        <stop offset="90%" stop-color="#FD1D1D"/>
+        <stop offset="100%" stop-color="#FCAF45"/>
+      </linearGradient>
+
+      <!-- Primary Brand Gradient -->
+      <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#0F172A"/>
+        <stop offset="100%" stop-color="#1E293B"/>
+      </linearGradient>
+
+      <!-- Tech Cyan Gradient -->
+      <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#0284C7"/>
+        <stop offset="100%" stop-color="#0EA5E9"/>
+      </linearGradient>
+
+      <!-- Success Emerald Gradient -->
+      <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#059669"/>
+        <stop offset="100%" stop-color="#10B981"/>
+      </linearGradient>
+
+      <!-- Warning Amber Gradient -->
+      <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#D97706"/>
+        <stop offset="100%" stop-color="#F59E0B"/>
+      </linearGradient>
+
+      <!-- Purple Accent Gradient -->
+      <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#6D28D9"/>
+        <stop offset="100%" stop-color="#8B5CF6"/>
+      </linearGradient>
+
+      <!-- Card Subtle Drop Shadow -->
+      <filter id="cardShadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+        <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.06"/>
+      </filter>
+
+      <!-- Elevated Drop Shadow -->
+      <filter id="elevatedShadow" x="-8%" y="-8%" width="116%" height="120%" filterUnits="userSpaceOnUse">
+        <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0F172A" flood-opacity="0.10"/>
+      </filter>
+
+      <!-- Arrow Markers -->
+      <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748B"/>
+      </marker>
+      <marker id="arrowPrimary" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284C7"/>
+      </marker>
+      <marker id="arrowEmerald" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#059669"/>
+      </marker>
+      <marker id="arrowIg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#E1306C"/>
+      </marker>
+    </defs>
+  
+
+  <!-- Top Title -->
+  <rect x="20" y="10" width="840" height="42" rx="8" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <rect x="20" y="10" width="6" height="42" rx="3" fill="#8B5CF6"/>
+  <text x="40" y="32" font-size="14" font-weight="700" fill="#0F172A">MULTI-ACCOUNT INDEPENDENT TARGET STATE MACHINE ARCHITECTURE</text>
+  <text x="40" y="46" font-size="10.5" fill="#64748B">Single post broadcasted to 3 Instagram accounts with isolated tokens, staggered dispatch, and partial success</text>
+
+  <!-- Left: Content Draft -->
+  <g transform="translate(30, 80)" filter="url(#cardShadow)">
+    <rect width="210" height="240" rx="8" fill="#FFFFFF" stroke="#0F172A" stroke-width="1.5"/>
+    <rect width="210" height="4" rx="2" fill="url(#igGrad)"/>
+    <text x="20" y="28" font-size="12" font-weight="bold" fill="#0F172A">ScheduledPost</text>
+    <text x="20" y="44" font-size="9" fill="#64748B">ID: sp_9831f42 (Workspace Alpha)</text>
+    
+    <rect x="15" y="55" width="180" height="70" rx="6" fill="#F8FAFC" stroke="#E2E8F0"/>
+    <text x="25" y="75" font-size="9.5" font-weight="bold" fill="#0F172A">Post Content Snapshot</text>
+    <text x="25" y="90" font-size="8.5" fill="#475569">&bull; Caption: "Exciting launch #ai"</text>
+    <text x="25" y="104" font-size="8.5" fill="#475569">&bull; Media: https://s3.../hero.jpg</text>
+    <text x="25" y="118" font-size="8.5" fill="#059669">&bull; SHA-256 Hash Verified</text>
+
+    <text x="20" y="145" font-size="10" font-weight="bold" fill="#8B5CF6">Selected Publishing Targets (3):</text>
+    <text x="20" y="162" font-size="9" fill="#334155">&bull; Target 1: @omnisocial_global</text>
+    <text x="20" y="176" font-size="9" fill="#334155">&bull; Target 2: @omnisocial_uk</text>
+    <text x="20" y="190" font-size="9" fill="#334155">&bull; Target 3: @omnisocial_apac</text>
+
+    <rect x="15" y="205" width="180" height="22" rx="4" fill="#F1F5F9"/>
+    <text x="105" y="219" font-size="8" font-weight="bold" fill="#0F172A" text-anchor="middle">Staggered Dispatch Interval: 1.5s</text>
+  </g>
+
+  <!-- Split Connectors -->
+  <path d="M 245 140 L 310 120" stroke="#059669" stroke-width="2" marker-end="url(#arrowEmerald)"/>
+  <path d="M 245 190 L 310 200" stroke="#EF4444" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M 245 240 L 310 280" stroke="#059669" stroke-width="2" marker-end="url(#arrowEmerald)"/>
+
+  <!-- Right: 3 Independent Target Cards -->
+  <!-- Target 1: Success -->
+  <g transform="translate(320, 75)" filter="url(#cardShadow)">
+    <rect width="520" height="75" rx="8" fill="#FFFFFF" stroke="#059669" stroke-width="1.5"/>
+    <rect width="6" height="75" rx="3" fill="#059669"/>
+    <text x="20" y="22" font-size="11" font-weight="bold" fill="#059669">TARGET 1: @omnisocial_global (US Main Account)</text>
+    <rect x="420" y="10" width="85" height="18" rx="4" fill="#D1FAE5"/>
+    <text x="462" y="22" font-size="8.5" font-weight="bold" fill="#059669" text-anchor="middle">PUBLISHED</text>
+    
+    <text x="20" y="42" font-size="9" fill="#475569">&bull; Account ID: 1784140029381 &bull; Token Decrypted: AES-256-GCM (Key v1)</text>
+    <text x="20" y="56" font-size="9" fill="#475569">&bull; Live IG Post ID: 18029384918239 &bull; Latency: 920ms &bull; Attempts: 1/3</text>
+    <text x="20" y="68" font-size="8" font-family="monospace" fill="#059669">https://www.instagram.com/p/DB7xKq19/</text>
+  </g>
+
+  <!-- Target 2: Partial Failure / Transient Retry -->
+  <g transform="translate(320, 160)" filter="url(#cardShadow)">
+    <rect width="520" height="85" rx="8" fill="#FFFFFF" stroke="#F59E0B" stroke-width="1.5"/>
+    <rect width="6" height="85" rx="3" fill="#F59E0B"/>
+    <text x="20" y="22" font-size="11" font-weight="bold" fill="#D97706">TARGET 2: @omnisocial_uk (UK Regional Account)</text>
+    <rect x="390" y="10" width="115" height="18" rx="4" fill="#FEF3C7"/>
+    <text x="447" y="22" font-size="8.5" font-weight="bold" fill="#B45309" text-anchor="middle">RETRY_QUEUED</text>
+    
+    <text x="20" y="42" font-size="9" fill="#475569">&bull; Account ID: 1784140084729 &bull; Token Decrypted: AES-256-GCM (Key v1)</text>
+    <text x="20" y="56" font-size="9" fill="#DC2626">&bull; Meta Error: (#1) An unknown error occurred (503 Service Unavailable)</text>
+    <text x="20" y="70" font-size="8.5" fill="#64748B">&bull; Attempt 1/3 failed &bull; Next retry scheduled in +60 seconds &bull; Does NOT block other accounts</text>
+  </g>
+
+  <!-- Target 3: Success -->
+  <g transform="translate(320, 255)" filter="url(#cardShadow)">
+    <rect width="520" height="75" rx="8" fill="#FFFFFF" stroke="#059669" stroke-width="1.5"/>
+    <rect width="6" height="75" rx="3" fill="#059669"/>
+    <text x="20" y="22" font-size="11" font-weight="bold" fill="#059669">TARGET 3: @omnisocial_apac (Singapore APAC Account)</text>
+    <rect x="420" y="10" width="85" height="18" rx="4" fill="#D1FAE5"/>
+    <text x="462" y="22" font-size="8.5" font-weight="bold" fill="#059669" text-anchor="middle">PUBLISHED</text>
+    
+    <text x="20" y="42" font-size="9" fill="#475569">&bull; Account ID: 1784140092841 &bull; Token Decrypted: AES-256-GCM (Key v1)</text>
+    <text x="20" y="56" font-size="9" fill="#475569">&bull; Live IG Post ID: 18029384918455 &bull; Latency: 1,140ms &bull; Attempts: 1/3</text>
+    <text x="20" y="68" font-size="8" font-family="monospace" fill="#059669">https://www.instagram.com/p/DB7xKq42/</text>
+  </g>
+
+  <!-- Bottom Summary Callout -->
+  <g transform="translate(30, 345)" filter="url(#cardShadow)">
+    <rect width="810" height="75" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="20" y="22" font-size="10.5" font-weight="bold" fill="#0F172A">KEY MULTI-ACCOUNT PUBLISHING ADVANTAGES IN OMNISOCIAL AI</text>
+    <text x="20" y="40" font-size="8.5" fill="#334155">&bull; <tspan font-weight="bold">No Cascade Failure:</tspan> Failure on one regional account never interrupts or cancels publishing to remaining accounts.</text>
+    <text x="20" y="54" font-size="8.5" fill="#334155">&bull; <tspan font-weight="bold">Anti-Burst Delay:</tspan> Staggered 1.5s delay between account dispatches prevents Meta anti-bot rate-limit triggers.</text>
+    <text x="20" y="68" font-size="8.5" fill="#334155">&bull; <tspan font-weight="bold">Granular Audit Records:</tspan> Each target has its own attempt count, error message, latency metric, and external URL.</text>
+  </g>
+</svg>

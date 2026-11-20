@@ -311,64 +311,47 @@ describe('Frontend Form Validation Schemas', () => {
     });
   });
 
-  describe('WhatsApp Business Configuration & Recipient Consent Validation', () => {
-    const whatsAppSettingsSchema = z.object({
-      wabaId: z.string().min(1, 'WABA ID is required'),
-      phoneNumberId: z.string().min(1, 'Phone Number ID is required'),
-      systemUserAccessToken: z.string().min(1, 'Access Token is required'),
-      businessPhoneNumber: z.string().optional(),
+  describe('Bulk Multi-Account Campaign Publish Validation', () => {
+    const bulkPublishSchema = z.object({
+      draftIds: z.array(z.string().min(1)).min(1, 'Select at least one approved campaign'),
+      socialAccountIds: z.array(z.string().min(1)).min(1, 'Select at least one connected account'),
+      dispatchMode: z.enum(['IMMEDIATE', 'SCHEDULED', 'STAGGERED']),
+      staggerMinutes: z.number().int().min(1).max(1440).optional(),
     });
 
-    const recipientConsentSchema = z.object({
-      displayName: z.string().min(2, 'Name must be at least 2 characters'),
-      phoneNumber: z.string().regex(/^\+[1-9]\d{7,14}$/, 'Must be valid E.164 phone format'),
-      consentAcknowledged: z.literal(true, {
-        errorMap: () => ({ message: 'Explicit consent acknowledgement is required' }),
-      }),
-    });
-
-    it('should validate valid WhatsApp Cloud API settings', () => {
-      const result = whatsAppSettingsSchema.safeParse({
-        wabaId: '108923485729103',
-        phoneNumberId: '1009823481239',
-        systemUserAccessToken: 'EAAB...secret-token',
-        businessPhoneNumber: '+919876543210',
+    it('should validate valid immediate bulk publish payload across multiple accounts', () => {
+      const result = bulkPublishSchema.safeParse({
+        draftIds: ['draft-1', 'draft-2'],
+        socialAccountIds: ['acc-ig', 'acc-fb', 'acc-pin', 'acc-yt', 'acc-tt', 'acc-threads'],
+        dispatchMode: 'IMMEDIATE',
       });
       expect(result.success).toBe(true);
     });
 
-    it('should reject WhatsApp settings with missing WABA ID or token', () => {
-      const result = whatsAppSettingsSchema.safeParse({
-        wabaId: '',
-        phoneNumberId: '1009823481239',
-        systemUserAccessToken: '',
+    it('should reject bulk publish payload with no drafts or no accounts', () => {
+      const result = bulkPublishSchema.safeParse({
+        draftIds: [],
+        socialAccountIds: [],
+        dispatchMode: 'IMMEDIATE',
       });
       expect(result.success).toBe(false);
     });
 
-    it('should validate recipient registration with explicit consent acknowledgement', () => {
-      const result = recipientConsentSchema.safeParse({
-        displayName: 'Pooja Patel (Head of Brand)',
-        phoneNumber: '+919876543210',
-        consentAcknowledged: true,
+    it('should validate staggered bulk publish payload with interval', () => {
+      const result = bulkPublishSchema.safeParse({
+        draftIds: ['draft-1'],
+        socialAccountIds: ['acc-1', 'acc-2'],
+        dispatchMode: 'STAGGERED',
+        staggerMinutes: 15,
       });
       expect(result.success).toBe(true);
     });
 
-    it('should reject recipient registration when consent is false or unacknowledged', () => {
-      const result = recipientConsentSchema.safeParse({
-        displayName: 'Pooja Patel',
-        phoneNumber: '+919876543210',
-        consentAcknowledged: false,
-      });
-      expect(result.success).toBe(false);
-    });
-
-    it('should reject invalid phone format for recipient registration', () => {
-      const result = recipientConsentSchema.safeParse({
-        displayName: 'Pooja Patel',
-        phoneNumber: '12345',
-        consentAcknowledged: true,
+    it('should reject invalid dispatch mode', () => {
+      const result = bulkPublishSchema.safeParse({
+        draftIds: ['draft-1'],
+        socialAccountIds: ['acc-1'],
+        dispatchMode: 'INVALID_MODE',
       });
       expect(result.success).toBe(false);
     });

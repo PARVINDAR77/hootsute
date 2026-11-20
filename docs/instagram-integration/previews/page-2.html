@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>OmniSocial AI — Complete Official Instagram API Integration Guide</title>
+<style>
+  /* -------------------------------------------------------------
+     CSS PRINT & TYPOGRAPHY FOUNDATIONS
+     ------------------------------------------------------------- */
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  @media print {
+    body {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    .page-break {
+      page-break-after: always;
+      break-after: page;
+    }
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #1E293B;
+    background: #E2E8F0;
+    font-size: 9.5pt;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Each page container */
+  .doc-page {
+    width: 210mm;
+    min-height: 297mm;
+    height: 297mm;
+    max-height: 297mm;
+    padding: 16mm 18mm 16mm 18mm;
+    position: relative;
+    background: #FFFFFF;
+    margin: 0 auto 10px auto;
+    page-break-after: always;
+    break-after: page;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* Running Header */
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 3mm;
+    border-bottom: 1.5px solid #E2E8F0;
+    margin-bottom: 4mm;
+    font-size: 8pt;
+    color: #64748B;
+  }
+  .page-header .brand {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+    color: #0F172A;
+  }
+  .page-header .brand-badge {
+    background: linear-gradient(135deg, #833AB4, #FD1D1D, #FCAF45);
+    color: #FFFFFF;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 7pt;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+  .page-header .chapter-tag {
+    font-weight: 600;
+    color: #0284C7;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 7.5pt;
+  }
+
+  /* Running Footer */
+  .page-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 3mm;
+    border-top: 1.5px solid #E2E8F0;
+    margin-top: 4mm;
+    font-size: 7.5pt;
+    color: #94A3B8;
+  }
+  .page-footer .confidential {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .page-footer .page-number {
+    font-weight: 700;
+    color: #0F172A;
+  }
+
+  /* Page Content Area */
+  .page-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Headings */
+  h1.chapter-title {
+    font-size: 17pt;
+    font-weight: 800;
+    color: #0F172A;
+    letter-spacing: -0.5px;
+    margin-bottom: 2mm;
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  h1.chapter-title .num-pill {
+    background: #0F172A;
+    color: #FFFFFF;
+    font-size: 10pt;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 800;
+  }
+  h2.section-heading {
+    font-size: 11pt;
+    font-weight: 700;
+    color: #0F172A;
+    margin-top: 3mm;
+    margin-bottom: 1.5mm;
+    padding-bottom: 1mm;
+    border-bottom: 1px solid #F1F5F9;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  h3.sub-heading {
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: #1E293B;
+    margin-top: 2.5mm;
+    margin-bottom: 1mm;
+  }
+
+  p {
+    margin-bottom: 2mm;
+    color: #334155;
+    text-align: justify;
+  }
+  p.lead {
+    font-size: 10pt;
+    color: #1E293B;
+    font-weight: 500;
+    line-height: 1.4;
+    margin-bottom: 2.5mm;
+  }
+
+  /* Callout Boxes */
+  .callout {
+    padding: 3mm 4mm;
+    border-radius: 6px;
+    margin: 2mm 0;
+    font-size: 8.5pt;
+    line-height: 1.35;
+  }
+  .callout-info {
+    background: #F0F9FF;
+    border-left: 3.5px solid #0284C7;
+    color: #0369A1;
+  }
+  .callout-success {
+    background: #F0FDF4;
+    border-left: 3.5px solid #059669;
+    color: #065F46;
+  }
+  .callout-warning {
+    background: #FFFBEB;
+    border-left: 3.5px solid #D97706;
+    color: #92400E;
+  }
+  .callout-danger {
+    background: #FEF2F2;
+    border-left: 3.5px solid #DC2626;
+    color: #991B1B;
+  }
+  .callout-ig {
+    background: #FDF2F8;
+    border-left: 3.5px solid #E1306C;
+    color: #9D174D;
+  }
+  .callout strong {
+    font-weight: 700;
+  }
+
+  /* Tables */
+  table.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2mm 0 3mm 0;
+    font-size: 8pt;
+  }
+  table.data-table th {
+    background: #0F172A;
+    color: #FFFFFF;
+    text-align: left;
+    padding: 6px 8px;
+    font-weight: 700;
+    font-size: 7.5pt;
+    letter-spacing: 0.3px;
+  }
+  table.data-table td {
+    padding: 5px 8px;
+    border-bottom: 1px solid #E2E8F0;
+    color: #334155;
+    vertical-align: top;
+  }
+  table.data-table tr:nth-child(even) td {
+    background: #F8FAFC;
+  }
+  table.data-table tr:hover td {
+    background: #F1F5F9;
+  }
+  table.data-table code {
+    background: #F1F5F9;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 7.5pt;
+    color: #BE185D;
+  }
+
+  /* Code Blocks */
+  pre.code-block {
+    background: #0F172A;
+    color: #E2E8F0;
+    padding: 3mm 4mm;
+    border-radius: 6px;
+    font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 7.5pt;
+    line-height: 1.35;
+    margin: 2mm 0;
+    overflow: hidden;
+    border-left: 3.5px solid #8B5CF6;
+  }
+  pre.code-block .keyword { color: #F472B6; font-weight: bold; }
+  pre.code-block .string { color: #A7F3D0; }
+  pre.code-block .function { color: #60A5FA; }
+  pre.code-block .comment { color: #64748B; font-style: italic; }
+
+  /* Diagram Embedding */
+  .diagram-container {
+    width: 100%;
+    margin: 2.5mm 0;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  }
+  .diagram-container svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  /* Grid Layouts */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3mm;
+    margin: 2mm 0;
+  }
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2.5mm;
+    margin: 2mm 0;
+  }
+  .card-box {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
+    padding: 3mm;
+  }
+  .card-box h4 {
+    font-size: 9pt;
+    font-weight: 700;
+    color: #0F172A;
+    margin-bottom: 1.5mm;
+  }
+  .card-box p {
+    font-size: 8pt;
+    color: #475569;
+    margin-bottom: 1mm;
+  }
+
+  /* Badges & Tags */
+  .badge {
+    display: inline-block;
+    padding: 1.5px 6px;
+    border-radius: 3px;
+    font-size: 7pt;
+    font-weight: 700;
+  }
+  .badge-emerald { background: #D1FAE5; color: #065F46; }
+  .badge-blue { background: #DBEAFE; color: #1E40AF; }
+  .badge-purple { background: #EDE9FE; color: #5B21B6; }
+  .badge-rose { background: #FFE4E6; color: #9F1239; }
+  .badge-amber { background: #FEF3C7; color: #92400E; }
+
+  /* Lists */
+  ul.check-list {
+    list-style: none;
+    margin: 1.5mm 0 2mm 0;
+  }
+  ul.check-list li {
+    position: relative;
+    padding-left: 14px;
+    margin-bottom: 1.5mm;
+    font-size: 8.5pt;
+    color: #334155;
+  }
+  ul.check-list li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #059669;
+    font-weight: bold;
+    font-size: 9pt;
+  }
+
+  /* Cover Page Specific */
+  .cover-page {
+    width: 210mm;
+    height: 297mm;
+    padding: 0;
+    position: relative;
+    background: #0F172A;
+    color: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+  }
+  .cover-top-bar {
+    height: 8mm;
+    background: linear-gradient(90deg, #833AB4, #C13584, #E1306C, #FD1D1D, #FCAF45);
+  }
+  .cover-body {
+    padding: 24mm 22mm;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .cover-logo-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    font-size: 9pt;
+    font-weight: 700;
+    color: #38BDF8;
+    margin-bottom: 10mm;
+    width: fit-content;
+  }
+  .cover-title {
+    font-size: 32pt;
+    font-weight: 900;
+    line-height: 1.12;
+    letter-spacing: -1px;
+    color: #FFFFFF;
+    margin-bottom: 5mm;
+  }
+  .cover-title span {
+    background: linear-gradient(135deg, #E1306C, #FD1D1D, #FCAF45);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .cover-subtitle {
+    font-size: 13pt;
+    font-weight: 400;
+    color: #94A3B8;
+    max-width: 160mm;
+    line-height: 1.45;
+    margin-bottom: 10mm;
+  }
+  .cover-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4mm;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 5mm 6mm;
+    margin-top: 6mm;
+  }
+  .cover-meta-item .label {
+    font-size: 7.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748B;
+    font-weight: 600;
+    margin-bottom: 1mm;
+  }
+  .cover-meta-item .val {
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: #F8FAFC;
+  }
+  .cover-footer {
+    padding: 8mm 22mm;
+    background: rgba(15, 23, 42, 0.95);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: space-between;
+    font-size: 8pt;
+    color: #64748B;
+  }
+</style>
+</head>
+<body style="background:#ffffff; margin:0; padding:0;">
+<div class="doc-page">
+  <div class="page-header">
+    <div class="brand">
+      <span class="brand-badge">OMNISOCIAL AI</span>
+      <span>Official Instagram API Integration Master Guide</span>
+    </div>
+    <div class="chapter-tag">EXECUTIVE SUMMARY &amp; TOC</div>
+  </div>
+
+  <div class="page-content">
+    <h1 class="chapter-title">Executive Summary &amp; Document Index</h1>
+    <p class="lead">
+      This technical manual provides a comprehensive, production-grade guide for integrating the official Meta Instagram Graph API into <strong>OmniSocial AI</strong>. The system architecture strictly preserves modular boundaries: Next.js App Router for frontend UI, NestJS API Gateway for business logic and OAuth orchestration, PostgreSQL 18 with Prisma ORM for relational persistence, and Redis with BullMQ workers for resilient, asynchronous post scheduling and dispatch.
+    </p>
+
+    <div class="callout callout-info">
+      <strong>Core Architectural Invariant:</strong> The Next.js client-side application must NEVER communicate directly with PostgreSQL or external Meta Graph APIs. All authorization exchanges, sensitive token storage, and media container dispatches are mediated exclusively by the NestJS backend API. Client Secrets and plaintext tokens are never transmitted to browser bundles.
+    </div>
+
+    <h2 class="section-heading">Table of Contents &bull; 19 Chapters</h2>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width:10%;">Chapter</th>
+          <th style="width:40%;">Title &amp; Focus Area</th>
+          <th style="width:35%;">Key Architectural Deliverable</th>
+          <th style="width:15%;">Page</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>01</strong></td>
+          <td>Introduction &amp; Integration Fundamentals</td>
+          <td>Customer lifecycle flow, Meta app vs consumer app</td>
+          <td>Page 03</td>
+        </tr>
+        <tr>
+          <td><strong>02</strong></td>
+          <td>Meta Developer Account &amp; App Creation</td>
+          <td>developers.facebook.com 13-step setup walkthrough</td>
+          <td>Page 04</td>
+        </tr>
+        <tr>
+          <td><strong>03</strong></td>
+          <td>Instagram Account Types &amp; Login Paths</td>
+          <td>Personal vs Creator vs Business, Route A/B Matrix</td>
+          <td>Page 05</td>
+        </tr>
+        <tr>
+          <td><strong>04</strong></td>
+          <td>Cost Structure, API Rate Limits &amp; Permissions</td>
+          <td>Permission comparison table, 25-post/24h rolling limit</td>
+          <td>Page 06</td>
+        </tr>
+        <tr>
+          <td><strong>05</strong></td>
+          <td>Complete System Architecture</td>
+          <td>Multi-tier Next.js &gt; NestJS &gt; Prisma &gt; Redis &gt; Meta flow</td>
+          <td>Page 07</td>
+        </tr>
+        <tr>
+          <td><strong>06</strong></td>
+          <td>Instagram OAuth 2.0 Integration Deep Dive</td>
+          <td>CSRF state validation, PKCE, 60-day token exchange</td>
+          <td>Page 08</td>
+        </tr>
+        <tr>
+          <td><strong>07</strong></td>
+          <td>Database &amp; Prisma Schema Design</td>
+          <td>SocialAccount, ScheduledPost, TokenVault models</td>
+          <td>Page 09</td>
+        </tr>
+        <tr>
+          <td><strong>08</strong></td>
+          <td>Instagram Account Management UI &amp; UX</td>
+          <td>Connect modal, account cards, reconnect flows</td>
+          <td>Page 10</td>
+        </tr>
+        <tr>
+          <td><strong>09</strong></td>
+          <td>First Instagram Image Publishing</td>
+          <td>2-step media container creation &amp; publish lifecycle</td>
+          <td>Page 11</td>
+        </tr>
+        <tr>
+          <td><strong>10</strong></td>
+          <td>Advanced Content Formats (Carousels &amp; Reels)</td>
+          <td>Multi-item containers, video transcoding &amp; polling</td>
+          <td>Page 12</td>
+        </tr>
+        <tr>
+          <td><strong>11</strong></td>
+          <td>Scheduling &amp; Redis BullMQ Worker Engine</td>
+          <td>Timezone handling, sweeper loop, idempotency keys</td>
+          <td>Page 13</td>
+        </tr>
+        <tr>
+          <td><strong>12</strong></td>
+          <td>Multi-Account &amp; Bulk Publishing</td>
+          <td>1-to-many target isolation, staggered dispatch (1.5s)</td>
+          <td>Page 14</td>
+        </tr>
+        <tr>
+          <td><strong>13</strong></td>
+          <td>Instagram Analytics &amp; Performance Telemetry</td>
+          <td>Supported Graph metrics: Reach, Impressions, Saves</td>
+          <td>Page 15</td>
+        </tr>
+        <tr>
+          <td><strong>14</strong></td>
+          <td>Comments, Mentions &amp; Webhook Automation</td>
+          <td>HMAC-SHA256 signature check, 2-way comment replies</td>
+          <td>Page 16</td>
+        </tr>
+        <tr>
+          <td><strong>15</strong></td>
+          <td>Security Architecture &amp; Vault Hardening</td>
+          <td>AES-256-GCM dual-key rotation, workspace isolation</td>
+          <td>Page 17</td>
+        </tr>
+        <tr>
+          <td><strong>16</strong></td>
+          <td>Comprehensive Testing Strategy</td>
+          <td>Unit, integration, E2E OAuth, resilience checklist</td>
+          <td>Page 18</td>
+        </tr>
+        <tr>
+          <td><strong>17</strong></td>
+          <td>Production Deployment &amp; Meta App Review</td>
+          <td>Screencast walkthrough, privacy policy, live mode</td>
+          <td>Page 19</td>
+        </tr>
+        <tr>
+          <td><strong>18</strong></td>
+          <td>Complete Implementation Roadmap</td>
+          <td>Phase 0 to Phase 11 milestone dependencies</td>
+          <td>Page 20</td>
+        </tr>
+        <tr>
+          <td><strong>19</strong></td>
+          <td>Master Coding Agent Implementation Prompt</td>
+          <td>Copy-ready prompt with strict architectural guardrails</td>
+          <td>Pages 21-22</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="page-footer">
+    <div class="confidential">CONFIDENTIAL &bull; OMNISOCIAL AI ARCHITECTURAL SPECIFICATION</div>
+    <div class="page-number">Page 02 of 23</div>
+  </div>
+</div>
+
+<!-- =======================================================================
+     PAGE 3: CHAPTER 01 — INTRODUCTION
+     ======================================================================= -->
+</body>
+</html>

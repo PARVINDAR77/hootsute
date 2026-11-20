@@ -30,16 +30,6 @@ export default () => ({
     timeoutMs: parseInt(process.env.AI_REQUEST_TIMEOUT_MS, 10) || 30000,
     maxRetries: parseInt(process.env.AI_MAX_RETRIES, 10) || 2,
   },
-  whatsapp: {
-    provider: (process.env.WHATSAPP_PROVIDER || (process.env.NODE_ENV === 'test' ? 'mock' : 'meta')).toLowerCase(),
-    accessToken: process.env.META_WHATSAPP_ACCESS_TOKEN || '',
-    phoneNumberId: process.env.META_WHATSAPP_PHONE_NUMBER_ID || '',
-    wabaId: process.env.META_WHATSAPP_WABA_ID || '',
-    appSecret: process.env.META_WHATSAPP_APP_SECRET || '',
-    verifyToken: process.env.META_WHATSAPP_VERIFY_TOKEN || 'omnisocial_wa_verify_token',
-    actionTokenSecret: process.env.WHATSAPP_ACTION_SECRET || 'dev-action-secret-minimum-32-characters-required',
-    reviewBaseUrl: process.env.FRONTEND_APP_URL || 'http://localhost:3000',
-  },
   meta: {
     appId: process.env.META_APP_ID || '',
     appSecret: process.env.META_APP_SECRET || '',

@@ -164,7 +164,7 @@ export default function CalendarPage() {
       });
 
       const response = await apiClient<any>(
-        `publishing/workspaces/${workspaceId}/scheduled-posts/calendar?${queryParams.toString()}`,
+        `/workspaces/${workspaceId}/scheduled-posts/calendar?${queryParams.toString()}`,
       );
 
       const list: ScheduledPostDto[] = Array.isArray(response)
@@ -354,57 +354,57 @@ export default function CalendarPage() {
 
       {/* KPI Stats Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-white dark:bg-[#0F142B]/90 border border-[#E7EAF2] dark:border-[#1E2749] shadow-soft dark:shadow-none flex items-center justify-between">
           <div>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#64748B] dark:text-slate-400">
               Upcoming Scheduled
             </span>
-            <div className="text-xl font-bold text-slate-900 mt-0.5">{stats.scheduled}</div>
+            <div className="text-xl font-extrabold text-[#111827] dark:text-white mt-0.5">{stats.scheduled}</div>
           </div>
-          <div className="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-[#F1EBFF] dark:bg-[#7138F5]/20 text-[#7138F5] dark:text-[#C4A5FF] flex items-center justify-center">
             <Clock className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-white dark:bg-[#0F142B]/90 border border-[#E7EAF2] dark:border-[#1E2749] shadow-soft dark:shadow-none flex items-center justify-between">
           <div>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#64748B] dark:text-slate-400">
               In Dispatch
             </span>
-            <div className="text-xl font-bold text-amber-600 mt-0.5">{stats.publishing}</div>
+            <div className="text-xl font-extrabold text-amber-600 dark:text-amber-400 mt-0.5">{stats.publishing}</div>
           </div>
-          <div className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center">
             <RotateCw className="w-5 h-5 animate-spin" />
           </div>
         </div>
 
-        <div className="p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-white dark:bg-[#0F142B]/90 border border-[#E7EAF2] dark:border-[#1E2749] shadow-soft dark:shadow-none flex items-center justify-between">
           <div>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#64748B] dark:text-slate-400">
               Published
             </span>
-            <div className="text-xl font-bold text-emerald-600 mt-0.5">{stats.published}</div>
+            <div className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5">{stats.published}</div>
           </div>
-          <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
             <CheckCircle2 className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-white dark:bg-[#0F142B]/90 border border-[#E7EAF2] dark:border-[#1E2749] shadow-soft dark:shadow-none flex items-center justify-between">
           <div>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#64748B] dark:text-slate-400">
               Needs Attention
             </span>
-            <div className="text-xl font-bold text-rose-600 mt-0.5">{stats.failed}</div>
+            <div className="text-xl font-extrabold text-rose-600 dark:text-rose-400 mt-0.5">{stats.failed}</div>
           </div>
-          <div className="w-9 h-9 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center justify-center">
             <AlertTriangle className="w-5 h-5" />
           </div>
         </div>
       </div>
 
       {/* Calendar Controls & Filter Toolbar */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs space-y-4">
+      <div className="bg-white dark:bg-[#0F142B]/90 rounded-2xl border border-[#E7EAF2] dark:border-[#1E2749] p-4 shadow-soft dark:shadow-none space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           {/* Left: Month/Week Navigation */}
           <div className="flex items-center gap-3">

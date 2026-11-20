@@ -118,10 +118,10 @@ export function PushNotificationToggle() {
         disabled={isLoading}
         aria-label={isSubscribed ? 'Disable push notifications' : 'Enable push notifications'}
         title={isSubscribed ? 'Disable desktop push notifications' : 'Enable desktop push notifications'}
-        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
           isSubscribed
-            ? 'bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100'
-            : 'bg-slate-100 border border-slate-200 text-slate-700 hover:bg-slate-200'
+            ? 'bg-[#F1EBFF] dark:bg-[#7138F5]/20 border border-[#7138F5]/25 text-[#7138F5] dark:text-[#C4A5FF] hover:bg-[#E4D7FF] dark:hover:bg-[#7138F5]/30'
+            : 'bg-white dark:bg-[#0F142B]/80 border border-[#E7EAF2] dark:border-white/15 text-[#64748B] dark:text-slate-300 hover:bg-[#F7F8FC] dark:hover:bg-white/10'
         } disabled:opacity-50`}
       >
         {isLoading ? (

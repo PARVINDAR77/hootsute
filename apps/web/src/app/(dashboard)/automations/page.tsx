@@ -52,7 +52,7 @@ export default function AutomationsPage() {
   const [isRuleModalOpen, setIsRuleModalOpen] = useState(false);
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
   const [testingRule, setTestingRule] = useState<AutomationRuleDto | null>(null);
-  const [testSampleText, setTestSampleText] = useState('Earn $500 daily whatsapp me now!');
+  const [testSampleText, setTestSampleText] = useState('Earn $500 daily click link in bio now!');
   const [testPlatform, setTestPlatform] = useState('FACEBOOK');
   const [testResult, setTestResult] = useState<TriggerRuleTestResultDto | null>(null);
   const [isTesting, setIsTesting] = useState(false);
@@ -66,7 +66,7 @@ export default function AutomationsPage() {
   const [formAction, setFormAction] = useState<AutomationActionType>(
     AutomationActionType.AUTO_HIDE_SPAM,
   );
-  const [formKeywords, setFormKeywords] = useState('crypto, telegram, whatsapp me, free money');
+  const [formKeywords, setFormKeywords] = useState('crypto, telegram, cash app, free money');
   const [formPlatform, setFormPlatform] = useState('');
   const [formReplyTemplate, setFormReplyTemplate] = useState(
     'Thank you for reaching out! We will be in touch shortly.',
@@ -84,20 +84,14 @@ export default function AutomationsPage() {
 
     try {
       const [rulesRes, recipesRes, logsRes] = await Promise.all([
-        apiClient<{ success: boolean; data: AutomationRuleDto[] }>(
-          `/workspaces/${currentWorkspace.id}/automations`,
-        ),
-        apiClient<{ success: boolean; data: AutomationRecipeDto[] }>(
-          `/workspaces/${currentWorkspace.id}/automations/templates`,
-        ),
-        apiClient<{ success: boolean; data: AutomationExecutionLogDto[] }>(
-          `/workspaces/${currentWorkspace.id}/automations/logs?limit=30`,
-        ),
+        apiClient<any>(`/workspaces/${currentWorkspace.id}/automations`),
+        apiClient<any>(`/workspaces/${currentWorkspace.id}/automations/templates`),
+        apiClient<any>(`/workspaces/${currentWorkspace.id}/automations/logs?limit=30`),
       ]);
 
-      if (rulesRes.data) setRules(rulesRes.data);
-      if (recipesRes.data) setRecipes(recipesRes.data);
-      if (logsRes.data) setLogs(logsRes.data);
+      setRules(Array.isArray(rulesRes) ? rulesRes : (rulesRes?.data || []));
+      setRecipes(Array.isArray(recipesRes) ? recipesRes : (recipesRes?.data || []));
+      setLogs(Array.isArray(logsRes) ? logsRes : (logsRes?.data || []));
     } catch (err: any) {
       setErrorMessage(err.message || 'Failed to load automations data');
     } finally {
@@ -190,10 +184,11 @@ export default function AutomationsPage() {
         },
       );
 
-      if (res.data) {
-        setRules((prev) => [res.data, ...prev]);
+      const created: AutomationRuleDto | null = (res as any)?.data ?? res;
+      if (created) {
+        setRules((prev) => [created, ...prev]);
         setIsRuleModalOpen(false);
-        setSuccessMessage(`Automation rule "${res.data.name}" created successfully.`);
+        setSuccessMessage(`Automation rule "${created.name}" created successfully.`);
         // Reset form
         setFormName('');
         setFormDescription('');
@@ -232,8 +227,9 @@ export default function AutomationsPage() {
         },
       );
 
-      if (res.data) {
-        setTestResult(res.data);
+      const testPayload: TriggerRuleTestResultDto | null = (res as any)?.data ?? res;
+      if (testPayload) {
+        setTestResult(testPayload);
       }
     } catch (err: any) {
       setErrorMessage(err.message || 'Failed to simulate rule');
@@ -255,7 +251,7 @@ export default function AutomationsPage() {
             <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
               Smart Automations &amp; Workflows
             </h1>
-            <Badge variant="purple">STAGE 13</Badge>
+            <Badge variant="purple">Workflows</Badge>
           </div>
           <p className="text-xs text-slate-500 mt-1">
             Build trigger-action rules for spam auto-moderation, instant customer replies, festival auto-drafts, and webhook alerts.
@@ -683,7 +679,7 @@ export default function AutomationsPage() {
                     type="text"
                     value={formKeywords}
                     onChange={(e) => setFormKeywords(e.target.value)}
-                    placeholder="crypto, telegram, whatsapp, free"
+                    placeholder="crypto, telegram, cash app, free"
                     className="w-full px-3 py-1.5 border border-slate-300 rounded-lg bg-white outline-hidden"
                   />
                 </div>

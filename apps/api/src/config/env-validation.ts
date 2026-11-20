@@ -143,26 +143,6 @@ export function validateEnvironment(config: Record<string, any>): Record<string,
       });
     }
 
-    const waProvider = (config.WHATSAPP_PROVIDER || '').toLowerCase();
-    if (waProvider === 'meta') {
-      const waSecret = config.META_WHATSAPP_APP_SECRET;
-      const waVerifyToken = config.META_WHATSAPP_VERIFY_TOKEN;
-
-      if (!waSecret || waSecret.trim().length === 0) {
-        issues.push({
-          variable: 'META_WHATSAPP_APP_SECRET',
-          reason: 'META_WHATSAPP_APP_SECRET is required when WHATSAPP_PROVIDER is "meta" in production.',
-        });
-      }
-
-      if (waVerifyToken && INSECURE_DEFAULT_SECRETS.has(waVerifyToken)) {
-        issues.push({
-          variable: 'META_WHATSAPP_VERIFY_TOKEN',
-          reason: 'META_WHATSAPP_VERIFY_TOKEN cannot use default development token in production.',
-        });
-      }
-    }
-
     // 5. Validate CORS & Cookie in Production
     const corsOrigin = config.CORS_ORIGIN;
     if (corsOrigin === '*' || (corsOrigin && corsOrigin.includes('localhost'))) {

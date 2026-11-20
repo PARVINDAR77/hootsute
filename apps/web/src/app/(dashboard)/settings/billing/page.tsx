@@ -55,18 +55,15 @@ export default function BillingPage() {
 
     try {
       const [plansRes, subRes, invoicesRes] = await Promise.all([
-        apiClient<{ success: boolean; data: PricingPlanDto[] }>('/billing/plans'),
-        apiClient<{ success: boolean; data: WorkspaceSubscriptionDto }>(
-          `/workspaces/${currentWorkspace.id}/billing/subscription`,
-        ),
-        apiClient<{ success: boolean; data: BillingInvoiceDto[] }>(
-          `/workspaces/${currentWorkspace.id}/billing/invoices`,
-        ),
+        apiClient<any>('/billing/plans'),
+        apiClient<any>(`/workspaces/${currentWorkspace.id}/billing/subscription`),
+        apiClient<any>(`/workspaces/${currentWorkspace.id}/billing/invoices`),
       ]);
 
-      if (plansRes.data) setPlans(plansRes.data);
-      if (subRes.data) setSubscription(subRes.data);
-      if (invoicesRes.data) setInvoices(invoicesRes.data);
+      setPlans(Array.isArray(plansRes) ? plansRes : (plansRes?.data || []));
+      const subData = subRes?.data ?? subRes;
+      if (subData && typeof subData === 'object') setSubscription(subData);
+      setInvoices(Array.isArray(invoicesRes) ? invoicesRes : (invoicesRes?.data || []));
     } catch (err: any) {
       setErrorMessage(err.message || 'Failed to load subscription and billing details');
     } finally {
@@ -111,8 +108,9 @@ export default function BillingPage() {
         },
       );
 
-      if (res.data?.checkoutUrl) {
-        window.location.href = res.data.checkoutUrl;
+      const payload = (res as any)?.data ?? res;
+      if (payload?.checkoutUrl) {
+        window.location.href = payload.checkoutUrl;
       }
     } catch (err: any) {
       setErrorMessage(err.message || 'Failed to initiate checkout session');
@@ -136,8 +134,9 @@ export default function BillingPage() {
         },
       );
 
-      if (res.data?.portalUrl) {
-        window.location.href = res.data.portalUrl;
+      const payload = (res as any)?.data ?? res;
+      if (payload?.portalUrl) {
+        window.location.href = payload.portalUrl;
       }
     } catch (err: any) {
       setErrorMessage(err.message || 'Failed to open customer billing portal');

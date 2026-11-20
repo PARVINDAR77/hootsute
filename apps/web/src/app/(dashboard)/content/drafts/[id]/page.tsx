@@ -110,59 +110,6 @@ export default function DraftDetailPage() {
   // Media Asset Picker state
   const [showMediaPicker, setShowMediaPicker] = useState(false);
 
-  // WhatsApp Preview state
-  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
-  const [whatsAppRecipients, setWhatsAppRecipients] = useState<Array<{ id: string; displayName: string; phoneNumber: string; status: string }>>([]);
-  const [selectedRecipientIds, setSelectedRecipientIds] = useState<string[]>([]);
-  const [whatsAppHistory, setWhatsAppHistory] = useState<any[]>([]);
-  const [isLoadingWhatsApp, setIsLoadingWhatsApp] = useState(false);
-  const [isDispatchingWhatsApp, setIsDispatchingWhatsApp] = useState(false);
-
-  const openWhatsAppModal = async () => {
-    if (!currentWorkspace || !draft) return;
-    setShowWhatsAppModal(true);
-    setIsLoadingWhatsApp(true);
-    try {
-      const [recipientsRes, historyRes] = await Promise.all([
-        apiClient<{ success: boolean; data: any[] }>(`/workspaces/${currentWorkspace.id}/whatsapp/recipients`),
-        apiClient<{ success: boolean; data: any[] }>(`/workspaces/${currentWorkspace.id}/content-drafts/${draft.id}/whatsapp-history`),
-      ]);
-
-      const activeRecipients = (recipientsRes?.data || []).filter((r: any) => r.status === 'OPTED_IN');
-      setWhatsAppRecipients(recipientsRes?.data || []);
-      setSelectedRecipientIds(activeRecipients.map((r: any) => r.id));
-      setWhatsAppHistory(historyRes?.data || []);
-    } catch (err: any) {
-      console.error('Failed to load WhatsApp data:', err);
-    } finally {
-      setIsLoadingWhatsApp(false);
-    }
-  };
-
-  const handleDispatchWhatsAppPreview = async () => {
-    if (!currentWorkspace || !draft || selectedRecipientIds.length === 0) return;
-    setIsDispatchingWhatsApp(true);
-    try {
-      const res = await apiClient<{ success: boolean; message: string }>(
-        `/workspaces/${currentWorkspace.id}/content-drafts/${draft.id}/whatsapp-preview`,
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            recipientConsentIds: selectedRecipientIds,
-            platform: activeVariant?.platform || SocialPlatform.INSTAGRAM,
-          }),
-        },
-      );
-
-      setAlertMsg({ type: 'success', message: res.message || 'WhatsApp preview dispatched successfully!' });
-      setShowWhatsAppModal(false);
-    } catch (err: any) {
-      setAlertMsg({ type: 'error', message: err.message || 'Failed to dispatch WhatsApp preview' });
-    } finally {
-      setIsDispatchingWhatsApp(false);
-    }
-  };
-
   const handleSelectMedia = (asset: MediaAssetDto) => {
     if (!activeVariant || !draft || !draft.variants) return;
     const updatedVariants = draft.variants.map((v) =>
@@ -214,13 +161,14 @@ export default function DraftDetailPage() {
     if (!currentWorkspace) return;
     setIsLoading(true);
     try {
-      const res = await apiClient<{ success: boolean; data: ContentDraftDto }>(
+      const res = await apiClient<any>(
         `/workspaces/${currentWorkspace.id}/content-drafts/${draftId}`,
       );
-      if (res.data) {
-        setDraft(res.data);
-        if (res.data.variants && res.data.variants.length > 0) {
-          setActiveVariant(res.data.variants[activeVariantIndex] || res.data.variants[0]);
+      const loadedDraft: ContentDraftDto | null = res?.data ?? res;
+      if (loadedDraft && loadedDraft.id) {
+        setDraft(loadedDraft);
+        if (loadedDraft.variants && loadedDraft.variants.length > 0) {
+          setActiveVariant(loadedDraft.variants[activeVariantIndex] || loadedDraft.variants[0]);
         }
       }
       loadApprovalProgress();
@@ -234,10 +182,10 @@ export default function DraftDetailPage() {
   const loadApprovalProgress = async () => {
     if (!currentWorkspace?.id || !draftId) return;
     try {
-      const res = await apiClient<{ success: boolean; data: DraftApprovalProgressDto }>(
+      const res = await apiClient<any>(
         `/workspaces/${currentWorkspace.id}/drafts/${draftId}/approval/progress`,
       );
-      setApprovalProgress(res.data || null);
+      setApprovalProgress(res?.data ?? res ?? null);
     } catch {
       setApprovalProgress(null);
     }
@@ -287,9 +235,10 @@ export default function DraftDetailPage() {
         },
       );
 
-      setDraft(res.data);
-      if (res.data.variants) {
-        const updated = res.data.variants.find((v) => v.id === activeVariant.id);
+      const savedDraft: ContentDraftDto = (res as any)?.data ?? res;
+      setDraft(savedDraft);
+      if (savedDraft?.variants) {
+        const updated = savedDraft.variants.find((v) => v.id === activeVariant.id);
         if (updated) setActiveVariant(updated);
       }
       setAlertMsg({
@@ -309,11 +258,11 @@ export default function DraftDetailPage() {
     if (!currentWorkspace || !draft) return;
     setActionInProgress('submit');
     try {
-      const res = await apiClient<{ success: boolean; data: ContentDraftDto }>(
+      const res = await apiClient<any>(
         `/workspaces/${currentWorkspace.id}/content-drafts/${draft.id}/submit-review`,
         { method: 'POST' },
       );
-      setDraft(res.data);
+      setDraft(res?.data ?? res);
       setAlertMsg({ type: 'success', message: 'Campaign submitted for review (IN_REVIEW status).' });
     } catch (err: any) {
       setAlertMsg({ type: 'error', message: err.message || 'Failed to submit review' });
@@ -326,11 +275,11 @@ export default function DraftDetailPage() {
     if (!currentWorkspace || !draft || !canApproveOrReject || isSelfApprovalBlocked) return;
     setActionInProgress('approve');
     try {
-      const res = await apiClient<{ success: boolean; data: ContentDraftDto }>(
+      const res = await apiClient<any>(
         `/workspaces/${currentWorkspace.id}/content-drafts/${draft.id}/approve`,
         { method: 'POST' },
       );
-      setDraft(res.data);
+      setDraft(res?.data ?? res);
       setAlertMsg({ type: 'success', message: 'Campaign approved successfully! Post is ready for scheduling.' });
     } catch (err: any) {
       setAlertMsg({ type: 'error', message: err.message || 'Approval failed' });
@@ -344,14 +293,14 @@ export default function DraftDetailPage() {
     if (!currentWorkspace || !draft || !rejectionReason.trim()) return;
     setActionInProgress('reject');
     try {
-      const res = await apiClient<{ success: boolean; data: ContentDraftDto }>(
+      const res = await apiClient<any>(
         `/workspaces/${currentWorkspace.id}/content-drafts/${draft.id}/reject`,
         {
           method: 'POST',
           body: JSON.stringify({ rejectionReason: rejectionReason.trim() }),
         },
       );
-      setDraft(res.data);
+      setDraft(res?.data ?? res);
       setShowRejectModal(false);
       setRejectionReason('');
       setAlertMsg({ type: 'info', message: 'Draft rejected with feedback. Editors can revise and resubmit.' });
@@ -366,11 +315,12 @@ export default function DraftDetailPage() {
     if (!currentWorkspace || !draft) return;
     setActionInProgress('duplicate');
     try {
-      const res = await apiClient<{ success: boolean; data: ContentDraftDto }>(
+      const res = await apiClient<any>(
         `/workspaces/${currentWorkspace.id}/content-drafts/${draft.id}/duplicate`,
         { method: 'POST' },
       );
-      router.push(`/content/drafts/${res.data.id}`);
+      const dup = res?.data ?? res;
+      if (dup?.id) router.push(`/content/drafts/${dup.id}`);
     } catch (err: any) {
       setAlertMsg({ type: 'error', message: err.message || 'Failed to duplicate' });
       setActionInProgress(null);
@@ -382,7 +332,7 @@ export default function DraftDetailPage() {
     if (!currentWorkspace || !draft || !activeVariant) return;
     setActionInProgress('regenerating');
     try {
-      const res = await apiClient<{ success: boolean; data: ContentVariantDto }>(
+      const res = await apiClient<any>(
         `/workspaces/${currentWorkspace.id}/content-drafts/${draft.id}/variants/${activeVariant.id}/regenerate`,
         {
           method: 'POST',
@@ -392,7 +342,7 @@ export default function DraftDetailPage() {
           }),
         },
       );
-      setActiveVariant(res.data);
+      setActiveVariant(res?.data ?? res);
       setShowRegenerateModal(false);
       setRegenInstructions('');
       loadDraft();
@@ -409,14 +359,14 @@ export default function DraftDetailPage() {
     if (!currentWorkspace || !draft || !activeVariant) return;
     setActionInProgress('translating');
     try {
-      const res = await apiClient<{ success: boolean; data: ContentVariantDto }>(
+      const res = await apiClient<any>(
         `/workspaces/${currentWorkspace.id}/content-drafts/${draft.id}/variants/${activeVariant.id}/translate`,
         {
           method: 'POST',
           body: JSON.stringify({ targetLanguage }),
         },
       );
-      setActiveVariant(res.data);
+      setActiveVariant(res?.data ?? res);
       setShowTranslateModal(false);
       loadDraft();
       setAlertMsg({ type: 'success', message: `Variant translated to ${targetLanguage} and revision recorded.` });
@@ -432,7 +382,7 @@ export default function DraftDetailPage() {
     if (!currentWorkspace || !draft || !activeVariant) return;
     setActionInProgress('adapting');
     try {
-      const res = await apiClient<{ success: boolean; data: ContentVariantDto }>(
+      await apiClient<any>(
         `/workspaces/${currentWorkspace.id}/content-drafts/${draft.id}/variants/${activeVariant.id}/adapt`,
         {
           method: 'POST',
@@ -454,15 +404,18 @@ export default function DraftDetailPage() {
     if (!currentWorkspace || !draft || !activeVariant) return;
     setActionInProgress('brief');
     try {
-      const res = await apiClient<{ success: boolean; data: { mediaBrief: string } }>(
+      const res = await apiClient<any>(
         `/workspaces/${currentWorkspace.id}/content-drafts/${draft.id}/variants/${activeVariant.id}/creative-brief`,
         {
           method: 'POST',
           body: JSON.stringify({ visualPreferences: visualPreferences.trim() || undefined }),
         },
       );
-      setGeneratedBrief(res.data.mediaBrief);
-      setActiveVariant({ ...activeVariant, mediaBrief: res.data.mediaBrief });
+      const briefPayload = res?.data ?? res;
+      if (briefPayload?.mediaBrief) {
+        setGeneratedBrief(briefPayload.mediaBrief);
+        setActiveVariant({ ...activeVariant, mediaBrief: briefPayload.mediaBrief });
+      }
       loadDraft();
     } catch (err: any) {
       setAlertMsg({ type: 'error', message: err.message || 'Brief generation failed' });
@@ -578,17 +531,6 @@ export default function DraftDetailPage() {
           >
             <Copy className="w-3.5 h-3.5" />
             <span>Duplicate</span>
-          </Button>
-
-          {/* WhatsApp Preview Notification */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={openWhatsAppModal}
-            className="gap-1.5 text-xs border-emerald-300 text-emerald-700 hover:bg-emerald-50 bg-emerald-50/50"
-          >
-            <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
-            <span>WhatsApp Preview</span>
           </Button>
 
           {/* Collaborative Review Comments */}
@@ -851,7 +793,7 @@ export default function DraftDetailPage() {
                   disabled={!isEditable}
                   value={activeVariant.callToAction || ''}
                   onChange={(e) => handleUpdateVariantField('callToAction', e.target.value)}
-                  placeholder="e.g. Shop now via the link in bio or WhatsApp us at..."
+                  placeholder="e.g. Shop now via the link in bio or visit our website..."
                 />
 
                 {/* Hashtags */}
@@ -1312,137 +1254,6 @@ export default function DraftDetailPage() {
         </div>
       )}
 
-      {/* Modal: WhatsApp Preview Dispatch */}
-      {showWhatsAppModal && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                  <Smartphone className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900">Dispatch WhatsApp Post Preview</h3>
-                  <p className="text-[11px] text-slate-500">Send an interactive review notification to reviewers via WhatsApp.</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowWhatsAppModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-sm"
-              >
-                ✕
-              </button>
-            </div>
-
-            {isLoadingWhatsApp ? (
-              <div className="py-8 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
-                <span>Loading registered reviewers...</span>
-              </div>
-            ) : whatsAppRecipients.length === 0 ? (
-              <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs space-y-2">
-                <p className="font-semibold flex items-center gap-1.5">
-                  <AlertTriangle className="w-4 h-4 text-amber-600" /> No registered WhatsApp reviewers found.
-                </p>
-                <p>
-                  Register reviewer phone numbers under <strong>Settings &gt; WhatsApp Approval</strong> with explicit consent before dispatching previews.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4 text-xs">
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1.5">
-                    Select Reviewers (Only opted-in numbers can receive notifications):
-                  </label>
-                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                    {whatsAppRecipients.map((rec) => {
-                      const isOptedIn = rec.status === 'OPTED_IN';
-                      const isChecked = selectedRecipientIds.includes(rec.id);
-                      return (
-                        <div
-                          key={rec.id}
-                          className={`flex items-center justify-between p-2.5 rounded-lg border transition ${
-                            !isOptedIn
-                              ? 'bg-slate-50 border-slate-200 opacity-60'
-                              : isChecked
-                              ? 'bg-emerald-50/60 border-emerald-300'
-                              : 'bg-white border-slate-200 hover:bg-slate-50'
-                          }`}
-                        >
-                          <label className="flex items-center gap-2.5 cursor-pointer select-none flex-1">
-                            <input
-                              type="checkbox"
-                              disabled={!isOptedIn}
-                              checked={isChecked}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setSelectedRecipientIds([...selectedRecipientIds, rec.id]);
-                                } else {
-                                  setSelectedRecipientIds(selectedRecipientIds.filter((id) => id !== rec.id));
-                                }
-                              }}
-                              className="rounded text-emerald-600 focus:ring-emerald-500"
-                            />
-                            <div>
-                              <div className="font-semibold text-slate-900">{rec.displayName}</div>
-                              <div className="text-[10px] text-slate-400 font-mono">{rec.phoneNumber}</div>
-                            </div>
-                          </label>
-
-                          <Badge
-                            variant={isOptedIn ? 'success' : 'default'}
-                            className="text-[9px] uppercase tracking-wider"
-                          >
-                            {isOptedIn ? 'Opted In' : 'Opted Out'}
-                          </Badge>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {whatsAppHistory.length > 0 && (
-                  <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Previous Dispatches for this Draft:</label>
-                    <div className="space-y-1.5 max-h-28 overflow-y-auto text-[11px] text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
-                      {whatsAppHistory.map((h: any) => (
-                        <div key={h.id} className="flex items-center justify-between">
-                          <span>{h.recipient?.displayName || h.recipient?.phoneNumber}</span>
-                          <span className="font-mono text-[10px] text-slate-400 uppercase">{h.status}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowWhatsAppModal(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={handleDispatchWhatsAppPreview}
-                    disabled={isDispatchingWhatsApp || selectedRecipientIds.length === 0}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
-                  >
-                    {isDispatchingWhatsApp ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <Send className="w-3.5 h-3.5" />
-                    )}
-                    <span>Dispatch to {selectedRecipientIds.length} Reviewer(s)</span>
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
       {/* Media Picker Modal */}
       <MediaPickerModal
         isOpen={showMediaPicker}

@@ -47,6 +47,23 @@ const onTokenRefreshFailed = (err: any) => {
   refreshSubscribers = [];
 };
 
+export function unwrapData<T = any>(res: any, fallback?: T): T {
+  if (res === null || res === undefined) return fallback as T;
+  if (typeof res === 'object' && !Array.isArray(res) && 'data' in res && 'success' in res) {
+    return (res.data !== undefined ? res.data : fallback) as T;
+  }
+  return res as T;
+}
+
+export function unwrapList<T = any>(res: any): T[] {
+  if (Array.isArray(res)) return res;
+  if (res && Array.isArray(res.data)) return res.data;
+  if (res?.data && Array.isArray(res.data.data)) return res.data.data;
+  if (res && Array.isArray(res.items)) return res.items;
+  if (res?.data && Array.isArray(res.data.items)) return res.data.items;
+  return [];
+}
+
 export async function apiClient<T = any>(
   endpoint: string,
   options: RequestInit = {},
@@ -55,7 +72,10 @@ export async function apiClient<T = any>(
   const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
 
   const headers = new Headers(options.headers || {});
-  headers.set('Content-Type', 'application/json');
+  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+  if (!isFormData && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
 
   if (inMemoryAccessToken) {
     headers.set('Authorization', `Bearer ${inMemoryAccessToken}`);

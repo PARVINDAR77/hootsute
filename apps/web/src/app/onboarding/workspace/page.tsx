@@ -6,12 +6,15 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useWorkspace } from '@/lib/workspace-context';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
+import { Card, CardContent } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/Alert';
-import { Building2, Globe, Sparkles, ArrowRight, ShieldCheck } from 'lucide-react';
+import { BrandLogo } from '@/components/ui/BrandLogo';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { Building2, Globe, ArrowRight, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
+import { ROUTES } from '@/lib/constants';
 
 const workspaceSchema = z.object({
   name: z.string().min(2, 'Workspace name must be at least 2 characters').max(100),
@@ -24,7 +27,11 @@ const workspaceSchema = z.object({
     .or(z.literal('')),
   description: z.string().max(500).optional(),
   industry: z.string().max(100).optional(),
-  websiteUrl: z.string().url('Please enter a valid URL (e.g. https://company.com)').optional().or(z.literal('')),
+  websiteUrl: z
+    .string()
+    .url('Please enter a valid URL (e.g. https://company.com)')
+    .optional()
+    .or(z.literal('')),
   timezone: z.string().default('UTC'),
 });
 
@@ -39,7 +46,6 @@ export default function WorkspaceOnboardingPage() {
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<WorkspaceFormData>({
     resolver: zodResolver(workspaceSchema),
@@ -56,7 +62,6 @@ export default function WorkspaceOnboardingPage() {
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setValue('name', val, { shouldValidate: true });
-    // Auto-generate slug if not manually customized
     const autoSlug = val
       .toLowerCase()
       .trim()
@@ -77,28 +82,36 @@ export default function WorkspaceOnboardingPage() {
         websiteUrl: data.websiteUrl || undefined,
         timezone: data.timezone,
       });
-      router.push('/dashboard');
+      router.push(ROUTES.DASHBOARD);
     } catch (err: any) {
       setServerError(err.message || 'Failed to create workspace. Please check the details entered.');
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/20 to-slate-100 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-xl">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-200 mb-3">
-            <Sparkles className="w-6 h-6" />
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-            Create Your Business Workspace
+    <div className="min-h-screen ambient-canvas flex flex-col py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl w-full mx-auto flex items-center justify-between mb-8">
+        <Link href={ROUTES.DASHBOARD} className="group">
+          <BrandLogo />
+        </Link>
+        <ThemeToggle />
+      </div>
+
+      <div className="flex-1 flex flex-col justify-center max-w-xl w-full mx-auto">
+        <div className="text-center mb-8 space-y-2">
+          <span className="inline-flex items-center px-3 py-1 rounded-full bg-[#F1EBFF] dark:bg-[#7138F5]/20 text-[#7138F5] dark:text-[#C4A5FF] text-xs font-bold">
+            Workspace Onboarding
+          </span>
+          <h1 className="text-3xl font-extrabold tracking-tight text-[#111827] dark:text-white">
+            Create Your Business <span className="text-gradient">Workspace</span>
           </h1>
-          <p className="mt-1 text-xs text-slate-500 max-w-md mx-auto">
-            Set up an isolated workspace for your brand, agency, or team. You will be assigned the OWNER role.
+          <p className="text-sm text-[#64748B] dark:text-slate-400 max-w-md mx-auto">
+            Set up an isolated multi-tenant workspace for your brand, agency, or team. You will be
+            assigned the OWNER role.
           </p>
         </div>
 
-        <Card className="shadow-xl shadow-slate-200/50 border-slate-200/80">
+        <Card variant="glow" className="shadow-elevated">
           <CardContent className="p-6 sm:p-8 space-y-6">
             {serverError && <Alert type="error" message={serverError} />}
 
@@ -144,12 +157,12 @@ export default function WorkspaceOnboardingPage() {
               />
 
               <div className="space-y-1.5">
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-300">
                   Workspace Description (Optional)
                 </label>
                 <textarea
                   rows={2}
-                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="w-full rounded-xl border border-[#E7EAF2] dark:border-[#1E2749] bg-white dark:bg-[#0B1024] px-3.5 py-2.5 text-sm text-[#111827] dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#7138F5]/20 focus:border-[#7138F5]"
                   placeholder="Briefly describe what this workspace will manage..."
                   {...register('description')}
                 />
@@ -158,6 +171,7 @@ export default function WorkspaceOnboardingPage() {
               <div className="pt-2">
                 <Button
                   type="submit"
+                  size="lg"
                   className="w-full"
                   isLoading={isSubmitting}
                   rightIcon={<ArrowRight className="w-4 h-4" />}
@@ -169,7 +183,7 @@ export default function WorkspaceOnboardingPage() {
           </CardContent>
         </Card>
 
-        <div className="mt-6 flex items-center justify-center gap-2 text-slate-400 text-xs">
+        <div className="mt-6 flex items-center justify-center gap-2 text-[#64748B] dark:text-slate-400 text-xs">
           <ShieldCheck className="w-4 h-4 text-emerald-500" />
           <span>Tenant Data Isolation &amp; RBAC Guaranteed</span>
         </div>

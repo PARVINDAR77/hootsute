@@ -430,7 +430,7 @@ export class ListeningService {
         authorHandle: 'sarah-jenkins-cmo',
         authorName: 'Sarah Jenkins',
         followersCount: 28500,
-        content: `Evaluating social media toolkits for our 2026 Q3 rollout. Testing ${mainKeyword} alongside legacy solutions. The WhatsApp preview approval workflow is solid for client sign-offs.`,
+        content: `Evaluating social media toolkits for our 2026 Q3 rollout. Testing ${mainKeyword} alongside legacy solutions. The multi-level approval matrix and bulk multi-network publishing workflow are solid for client sign-offs.`,
         engagementCount: 89,
         reachEstimate: 24000,
         hoursAgo: 8,

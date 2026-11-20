@@ -974,6 +974,84 @@ export class ContentDraftsService {
     });
   }
 
+  async bulkApproveDrafts(
+    workspaceId: string,
+    draftIds: string[],
+    userRole: WorkspaceRole,
+    userId: string,
+  ) {
+    if (userRole !== WorkspaceRole.ADMIN && userRole !== WorkspaceRole.OWNER) {
+      throw new ForbiddenException('Only workspace Admins or Owners can bulk approve campaign drafts');
+    }
+
+    const approvedIds: string[] = [];
+    const skipped: Array<{ draftId: string; reason: string }> = [];
+
+    for (const draftId of draftIds) {
+      const draft = await this.prisma.contentDraft.findFirst({
+        where: { id: draftId, workspaceId },
+        include: { variants: true },
+      });
+
+      if (!draft) {
+        skipped.push({ draftId, reason: 'Draft not found in workspace' });
+        continue;
+      }
+
+      if (draft.status === DraftStatus.APPROVED) {
+        approvedIds.push(draft.id);
+        continue;
+      }
+
+      if (!draft.variants || draft.variants.length === 0) {
+        skipped.push({ draftId, reason: 'Draft has no platform variants' });
+        continue;
+      }
+
+      await this.prisma.$transaction(async (tx) => {
+        await tx.contentDraft.update({
+          where: { id: draft.id },
+          data: {
+            status: DraftStatus.APPROVED,
+            approvedByUserId: userId,
+            approvedAt: new Date(),
+            rejectionReason: null,
+          },
+        });
+
+        const nextRevNumber = await this.getNextRevisionNumber(tx, draft.id);
+        await tx.contentRevision.create({
+          data: {
+            draftId: draft.id,
+            revisionNumber: nextRevNumber,
+            action: 'APPROVE',
+            promptSummary: 'Bulk campaign approval granted by workspace administrator',
+            outputSnapshot: { status: DraftStatus.APPROVED },
+            createdByUserId: userId,
+          },
+        });
+      });
+
+      approvedIds.push(draft.id);
+    }
+
+    await this.prisma.auditLog.create({
+      data: {
+        workspaceId,
+        actorUserId: userId,
+        action: 'CONTENT_DRAFT_BULK_APPROVE',
+        entityType: 'ContentDraft',
+        metadata: {
+          approvedCount: approvedIds.length,
+          skippedCount: skipped.length,
+          approvedIds,
+        },
+      },
+    });
+
+    return { approvedIds, skipped };
+  }
+
   private async getNextRevisionNumber(
     tx: Prisma.TransactionClient,
     draftId: string,

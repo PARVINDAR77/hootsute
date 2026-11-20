@@ -11,6 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import { SocialAccountsService } from './social-accounts.service';
 import { Public } from '../common/decorators/public.decorator';
+import { SocialProvider } from '@packages/shared';
 
 @ApiTags('OAuth Callback')
 @Controller('oauth')
@@ -143,5 +144,90 @@ export class OAuthController {
       )}`;
       return res.redirect(targetUrl);
     }
+  }
+
+  private async handleGenericProviderCallback(
+    provider: SocialProvider,
+    code: string,
+    state: string,
+    error: string,
+    errorDescription: string,
+    res: Response,
+  ) {
+    const frontendUrl = this.configService.get<string>('CORS_ORIGIN') || 'http://localhost:3000';
+    if (error) {
+      this.logger.warn(`${provider} OAuth denied/failed: ${error} - ${errorDescription}`);
+      return res.redirect(
+        `${frontendUrl}/settings/social-accounts?error=${encodeURIComponent(
+          errorDescription || error || 'Authorization was cancelled or denied by user',
+        )}`,
+      );
+    }
+    if (!code || !state) {
+      throw new BadRequestException('Missing authorization code or state in callback query');
+    }
+    try {
+      const result = await this.socialAccountsService.handleProviderCallback(provider, code, state);
+      return res.redirect(result.redirectUrl);
+    } catch (err: any) {
+      this.logger.error(`Error processing ${provider} OAuth callback: ${err.message}`);
+      return res.redirect(
+        `${frontendUrl}/settings/social-accounts?error=${encodeURIComponent(
+          err.message || `${provider} OAuth verification failed`,
+        )}`,
+      );
+    }
+  }
+
+  @Public()
+  @Get('pinterest/callback')
+  @ApiOperation({ summary: 'Pinterest OAuth 2.0 redirect callback endpoint' })
+  async handlePinterestCallback(
+    @Query('code') code: string,
+    @Query('state') state: string,
+    @Query('error') error: string,
+    @Query('error_description') errorDescription: string,
+    @Res() res: Response,
+  ) {
+    return this.handleGenericProviderCallback(SocialProvider.PINTEREST, code, state, error, errorDescription, res);
+  }
+
+  @Public()
+  @Get('youtube/callback')
+  @ApiOperation({ summary: 'YouTube OAuth 2.0 redirect callback endpoint' })
+  async handleYouTubeCallback(
+    @Query('code') code: string,
+    @Query('state') state: string,
+    @Query('error') error: string,
+    @Query('error_description') errorDescription: string,
+    @Res() res: Response,
+  ) {
+    return this.handleGenericProviderCallback(SocialProvider.YOUTUBE, code, state, error, errorDescription, res);
+  }
+
+  @Public()
+  @Get('tiktok/callback')
+  @ApiOperation({ summary: 'TikTok OAuth 2.0 redirect callback endpoint' })
+  async handleTikTokCallback(
+    @Query('code') code: string,
+    @Query('state') state: string,
+    @Query('error') error: string,
+    @Query('error_description') errorDescription: string,
+    @Res() res: Response,
+  ) {
+    return this.handleGenericProviderCallback(SocialProvider.TIKTOK, code, state, error, errorDescription, res);
+  }
+
+  @Public()
+  @Get('threads/callback')
+  @ApiOperation({ summary: 'Threads OAuth 2.0 redirect callback endpoint' })
+  async handleThreadsCallback(
+    @Query('code') code: string,
+    @Query('state') state: string,
+    @Query('error') error: string,
+    @Query('error_description') errorDescription: string,
+    @Res() res: Response,
+  ) {
+    return this.handleGenericProviderCallback(SocialProvider.THREADS, code, state, error, errorDescription, res);
   }
 }

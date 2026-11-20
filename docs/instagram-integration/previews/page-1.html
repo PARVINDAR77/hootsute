@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>OmniSocial AI — Complete Official Instagram API Integration Guide</title>
+<style>
+  /* -------------------------------------------------------------
+     CSS PRINT & TYPOGRAPHY FOUNDATIONS
+     ------------------------------------------------------------- */
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  @media print {
+    body {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    .page-break {
+      page-break-after: always;
+      break-after: page;
+    }
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #1E293B;
+    background: #E2E8F0;
+    font-size: 9.5pt;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Each page container */
+  .doc-page {
+    width: 210mm;
+    min-height: 297mm;
+    height: 297mm;
+    max-height: 297mm;
+    padding: 16mm 18mm 16mm 18mm;
+    position: relative;
+    background: #FFFFFF;
+    margin: 0 auto 10px auto;
+    page-break-after: always;
+    break-after: page;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* Running Header */
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 3mm;
+    border-bottom: 1.5px solid #E2E8F0;
+    margin-bottom: 4mm;
+    font-size: 8pt;
+    color: #64748B;
+  }
+  .page-header .brand {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+    color: #0F172A;
+  }
+  .page-header .brand-badge {
+    background: linear-gradient(135deg, #833AB4, #FD1D1D, #FCAF45);
+    color: #FFFFFF;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 7pt;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+  .page-header .chapter-tag {
+    font-weight: 600;
+    color: #0284C7;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 7.5pt;
+  }
+
+  /* Running Footer */
+  .page-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 3mm;
+    border-top: 1.5px solid #E2E8F0;
+    margin-top: 4mm;
+    font-size: 7.5pt;
+    color: #94A3B8;
+  }
+  .page-footer .confidential {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .page-footer .page-number {
+    font-weight: 700;
+    color: #0F172A;
+  }
+
+  /* Page Content Area */
+  .page-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Headings */
+  h1.chapter-title {
+    font-size: 17pt;
+    font-weight: 800;
+    color: #0F172A;
+    letter-spacing: -0.5px;
+    margin-bottom: 2mm;
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  h1.chapter-title .num-pill {
+    background: #0F172A;
+    color: #FFFFFF;
+    font-size: 10pt;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 800;
+  }
+  h2.section-heading {
+    font-size: 11pt;
+    font-weight: 700;
+    color: #0F172A;
+    margin-top: 3mm;
+    margin-bottom: 1.5mm;
+    padding-bottom: 1mm;
+    border-bottom: 1px solid #F1F5F9;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  h3.sub-heading {
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: #1E293B;
+    margin-top: 2.5mm;
+    margin-bottom: 1mm;
+  }
+
+  p {
+    margin-bottom: 2mm;
+    color: #334155;
+    text-align: justify;
+  }
+  p.lead {
+    font-size: 10pt;
+    color: #1E293B;
+    font-weight: 500;
+    line-height: 1.4;
+    margin-bottom: 2.5mm;
+  }
+
+  /* Callout Boxes */
+  .callout {
+    padding: 3mm 4mm;
+    border-radius: 6px;
+    margin: 2mm 0;
+    font-size: 8.5pt;
+    line-height: 1.35;
+  }
+  .callout-info {
+    background: #F0F9FF;
+    border-left: 3.5px solid #0284C7;
+    color: #0369A1;
+  }
+  .callout-success {
+    background: #F0FDF4;
+    border-left: 3.5px solid #059669;
+    color: #065F46;
+  }
+  .callout-warning {
+    background: #FFFBEB;
+    border-left: 3.5px solid #D97706;
+    color: #92400E;
+  }
+  .callout-danger {
+    background: #FEF2F2;
+    border-left: 3.5px solid #DC2626;
+    color: #991B1B;
+  }
+  .callout-ig {
+    background: #FDF2F8;
+    border-left: 3.5px solid #E1306C;
+    color: #9D174D;
+  }
+  .callout strong {
+    font-weight: 700;
+  }
+
+  /* Tables */
+  table.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2mm 0 3mm 0;
+    font-size: 8pt;
+  }
+  table.data-table th {
+    background: #0F172A;
+    color: #FFFFFF;
+    text-align: left;
+    padding: 6px 8px;
+    font-weight: 700;
+    font-size: 7.5pt;
+    letter-spacing: 0.3px;
+  }
+  table.data-table td {
+    padding: 5px 8px;
+    border-bottom: 1px solid #E2E8F0;
+    color: #334155;
+    vertical-align: top;
+  }
+  table.data-table tr:nth-child(even) td {
+    background: #F8FAFC;
+  }
+  table.data-table tr:hover td {
+    background: #F1F5F9;
+  }
+  table.data-table code {
+    background: #F1F5F9;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 7.5pt;
+    color: #BE185D;
+  }
+
+  /* Code Blocks */
+  pre.code-block {
+    background: #0F172A;
+    color: #E2E8F0;
+    padding: 3mm 4mm;
+    border-radius: 6px;
+    font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 7.5pt;
+    line-height: 1.35;
+    margin: 2mm 0;
+    overflow: hidden;
+    border-left: 3.5px solid #8B5CF6;
+  }
+  pre.code-block .keyword { color: #F472B6; font-weight: bold; }
+  pre.code-block .string { color: #A7F3D0; }
+  pre.code-block .function { color: #60A5FA; }
+  pre.code-block .comment { color: #64748B; font-style: italic; }
+
+  /* Diagram Embedding */
+  .diagram-container {
+    width: 100%;
+    margin: 2.5mm 0;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  }
+  .diagram-container svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  /* Grid Layouts */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3mm;
+    margin: 2mm 0;
+  }
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2.5mm;
+    margin: 2mm 0;
+  }
+  .card-box {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
+    padding: 3mm;
+  }
+  .card-box h4 {
+    font-size: 9pt;
+    font-weight: 700;
+    color: #0F172A;
+    margin-bottom: 1.5mm;
+  }
+  .card-box p {
+    font-size: 8pt;
+    color: #475569;
+    margin-bottom: 1mm;
+  }
+
+  /* Badges & Tags */
+  .badge {
+    display: inline-block;
+    padding: 1.5px 6px;
+    border-radius: 3px;
+    font-size: 7pt;
+    font-weight: 700;
+  }
+  .badge-emerald { background: #D1FAE5; color: #065F46; }
+  .badge-blue { background: #DBEAFE; color: #1E40AF; }
+  .badge-purple { background: #EDE9FE; color: #5B21B6; }
+  .badge-rose { background: #FFE4E6; color: #9F1239; }
+  .badge-amber { background: #FEF3C7; color: #92400E; }
+
+  /* Lists */
+  ul.check-list {
+    list-style: none;
+    margin: 1.5mm 0 2mm 0;
+  }
+  ul.check-list li {
+    position: relative;
+    padding-left: 14px;
+    margin-bottom: 1.5mm;
+    font-size: 8.5pt;
+    color: #334155;
+  }
+  ul.check-list li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #059669;
+    font-weight: bold;
+    font-size: 9pt;
+  }
+
+  /* Cover Page Specific */
+  .cover-page {
+    width: 210mm;
+    height: 297mm;
+    padding: 0;
+    position: relative;
+    background: #0F172A;
+    color: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+  }
+  .cover-top-bar {
+    height: 8mm;
+    background: linear-gradient(90deg, #833AB4, #C13584, #E1306C, #FD1D1D, #FCAF45);
+  }
+  .cover-body {
+    padding: 24mm 22mm;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .cover-logo-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    font-size: 9pt;
+    font-weight: 700;
+    color: #38BDF8;
+    margin-bottom: 10mm;
+    width: fit-content;
+  }
+  .cover-title {
+    font-size: 32pt;
+    font-weight: 900;
+    line-height: 1.12;
+    letter-spacing: -1px;
+    color: #FFFFFF;
+    margin-bottom: 5mm;
+  }
+  .cover-title span {
+    background: linear-gradient(135deg, #E1306C, #FD1D1D, #FCAF45);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .cover-subtitle {
+    font-size: 13pt;
+    font-weight: 400;
+    color: #94A3B8;
+    max-width: 160mm;
+    line-height: 1.45;
+    margin-bottom: 10mm;
+  }
+  .cover-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4mm;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 5mm 6mm;
+    margin-top: 6mm;
+  }
+  .cover-meta-item .label {
+    font-size: 7.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748B;
+    font-weight: 600;
+    margin-bottom: 1mm;
+  }
+  .cover-meta-item .val {
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: #F8FAFC;
+  }
+  .cover-footer {
+    padding: 8mm 22mm;
+    background: rgba(15, 23, 42, 0.95);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: space-between;
+    font-size: 8pt;
+    color: #64748B;
+  }
+</style>
+</head>
+<body style="background:#ffffff; margin:0; padding:0;">
+<div class="doc-page cover-page">
+  <div class="cover-top-bar"></div>
+  <div class="cover-body">
+    <div class="cover-logo-pill">
+      <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#20C8E8;"></span>
+      OMNISOCIAL AI &bull; ARCHITECTURAL SPECIFICATION &bull; v2.4
+    </div>
+    <h1 class="cover-title">
+      Official Instagram API<br>
+      <span>Complete Integration Guide</span>
+    </h1>
+    <p class="cover-subtitle">
+      A comprehensive, beginner-friendly SaaS implementation handbook covering Meta Developer setup, Instagram OAuth 2.0 PKCE, TokenVault AES-256-GCM encryption, Redis BullMQ scheduling, 2-stage media container publishing, multi-account routing, and production App Review.
+    </p>
+
+    <div class="cover-meta-grid">
+      <div class="cover-meta-item">
+        <div class="label">Target Platform</div>
+        <div class="val">Instagram Graph API v21.0</div>
+      </div>
+      <div class="cover-meta-item">
+        <div class="label">SaaS Stack</div>
+        <div class="val">Next.js 14 + NestJS + Prisma</div>
+      </div>
+      <div class="cover-meta-item">
+        <div class="label">Token Security</div>
+        <div class="val">AES-256-GCM Dual-Key</div>
+      </div>
+      <div class="cover-meta-item">
+        <div class="label">Publication Date</div>
+        <div class="val">November 2026</div>
+      </div>
+    </div>
+  </div>
+  <div class="cover-footer">
+    <span>OmniSocial AI Engineering &bull; Architecture &amp; Platform Security Division</span>
+    <span>CONFIDENTIAL &bull; PRODUCTION IMPLEMENTATION MANUAL</span>
+  </div>
+</div>
+
+<!-- =======================================================================
+     PAGE 2: EXECUTIVE SUMMARY & TABLE OF CONTENTS
+     ======================================================================= -->
+</body>
+</html>

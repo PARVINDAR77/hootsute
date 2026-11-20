@@ -6,6 +6,7 @@ import {
   ConflictException,
   InternalServerErrorException,
   Logger,
+  Optional,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
@@ -13,6 +14,10 @@ import { TokenVaultService } from './token-vault/token-vault.service';
 import { MetaOAuthService } from './providers/meta/meta-oauth.service';
 import { LinkedInOAuthService } from './providers/linkedin/linkedin-oauth.service';
 import { TwitterOAuthService } from './providers/twitter/twitter-oauth.service';
+import { PinterestOAuthService } from './providers/pinterest/pinterest-oauth.service';
+import { YouTubeOAuthService } from './providers/youtube/youtube-oauth.service';
+import { TikTokOAuthService } from './providers/tiktok/tiktok-oauth.service';
+import { ThreadsOAuthService } from './providers/threads/threads-oauth.service';
 import {
   SocialProvider,
   SocialAccountType,
@@ -42,6 +47,10 @@ export class SocialAccountsService {
     private readonly linkedinOAuthService: LinkedInOAuthService,
     private readonly twitterOAuthService: TwitterOAuthService,
     private readonly configService: ConfigService,
+    @Optional() private readonly pinterestOAuthService?: PinterestOAuthService,
+    @Optional() private readonly youtubeOAuthService?: YouTubeOAuthService,
+    @Optional() private readonly tiktokOAuthService?: TikTokOAuthService,
+    @Optional() private readonly threadsOAuthService?: ThreadsOAuthService,
   ) {}
 
   private hashToken(token: string): string {
@@ -532,7 +541,12 @@ export class SocialAccountsService {
       } else if (
         item.accountType === SocialAccountType.LINKEDIN_PAGE ||
         item.accountType === SocialAccountType.LINKEDIN_PROFILE ||
-        item.accountType === SocialAccountType.TWITTER_PROFILE
+        item.accountType === SocialAccountType.TWITTER_PROFILE ||
+        item.accountType === SocialAccountType.PINTEREST_BUSINESS ||
+        item.accountType === SocialAccountType.YOUTUBE_CHANNEL ||
+        item.accountType === SocialAccountType.TIKTOK_BUSINESS ||
+        item.accountType === SocialAccountType.TIKTOK_CREATOR ||
+        item.accountType === SocialAccountType.THREADS_PROFILE
       ) {
         const found = payload.accounts?.find((a) => a.id === item.providerAccountId);
         if (!found) {
@@ -722,6 +736,164 @@ export class SocialAccountsService {
     if (account.provider === SocialProvider.TWITTER_X) {
       return this.initiateTwitterOAuth(workspaceId, userId);
     }
+    if (account.provider === SocialProvider.PINTEREST) {
+      return this.initiateProviderOAuth(workspaceId, userId, SocialProvider.PINTEREST);
+    }
+    if (account.provider === SocialProvider.YOUTUBE) {
+      return this.initiateProviderOAuth(workspaceId, userId, SocialProvider.YOUTUBE);
+    }
+    if (account.provider === SocialProvider.TIKTOK) {
+      return this.initiateProviderOAuth(workspaceId, userId, SocialProvider.TIKTOK);
+    }
+    if (account.provider === SocialProvider.THREADS) {
+      return this.initiateProviderOAuth(workspaceId, userId, SocialProvider.THREADS);
+    }
     return this.initiateMetaOAuth(workspaceId, userId);
+  }
+
+  /**
+   * Unified OAuth 2.0 initiator for Pinterest, YouTube, TikTok, and Threads.
+   */
+  async initiateProviderOAuth(
+    workspaceId: string,
+    userId: string,
+    provider: SocialProvider,
+    customRedirectUri?: string,
+  ) {
+    const state = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    const routeMap: Record<string, { envKey: string; defaultUri: string; svc: any }> = {
+      [SocialProvider.PINTEREST]: {
+        envKey: 'PINTEREST_OAUTH_REDIRECT_URI',
+        defaultUri: 'http://localhost:4000/api/v1/oauth/pinterest/callback',
+        svc: this.pinterestOAuthService,
+      },
+      [SocialProvider.YOUTUBE]: {
+        envKey: 'YOUTUBE_OAUTH_REDIRECT_URI',
+        defaultUri: 'http://localhost:4000/api/v1/oauth/youtube/callback',
+        svc: this.youtubeOAuthService,
+      },
+      [SocialProvider.TIKTOK]: {
+        envKey: 'TIKTOK_OAUTH_REDIRECT_URI',
+        defaultUri: 'http://localhost:4000/api/v1/oauth/tiktok/callback',
+        svc: this.tiktokOAuthService,
+      },
+      [SocialProvider.THREADS]: {
+        envKey: 'THREADS_OAUTH_REDIRECT_URI',
+        defaultUri: 'http://localhost:4000/api/v1/oauth/threads/callback',
+        svc: this.threadsOAuthService,
+      },
+    };
+
+    const entry = routeMap[provider];
+    if (!entry?.svc) {
+      throw new BadRequestException(`OAuth provider [${provider}] is not registered`);
+    }
+
+    const serverRedirectUri =
+      customRedirectUri || this.configService.get<string>(entry.envKey) || entry.defaultUri;
+
+    await this.prisma.oAuthState.create({
+      data: {
+        state,
+        workspaceId,
+        userId,
+        provider,
+        redirectUri: serverRedirectUri,
+        expiresAt,
+      },
+    });
+
+    const authorizationUrl = entry.svc.generateAuthorizationUrl(state, serverRedirectUri);
+    this.logger.log(`Initiated ${provider} OAuth for workspace [${workspaceId}] user [${userId}]`);
+
+    return {
+      authorizationUrl,
+      state,
+      provider,
+      expiresAt,
+    };
+  }
+
+  /**
+   * Unified OAuth 2.0 callback handler for Pinterest, YouTube, TikTok, and Threads.
+   */
+  async handleProviderCallback(provider: SocialProvider, code: string, state: string) {
+    const stateRecord = await this.prisma.oAuthState.findUnique({ where: { state } });
+
+    if (!stateRecord) {
+      throw new BadRequestException('Invalid or unknown OAuth state parameter');
+    }
+    if (stateRecord.usedAt) {
+      throw new BadRequestException('OAuth state has already been used');
+    }
+    if (stateRecord.expiresAt < new Date()) {
+      throw new BadRequestException('OAuth state has expired');
+    }
+
+    await this.prisma.oAuthState.update({
+      where: { id: stateRecord.id },
+      data: { usedAt: new Date() },
+    });
+
+    const svcMap: Record<string, { svc: any; scopes: string[] }> = {
+      [SocialProvider.PINTEREST]: {
+        svc: this.pinterestOAuthService,
+        scopes: ['boards:read', 'boards:write', 'pins:read', 'pins:write'],
+      },
+      [SocialProvider.YOUTUBE]: {
+        svc: this.youtubeOAuthService,
+        scopes: ['youtube.upload', 'youtube.readonly'],
+      },
+      [SocialProvider.TIKTOK]: {
+        svc: this.tiktokOAuthService,
+        scopes: ['user.info.basic', 'video.publish', 'video.upload'],
+      },
+      [SocialProvider.THREADS]: {
+        svc: this.threadsOAuthService,
+        scopes: ['threads_basic', 'threads_content_publish', 'threads_manage_insights'],
+      },
+    };
+
+    const entry = svcMap[provider];
+    if (!entry?.svc) {
+      throw new BadRequestException(`OAuth provider [${provider}] is not registered`);
+    }
+
+    const result = await entry.svc.exchangeCodeAndFetchAccounts(code, stateRecord.redirectUri);
+
+    const sessionToken = crypto.randomBytes(32).toString('hex');
+    const sessionTokenHash = this.hashToken(sessionToken);
+
+    const expiresAt = result.expiresIn
+      ? new Date(Date.now() + result.expiresIn * 1000).toISOString()
+      : null;
+
+    const payload: SessionDecryptedPayload = {
+      accounts: result.accounts,
+      accessToken: result.accessToken,
+      grantedScopes: entry.scopes,
+      expiresAt,
+    };
+
+    const encryptedPayload = this.tokenVaultService.encrypt(JSON.stringify(payload));
+    const sessionExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+    await this.prisma.oAuthSession.create({
+      data: {
+        sessionTokenHash,
+        workspaceId: stateRecord.workspaceId,
+        userId: stateRecord.userId,
+        provider,
+        encryptedPayload,
+        expiresAt: sessionExpiresAt,
+      },
+    });
+
+    const frontendUrl = this.configService.get<string>('CORS_ORIGIN') || 'http://localhost:3000';
+    const redirectUrl = `${frontendUrl}/settings/social-accounts/connect?session=${sessionToken}&workspaceId=${stateRecord.workspaceId}`;
+
+    return { redirectUrl, sessionToken, workspaceId: stateRecord.workspaceId };
   }
 }

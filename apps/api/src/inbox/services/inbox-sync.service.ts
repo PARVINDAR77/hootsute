@@ -233,8 +233,22 @@ export class InboxSyncService {
     });
 
     return accounts.map((acc) => {
-      const adapter = this.adapterFactory.getAdapter(acc);
-      const health = adapter.checkPermissionHealth(acc);
+      let health: PermissionHealth = {
+        canRead: true,
+        canReply: false,
+        missingScopes: [],
+      };
+      try {
+        const adapter = this.adapterFactory.getAdapter(acc);
+        health = adapter.checkPermissionHealth(acc);
+      } catch {
+        // Non-Meta providers (e.g. LinkedIn, Twitter/X) do not yet use the Meta inbox adapter
+        health = {
+          canRead: true,
+          canReply: false,
+          missingScopes: [],
+        };
+      }
 
       return {
         socialAccountId: acc.id,

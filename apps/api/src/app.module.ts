@@ -16,7 +16,6 @@ import { BrandProfileModule } from './brand-profile/brand-profile.module';
 import { OccasionsModule } from './occasions/occasions.module';
 import { ContentDraftsModule } from './content-drafts/content-drafts.module';
 import { ContentGenerationModule } from './content-generation/content-generation.module';
-import { WhatsAppModule } from './whatsapp/whatsapp.module';
 import { PublishingModule } from './publishing/publishing.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { InboxModule } from './inbox/inbox.module';
@@ -31,6 +30,7 @@ import { CompetitorsModule } from './competitors/competitors.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { MailModule } from './mail/mail.module';
 import { PushNotificationsModule } from './push-notifications/push-notifications.module';
+import { PublicModule } from './public/public.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -71,7 +71,6 @@ import { RedisThrottlerStorage } from './common/throttler/redis-throttler-storag
     OccasionsModule,
     ContentDraftsModule,
     ContentGenerationModule,
-    WhatsAppModule,
     PublishingModule,
     AnalyticsModule,
     InboxModule,
@@ -84,6 +83,7 @@ import { RedisThrottlerStorage } from './common/throttler/redis-throttler-storag
     ReportsModule,
     CompetitorsModule,
     WebhooksModule,
+    PublicModule,
   ],
   providers: [
     {

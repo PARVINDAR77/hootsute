@@ -55,7 +55,7 @@ describe('Smart Automations & Workflows Page', () => {
       category: 'MODERATION',
       triggerType: AutomationTriggerType.INBOX_NEW_MESSAGE,
       actionType: AutomationActionType.AUTO_HIDE_SPAM,
-      defaultConditions: { keywords: ['whatsapp me'] },
+      defaultConditions: { keywords: ['click link in bio'] },
       defaultActionConfig: {},
     },
   ];

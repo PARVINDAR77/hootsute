@@ -255,7 +255,7 @@ export default function CompetitorsPage() {
               <Swords className="w-6 h-6" />
             </span>
             <h1 className="text-xl font-bold text-slate-900">Competitor Benchmarking &amp; Public Intelligence</h1>
-            <Badge variant="purple">Phase 21 Active</Badge>
+            <Badge variant="purple">Intelligence</Badge>
           </div>
           <p className="text-sm text-slate-500 mt-1">
             Track industry rivals, compare social engagement velocity, and uncover content strategy opportunities.

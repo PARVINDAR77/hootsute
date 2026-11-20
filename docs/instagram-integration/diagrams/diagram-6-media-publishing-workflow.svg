@@ -1,0 +1,187 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 440" width="100%" height="100%" style="background:#ffffff; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  
+    <defs>
+      <!-- Instagram Gradient -->
+      <linearGradient id="igGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#833AB4"/>
+        <stop offset="35%" stop-color="#C13584"/>
+        <stop offset="70%" stop-color="#E1306C"/>
+        <stop offset="90%" stop-color="#FD1D1D"/>
+        <stop offset="100%" stop-color="#FCAF45"/>
+      </linearGradient>
+
+      <!-- Primary Brand Gradient -->
+      <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#0F172A"/>
+        <stop offset="100%" stop-color="#1E293B"/>
+      </linearGradient>
+
+      <!-- Tech Cyan Gradient -->
+      <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#0284C7"/>
+        <stop offset="100%" stop-color="#0EA5E9"/>
+      </linearGradient>
+
+      <!-- Success Emerald Gradient -->
+      <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#059669"/>
+        <stop offset="100%" stop-color="#10B981"/>
+      </linearGradient>
+
+      <!-- Warning Amber Gradient -->
+      <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#D97706"/>
+        <stop offset="100%" stop-color="#F59E0B"/>
+      </linearGradient>
+
+      <!-- Purple Accent Gradient -->
+      <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#6D28D9"/>
+        <stop offset="100%" stop-color="#8B5CF6"/>
+      </linearGradient>
+
+      <!-- Card Subtle Drop Shadow -->
+      <filter id="cardShadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+        <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.06"/>
+      </filter>
+
+      <!-- Elevated Drop Shadow -->
+      <filter id="elevatedShadow" x="-8%" y="-8%" width="116%" height="120%" filterUnits="userSpaceOnUse">
+        <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0F172A" flood-opacity="0.10"/>
+      </filter>
+
+      <!-- Arrow Markers -->
+      <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748B"/>
+      </marker>
+      <marker id="arrowPrimary" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284C7"/>
+      </marker>
+      <marker id="arrowEmerald" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#059669"/>
+      </marker>
+      <marker id="arrowIg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#E1306C"/>
+      </marker>
+    </defs>
+  
+
+  <!-- Top Title -->
+  <rect x="20" y="10" width="840" height="42" rx="8" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <rect x="20" y="10" width="6" height="42" rx="3" fill="#E1306C"/>
+  <text x="40" y="32" font-size="14" font-weight="700" fill="#0F172A">INSTAGRAM 2-STAGE MEDIA CONTAINER PUBLISHING ENGINE</text>
+  <text x="40" y="46" font-size="10.5" fill="#64748B">Step-by-step lifecycle: Validation &gt; S3 Public Storage &gt; Container Creation &gt; Container Publish &gt; Verification</text>
+
+  <!-- Step 1: Media Preparation -->
+  <g transform="translate(30, 75)" filter="url(#cardShadow)">
+    <rect width="185" height="160" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <rect width="185" height="4" rx="2" fill="#0284C7"/>
+    <circle cx="26" cy="26" r="11" fill="#E0F2FE"/>
+    <text x="26" y="30" font-size="10" font-weight="bold" fill="#0284C7" text-anchor="middle">1</text>
+    <text x="45" y="29" font-size="11" font-weight="bold" fill="#0F172A">Media Validation</text>
+    <text x="15" y="52" font-size="9" font-weight="600" fill="#334155">Storage &amp; Formatting</text>
+    <text x="15" y="68" font-size="8.5" fill="#64748B">&bull; Stored on public HTTPS (S3)</text>
+    <text x="15" y="82" font-size="8.5" fill="#64748B">&bull; Format: JPEG / PNG</text>
+    <text x="15" y="96" font-size="8.5" fill="#64748B">&bull; Max size: 8 MB</text>
+    <text x="15" y="110" font-size="8.5" fill="#64748B">&bull; Aspect: 4:5 to 1.91:1</text>
+    <rect x="15" y="125" width="155" height="22" rx="4" fill="#F1F5F9"/>
+    <text x="92" y="139" font-size="8" font-family="monospace" fill="#0284C7" text-anchor="middle">https://s3.../photo.jpg</text>
+  </g>
+
+  <!-- Arrow 1 -> 2 -->
+  <path d="M 220 155 L 245 155" stroke="#0284C7" stroke-width="2" marker-end="url(#arrowPrimary)"/>
+
+  <!-- Step 2: Create Media Container -->
+  <g transform="translate(250, 75)" filter="url(#cardShadow)">
+    <rect width="190" height="160" rx="8" fill="#FFFFFF" stroke="#E1306C" stroke-width="1.5"/>
+    <rect width="190" height="4" rx="2" fill="#E1306C"/>
+    <circle cx="26" cy="26" r="11" fill="#FCE7F3"/>
+    <text x="26" y="30" font-size="10" font-weight="bold" fill="#E1306C" text-anchor="middle">2</text>
+    <text x="45" y="29" font-size="11" font-weight="bold" fill="#0F172A">Create Container</text>
+    <text x="15" y="52" font-size="9" font-weight="600" fill="#334155">POST /{ig-user-id}/media</text>
+    <rect x="12" y="60" width="166" height="58" rx="4" fill="#F8FAFC" stroke="#E2E8F0"/>
+    <text x="18" y="74" font-size="7.5" font-family="monospace" fill="#0F172A">{</text>
+    <text x="24" y="86" font-size="7.5" font-family="monospace" fill="#0F172A">  image_url: "https://...",</text>
+    <text x="24" y="98" font-size="7.5" font-family="monospace" fill="#0F172A">  caption: "New post #ai",</text>
+    <text x="24" y="110" font-size="7.5" font-family="monospace" fill="#0F172A">  access_token: "..."</text>
+    <text x="18" y="122" font-size="7.5" font-family="monospace" fill="#0F172A">}</text>
+    <rect x="15" y="125" width="160" height="22" rx="4" fill="#FDF2F8"/>
+    <text x="95" y="139" font-size="8.5" font-weight="bold" fill="#BE185D" text-anchor="middle">Returns: { id: "creation_id" }</text>
+  </g>
+
+  <!-- Arrow 2 -> 3 -->
+  <path d="M 445 155 L 470 155" stroke="#E1306C" stroke-width="2" marker-end="url(#arrowIg)"/>
+
+  <!-- Step 3: Check Processing (Optional for photos, mandatory for video/carousel) -->
+  <g transform="translate(475, 75)" filter="url(#cardShadow)">
+    <rect width="180" height="160" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <rect width="180" height="4" rx="2" fill="#8B5CF6"/>
+    <circle cx="26" cy="26" r="11" fill="#EDE9FE"/>
+    <text x="26" y="30" font-size="10" font-weight="bold" fill="#8B5CF6" text-anchor="middle">3</text>
+    <text x="45" y="29" font-size="11" font-weight="bold" fill="#0F172A">Status Check</text>
+    <text x="15" y="52" font-size="9" font-weight="600" fill="#334155">GET /{creation_id}</text>
+    <text x="15" y="68" font-size="8.5" fill="#64748B">&bull; Immediate for single images</text>
+    <text x="15" y="82" font-size="8.5" fill="#64748B">&bull; Poll loop for video/reels</text>
+    <text x="15" y="96" font-size="8.5" fill="#64748B">&bull; status_code == FINISHED</text>
+    <text x="15" y="110" font-size="8.5" fill="#EF4444">&bull; Error if EXPIRED or ERROR</text>
+    <rect x="15" y="125" width="150" height="22" rx="4" fill="#F3E8FF"/>
+    <text x="90" y="139" font-size="8.5" font-weight="bold" fill="#6D28D9" text-anchor="middle">Container Ready</text>
+  </g>
+
+  <!-- Arrow 3 -> 4 -->
+  <path d="M 660 155 L 685 155" stroke="#059669" stroke-width="2" marker-end="url(#arrowEmerald)"/>
+
+  <!-- Step 4: Media Publish -->
+  <g transform="translate(690, 75)" filter="url(#cardShadow)">
+    <rect width="160" height="160" rx="8" fill="#FFFFFF" stroke="#059669" stroke-width="1.5"/>
+    <rect width="160" height="4" rx="2" fill="#059669"/>
+    <circle cx="26" cy="26" r="11" fill="#D1FAE5"/>
+    <text x="26" y="30" font-size="10" font-weight="bold" fill="#059669" text-anchor="middle">4</text>
+    <text x="45" y="29" font-size="11" font-weight="bold" fill="#0F172A">Publish Container</text>
+    <text x="15" y="52" font-size="8.5" font-weight="600" fill="#334155">POST /{id}/media_publish</text>
+    <rect x="12" y="60" width="136" height="58" rx="4" fill="#F8FAFC" stroke="#E2E8F0"/>
+    <text x="18" y="74" font-size="7.5" font-family="monospace" fill="#0F172A">{</text>
+    <text x="24" y="86" font-size="7.5" font-family="monospace" fill="#0F172A">  creation_id: "...",</text>
+    <text x="24" y="98" font-size="7.5" font-family="monospace" fill="#0F172A">  access_token: "..."</text>
+    <text x="18" y="110" font-size="7.5" font-family="monospace" fill="#0F172A">}</text>
+    <rect x="15" y="125" width="130" height="22" rx="4" fill="#ECFDF5"/>
+    <text x="80" y="139" font-size="8.5" font-weight="bold" fill="#059669" text-anchor="middle">Live on Instagram</text>
+  </g>
+
+  <!-- Step 5: Bottom Persistence & Audit Loop -->
+  <g transform="translate(30, 260)" filter="url(#cardShadow)">
+    <rect width="820" height="160" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <rect width="820" height="4" rx="2" fill="url(#igGrad)"/>
+    <text x="25" y="26" font-size="12" font-weight="700" fill="#0F172A">STEP 5: RESULT RECONCILIATION &amp; AUDIT TRAIL LOGGING</text>
+
+    <!-- Sub-Box A: Prisma Update -->
+    <g transform="translate(25, 42)">
+      <rect width="250" height="100" rx="6" fill="#FFFFFF" stroke="#E2E8F0"/>
+      <text x="15" y="20" font-size="10.5" font-weight="bold" fill="#059669">1. Update ScheduledPostTarget</text>
+      <text x="15" y="38" font-size="8.5" fill="#334155">&bull; status: PUBLISHED</text>
+      <text x="15" y="52" font-size="8.5" fill="#334155">&bull; externalPostId: "18029384756..."</text>
+      <text x="15" y="66" font-size="8.5" fill="#334155">&bull; externalPostUrl: https://instagram.com/p/...</text>
+      <text x="15" y="80" font-size="8.5" fill="#059669" font-weight="600">&bull; executedAt: NOW()</text>
+    </g>
+
+    <!-- Sub-Box B: Audit Logging -->
+    <g transform="translate(295, 42)">
+      <rect width="250" height="100" rx="6" fill="#FFFFFF" stroke="#E2E8F0"/>
+      <text x="15" y="20" font-size="10.5" font-weight="bold" fill="#0284C7">2. Create PublishingLog</text>
+      <text x="15" y="38" font-size="8.5" fill="#334155">&bull; outcome: SUCCESS</text>
+      <text x="15" y="52" font-size="8.5" fill="#334155">&bull; rawResponse: { id, creation_id }</text>
+      <text x="15" y="66" font-size="8.5" fill="#334155">&bull; latencyMs: 840ms</text>
+      <text x="15" y="80" font-size="8.5" fill="#0284C7" font-weight="600">&bull; Immutable security audit record</text>
+    </g>
+
+    <!-- Sub-Box C: UI Notification -->
+    <g transform="translate(565, 42)">
+      <rect width="230" height="100" rx="6" fill="#FFFFFF" stroke="#E2E8F0"/>
+      <text x="15" y="20" font-size="10.5" font-weight="bold" fill="#E1306C">3. Broadcast to Next.js UI</text>
+      <text x="15" y="38" font-size="8.5" fill="#334155">&bull; SSE / Polling updates Calendar badge</text>
+      <text x="15" y="52" font-size="8.5" fill="#334155">&bull; "Published" green badge rendered</text>
+      <text x="15" y="66" font-size="8.5" fill="#334155">&bull; Direct link to view live on IG</text>
+      <text x="15" y="80" font-size="8.5" fill="#E1306C" font-weight="600">&bull; Immediate user feedback</text>
+    </g>
+  </g>
+</svg>

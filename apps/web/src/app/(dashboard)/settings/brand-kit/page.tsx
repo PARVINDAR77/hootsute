@@ -75,15 +75,16 @@ export default function BrandKitPage() {
     setIsLoading(true);
     setStatusMessage(null);
     try {
-      const res = await apiClient<{ success: boolean; data: WorkspaceBrandProfileDto }>(
+      const res = await apiClient<any>(
         `/workspaces/${currentWorkspace.id}/brand-profile`,
       );
-      if (res.data) {
+      const data: WorkspaceBrandProfileDto | null = res?.data ?? res;
+      if (data && typeof data === 'object') {
         setProfile({
-          ...res.data,
-          businessName: res.data.businessName || currentWorkspace.name,
-          contactDetails: res.data.contactDetails || { email: '', phone: '', address: '' },
-          supportedLanguages: res.data.supportedLanguages || ['en'],
+          ...data,
+          businessName: data.businessName || currentWorkspace.name,
+          contactDetails: data.contactDetails || { email: '', phone: '', address: '' },
+          supportedLanguages: data.supportedLanguages || ['en'],
         });
       }
     } catch (err: any) {
@@ -130,7 +131,7 @@ export default function BrandKitPage() {
         },
       );
 
-      setProfile(res.data);
+      setProfile((res as any)?.data ?? res);
       setStatusMessage({
         type: 'success',
         message: 'Brand Kit successfully updated. AI generation will now use your exact brand voice, guidelines, and colors.',
@@ -465,7 +466,7 @@ export default function BrandKitPage() {
               <CardTitle className="text-sm font-semibold">Public Contact Details</CardTitle>
             </div>
             <CardDescription className="text-xs">
-              Used when generating Call-To-Action (CTA) footers and WhatsApp inquiry prompts
+              Used when generating Call-To-Action (CTA) footers and direct inquiry prompts
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -483,7 +484,7 @@ export default function BrandKitPage() {
                 placeholder="sales@yourbrand.com"
               />
               <Input
-                label="Inquiry Phone / WhatsApp"
+                label="Business Inquiry Phone"
                 disabled={!canEdit}
                 value={profile.contactDetails?.phone || ''}
                 onChange={(e) =>

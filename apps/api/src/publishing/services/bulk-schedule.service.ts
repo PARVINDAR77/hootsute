@@ -554,6 +554,17 @@ export class BulkScheduleService {
       case 'TWITTER_X':
       case 'X':
         return SocialPlatform.TWITTER_X;
+      case 'PINTEREST':
+      case 'PIN':
+        return SocialPlatform.PINTEREST;
+      case 'YOUTUBE':
+      case 'YT':
+        return SocialPlatform.YOUTUBE;
+      case 'TIKTOK':
+      case 'TT':
+        return SocialPlatform.TIKTOK;
+      case 'THREADS':
+        return SocialPlatform.THREADS;
       default:
         return null;
     }
@@ -569,6 +580,14 @@ export class BulkScheduleService {
         return SocialPlatform.LINKEDIN;
       case 'TWITTER_X':
         return SocialPlatform.TWITTER_X;
+      case 'PINTEREST':
+        return SocialPlatform.PINTEREST;
+      case 'YOUTUBE':
+        return SocialPlatform.YOUTUBE;
+      case 'TIKTOK':
+        return SocialPlatform.TIKTOK;
+      case 'THREADS':
+        return SocialPlatform.THREADS;
       default:
         return SocialPlatform.FACEBOOK;
     }

@@ -65,10 +65,10 @@ export default function SocialListeningPage() {
 
     try {
       // 1. Fetch Queries
-      const qRes = await apiClient<{ success: boolean; data: ListeningQueryDto[] }>(
-        `workspaces/${workspaceId}/listening/queries`,
+      const qRes = await apiClient<any>(
+        `/workspaces/${workspaceId}/listening/queries`,
       );
-      const queryList = qRes.data || [];
+      const queryList: ListeningQueryDto[] = Array.isArray(qRes) ? qRes : (qRes?.data || []);
       setQueries(queryList);
 
       // 2. Fetch Feed Mentions
@@ -80,21 +80,30 @@ export default function SocialListeningPage() {
       if (onlyStarred) params.set('onlyStarred', 'true');
       params.set('limit', '50');
 
-      const feedRes = await apiClient<{
-        success: boolean;
-        data: { data: ListeningMentionDto[]; total: number };
-      }>(`workspaces/${workspaceId}/listening/feed?${params.toString()}`);
+      const feedRes = await apiClient<any>(
+        `/workspaces/${workspaceId}/listening/feed?${params.toString()}`,
+      );
 
-      setMentions(feedRes.data?.data || []);
+      const mentionList: ListeningMentionDto[] = Array.isArray(feedRes)
+        ? feedRes
+        : Array.isArray(feedRes?.data)
+          ? feedRes.data
+          : Array.isArray(feedRes?.data?.data)
+            ? feedRes.data.data
+            : [];
+      setMentions(mentionList);
 
       // 3. Fetch Analytics
       const analyticsParam = selectedQueryId !== 'ALL' ? `?queryId=${selectedQueryId}` : '';
-      const analyticsRes = await apiClient<{
-        success: boolean;
-        data: ListeningAnalyticsSummaryDto;
-      }>(`workspaces/${workspaceId}/listening/analytics${analyticsParam}`);
+      const analyticsRes = await apiClient<any>(
+        `/workspaces/${workspaceId}/listening/analytics${analyticsParam}`,
+      );
 
-      setAnalytics(analyticsRes.data || null);
+      const analyticsData: ListeningAnalyticsSummaryDto | null =
+        analyticsRes && typeof analyticsRes === 'object'
+          ? ('data' in analyticsRes ? analyticsRes.data : analyticsRes)
+          : null;
+      setAnalytics(analyticsData && 'totalMentions' in analyticsData ? analyticsData : null);
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to load social listening stream');
     } finally {
@@ -109,13 +118,14 @@ export default function SocialListeningPage() {
   const handleToggleStar = async (mentionId: string) => {
     if (!workspaceId) return;
     try {
-      const res = await apiClient<{ success: boolean; data: ListeningMentionDto }>(
-        `workspaces/${workspaceId}/listening/mentions/${mentionId}/star`,
+      const res = await apiClient<any>(
+        `/workspaces/${workspaceId}/listening/mentions/${mentionId}/star`,
         { method: 'PATCH' },
       );
-      if (res.data) {
+      const updated = res?.data ?? res;
+      if (updated && typeof updated.isStarred === 'boolean') {
         setMentions((prev) =>
-          prev.map((m) => (m.id === mentionId ? { ...m, isStarred: res.data.isStarred } : m)),
+          prev.map((m) => (m.id === mentionId ? { ...m, isStarred: updated.isStarred } : m)),
         );
       }
     } catch (err: any) {
@@ -226,7 +236,7 @@ export default function SocialListeningPage() {
             </div>
           </div>
           <div className="mt-3 text-2xl font-bold text-slate-900">
-            {analytics?.totalMentions.toLocaleString() || '0'}
+            {analytics?.totalMentions?.toLocaleString() || '0'}
           </div>
           <div className="mt-1 text-xs text-slate-400">Tracked across all active queries</div>
         </div>

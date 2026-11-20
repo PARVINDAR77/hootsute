@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>OmniSocial AI — Complete Official Instagram API Integration Guide</title>
+<style>
+  /* -------------------------------------------------------------
+     CSS PRINT & TYPOGRAPHY FOUNDATIONS
+     ------------------------------------------------------------- */
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  @media print {
+    body {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    .page-break {
+      page-break-after: always;
+      break-after: page;
+    }
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #1E293B;
+    background: #E2E8F0;
+    font-size: 9.5pt;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Each page container */
+  .doc-page {
+    width: 210mm;
+    min-height: 297mm;
+    height: 297mm;
+    max-height: 297mm;
+    padding: 16mm 18mm 16mm 18mm;
+    position: relative;
+    background: #FFFFFF;
+    margin: 0 auto 10px auto;
+    page-break-after: always;
+    break-after: page;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* Running Header */
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 3mm;
+    border-bottom: 1.5px solid #E2E8F0;
+    margin-bottom: 4mm;
+    font-size: 8pt;
+    color: #64748B;
+  }
+  .page-header .brand {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+    color: #0F172A;
+  }
+  .page-header .brand-badge {
+    background: linear-gradient(135deg, #833AB4, #FD1D1D, #FCAF45);
+    color: #FFFFFF;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 7pt;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+  .page-header .chapter-tag {
+    font-weight: 600;
+    color: #0284C7;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 7.5pt;
+  }
+
+  /* Running Footer */
+  .page-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 3mm;
+    border-top: 1.5px solid #E2E8F0;
+    margin-top: 4mm;
+    font-size: 7.5pt;
+    color: #94A3B8;
+  }
+  .page-footer .confidential {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .page-footer .page-number {
+    font-weight: 700;
+    color: #0F172A;
+  }
+
+  /* Page Content Area */
+  .page-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Headings */
+  h1.chapter-title {
+    font-size: 17pt;
+    font-weight: 800;
+    color: #0F172A;
+    letter-spacing: -0.5px;
+    margin-bottom: 2mm;
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  h1.chapter-title .num-pill {
+    background: #0F172A;
+    color: #FFFFFF;
+    font-size: 10pt;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 800;
+  }
+  h2.section-heading {
+    font-size: 11pt;
+    font-weight: 700;
+    color: #0F172A;
+    margin-top: 3mm;
+    margin-bottom: 1.5mm;
+    padding-bottom: 1mm;
+    border-bottom: 1px solid #F1F5F9;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  h3.sub-heading {
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: #1E293B;
+    margin-top: 2.5mm;
+    margin-bottom: 1mm;
+  }
+
+  p {
+    margin-bottom: 2mm;
+    color: #334155;
+    text-align: justify;
+  }
+  p.lead {
+    font-size: 10pt;
+    color: #1E293B;
+    font-weight: 500;
+    line-height: 1.4;
+    margin-bottom: 2.5mm;
+  }
+
+  /* Callout Boxes */
+  .callout {
+    padding: 3mm 4mm;
+    border-radius: 6px;
+    margin: 2mm 0;
+    font-size: 8.5pt;
+    line-height: 1.35;
+  }
+  .callout-info {
+    background: #F0F9FF;
+    border-left: 3.5px solid #0284C7;
+    color: #0369A1;
+  }
+  .callout-success {
+    background: #F0FDF4;
+    border-left: 3.5px solid #059669;
+    color: #065F46;
+  }
+  .callout-warning {
+    background: #FFFBEB;
+    border-left: 3.5px solid #D97706;
+    color: #92400E;
+  }
+  .callout-danger {
+    background: #FEF2F2;
+    border-left: 3.5px solid #DC2626;
+    color: #991B1B;
+  }
+  .callout-ig {
+    background: #FDF2F8;
+    border-left: 3.5px solid #E1306C;
+    color: #9D174D;
+  }
+  .callout strong {
+    font-weight: 700;
+  }
+
+  /* Tables */
+  table.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2mm 0 3mm 0;
+    font-size: 8pt;
+  }
+  table.data-table th {
+    background: #0F172A;
+    color: #FFFFFF;
+    text-align: left;
+    padding: 6px 8px;
+    font-weight: 700;
+    font-size: 7.5pt;
+    letter-spacing: 0.3px;
+  }
+  table.data-table td {
+    padding: 5px 8px;
+    border-bottom: 1px solid #E2E8F0;
+    color: #334155;
+    vertical-align: top;
+  }
+  table.data-table tr:nth-child(even) td {
+    background: #F8FAFC;
+  }
+  table.data-table tr:hover td {
+    background: #F1F5F9;
+  }
+  table.data-table code {
+    background: #F1F5F9;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 7.5pt;
+    color: #BE185D;
+  }
+
+  /* Code Blocks */
+  pre.code-block {
+    background: #0F172A;
+    color: #E2E8F0;
+    padding: 3mm 4mm;
+    border-radius: 6px;
+    font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 7.5pt;
+    line-height: 1.35;
+    margin: 2mm 0;
+    overflow: hidden;
+    border-left: 3.5px solid #8B5CF6;
+  }
+  pre.code-block .keyword { color: #F472B6; font-weight: bold; }
+  pre.code-block .string { color: #A7F3D0; }
+  pre.code-block .function { color: #60A5FA; }
+  pre.code-block .comment { color: #64748B; font-style: italic; }
+
+  /* Diagram Embedding */
+  .diagram-container {
+    width: 100%;
+    margin: 2.5mm 0;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  }
+  .diagram-container svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  /* Grid Layouts */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3mm;
+    margin: 2mm 0;
+  }
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2.5mm;
+    margin: 2mm 0;
+  }
+  .card-box {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
+    padding: 3mm;
+  }
+  .card-box h4 {
+    font-size: 9pt;
+    font-weight: 700;
+    color: #0F172A;
+    margin-bottom: 1.5mm;
+  }
+  .card-box p {
+    font-size: 8pt;
+    color: #475569;
+    margin-bottom: 1mm;
+  }
+
+  /* Badges & Tags */
+  .badge {
+    display: inline-block;
+    padding: 1.5px 6px;
+    border-radius: 3px;
+    font-size: 7pt;
+    font-weight: 700;
+  }
+  .badge-emerald { background: #D1FAE5; color: #065F46; }
+  .badge-blue { background: #DBEAFE; color: #1E40AF; }
+  .badge-purple { background: #EDE9FE; color: #5B21B6; }
+  .badge-rose { background: #FFE4E6; color: #9F1239; }
+  .badge-amber { background: #FEF3C7; color: #92400E; }
+
+  /* Lists */
+  ul.check-list {
+    list-style: none;
+    margin: 1.5mm 0 2mm 0;
+  }
+  ul.check-list li {
+    position: relative;
+    padding-left: 14px;
+    margin-bottom: 1.5mm;
+    font-size: 8.5pt;
+    color: #334155;
+  }
+  ul.check-list li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #059669;
+    font-weight: bold;
+    font-size: 9pt;
+  }
+
+  /* Cover Page Specific */
+  .cover-page {
+    width: 210mm;
+    height: 297mm;
+    padding: 0;
+    position: relative;
+    background: #0F172A;
+    color: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+  }
+  .cover-top-bar {
+    height: 8mm;
+    background: linear-gradient(90deg, #833AB4, #C13584, #E1306C, #FD1D1D, #FCAF45);
+  }
+  .cover-body {
+    padding: 24mm 22mm;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .cover-logo-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    font-size: 9pt;
+    font-weight: 700;
+    color: #38BDF8;
+    margin-bottom: 10mm;
+    width: fit-content;
+  }
+  .cover-title {
+    font-size: 32pt;
+    font-weight: 900;
+    line-height: 1.12;
+    letter-spacing: -1px;
+    color: #FFFFFF;
+    margin-bottom: 5mm;
+  }
+  .cover-title span {
+    background: linear-gradient(135deg, #E1306C, #FD1D1D, #FCAF45);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .cover-subtitle {
+    font-size: 13pt;
+    font-weight: 400;
+    color: #94A3B8;
+    max-width: 160mm;
+    line-height: 1.45;
+    margin-bottom: 10mm;
+  }
+  .cover-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4mm;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 5mm 6mm;
+    margin-top: 6mm;
+  }
+  .cover-meta-item .label {
+    font-size: 7.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748B;
+    font-weight: 600;
+    margin-bottom: 1mm;
+  }
+  .cover-meta-item .val {
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: #F8FAFC;
+  }
+  .cover-footer {
+    padding: 8mm 22mm;
+    background: rgba(15, 23, 42, 0.95);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: space-between;
+    font-size: 8pt;
+    color: #64748B;
+  }
+</style>
+</head>
+<body style="background:#ffffff; margin:0; padding:0;">
+<div class="doc-page">
+  <div class="page-header">
+    <div class="brand">
+      <span class="brand-badge">OMNISOCIAL AI</span>
+      <span>Official Instagram API Integration Master Guide</span>
+    </div>
+    <div class="chapter-tag">CHAPTER 09 &bull; SINGLE IMAGE PUBLISHING</div>
+  </div>
+
+  <div class="page-content">
+    <h1 class="chapter-title"><span class="num-pill">09</span> First Instagram Image Publishing Workflow</h1>
+    <p class="lead">
+      Unlike simple social APIs that accept raw file uploads in a single HTTP request, Meta enforces a mandatory <strong>2-step container lifecycle</strong> for all Instagram media publishing.
+    </p>
+
+    <div class="diagram-container">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 440" width="100%" height="100%" style="background:#ffffff; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  
+    <defs>
+      <!-- Instagram Gradient -->
+      <linearGradient id="igGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#833AB4"/>
+        <stop offset="35%" stop-color="#C13584"/>
+        <stop offset="70%" stop-color="#E1306C"/>
+        <stop offset="90%" stop-color="#FD1D1D"/>
+        <stop offset="100%" stop-color="#FCAF45"/>
+      </linearGradient>
+
+      <!-- Primary Brand Gradient -->
+      <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#0F172A"/>
+        <stop offset="100%" stop-color="#1E293B"/>
+      </linearGradient>
+
+      <!-- Tech Cyan Gradient -->
+      <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#0284C7"/>
+        <stop offset="100%" stop-color="#0EA5E9"/>
+      </linearGradient>
+
+      <!-- Success Emerald Gradient -->
+      <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#059669"/>
+        <stop offset="100%" stop-color="#10B981"/>
+      </linearGradient>
+
+      <!-- Warning Amber Gradient -->
+      <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#D97706"/>
+        <stop offset="100%" stop-color="#F59E0B"/>
+      </linearGradient>
+
+      <!-- Purple Accent Gradient -->
+      <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#6D28D9"/>
+        <stop offset="100%" stop-color="#8B5CF6"/>
+      </linearGradient>
+
+      <!-- Card Subtle Drop Shadow -->
+      <filter id="cardShadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+        <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.06"/>
+      </filter>
+
+      <!-- Elevated Drop Shadow -->
+      <filter id="elevatedShadow" x="-8%" y="-8%" width="116%" height="120%" filterUnits="userSpaceOnUse">
+        <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0F172A" flood-opacity="0.10"/>
+      </filter>
+
+      <!-- Arrow Markers -->
+      <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748B"/>
+      </marker>
+      <marker id="arrowPrimary" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284C7"/>
+      </marker>
+      <marker id="arrowEmerald" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#059669"/>
+      </marker>
+      <marker id="arrowIg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#E1306C"/>
+      </marker>
+    </defs>
+  
+
+  <!-- Top Title -->
+  <rect x="20" y="10" width="840" height="42" rx="8" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <rect x="20" y="10" width="6" height="42" rx="3" fill="#E1306C"/>
+  <text x="40" y="32" font-size="14" font-weight="700" fill="#0F172A">INSTAGRAM 2-STAGE MEDIA CONTAINER PUBLISHING ENGINE</text>
+  <text x="40" y="46" font-size="10.5" fill="#64748B">Step-by-step lifecycle: Validation &gt; S3 Public Storage &gt; Container Creation &gt; Container Publish &gt; Verification</text>
+
+  <!-- Step 1: Media Preparation -->
+  <g transform="translate(30, 75)" filter="url(#cardShadow)">
+    <rect width="185" height="160" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <rect width="185" height="4" rx="2" fill="#0284C7"/>
+    <circle cx="26" cy="26" r="11" fill="#E0F2FE"/>
+    <text x="26" y="30" font-size="10" font-weight="bold" fill="#0284C7" text-anchor="middle">1</text>
+    <text x="45" y="29" font-size="11" font-weight="bold" fill="#0F172A">Media Validation</text>
+    <text x="15" y="52" font-size="9" font-weight="600" fill="#334155">Storage &amp; Formatting</text>
+    <text x="15" y="68" font-size="8.5" fill="#64748B">&bull; Stored on public HTTPS (S3)</text>
+    <text x="15" y="82" font-size="8.5" fill="#64748B">&bull; Format: JPEG / PNG</text>
+    <text x="15" y="96" font-size="8.5" fill="#64748B">&bull; Max size: 8 MB</text>
+    <text x="15" y="110" font-size="8.5" fill="#64748B">&bull; Aspect: 4:5 to 1.91:1</text>
+    <rect x="15" y="125" width="155" height="22" rx="4" fill="#F1F5F9"/>
+    <text x="92" y="139" font-size="8" font-family="monospace" fill="#0284C7" text-anchor="middle">https://s3.../photo.jpg</text>
+  </g>
+
+  <!-- Arrow 1 -> 2 -->
+  <path d="M 220 155 L 245 155" stroke="#0284C7" stroke-width="2" marker-end="url(#arrowPrimary)"/>
+
+  <!-- Step 2: Create Media Container -->
+  <g transform="translate(250, 75)" filter="url(#cardShadow)">
+    <rect width="190" height="160" rx="8" fill="#FFFFFF" stroke="#E1306C" stroke-width="1.5"/>
+    <rect width="190" height="4" rx="2" fill="#E1306C"/>
+    <circle cx="26" cy="26" r="11" fill="#FCE7F3"/>
+    <text x="26" y="30" font-size="10" font-weight="bold" fill="#E1306C" text-anchor="middle">2</text>
+    <text x="45" y="29" font-size="11" font-weight="bold" fill="#0F172A">Create Container</text>
+    <text x="15" y="52" font-size="9" font-weight="600" fill="#334155">POST /{ig-user-id}/media</text>
+    <rect x="12" y="60" width="166" height="58" rx="4" fill="#F8FAFC" stroke="#E2E8F0"/>
+    <text x="18" y="74" font-size="7.5" font-family="monospace" fill="#0F172A">{</text>
+    <text x="24" y="86" font-size="7.5" font-family="monospace" fill="#0F172A">  image_url: "https://...",</text>
+    <text x="24" y="98" font-size="7.5" font-family="monospace" fill="#0F172A">  caption: "New post #ai",</text>
+    <text x="24" y="110" font-size="7.5" font-family="monospace" fill="#0F172A">  access_token: "..."</text>
+    <text x="18" y="122" font-size="7.5" font-family="monospace" fill="#0F172A">}</text>
+    <rect x="15" y="125" width="160" height="22" rx="4" fill="#FDF2F8"/>
+    <text x="95" y="139" font-size="8.5" font-weight="bold" fill="#BE185D" text-anchor="middle">Returns: { id: "creation_id" }</text>
+  </g>
+
+  <!-- Arrow 2 -> 3 -->
+  <path d="M 445 155 L 470 155" stroke="#E1306C" stroke-width="2" marker-end="url(#arrowIg)"/>
+
+  <!-- Step 3: Check Processing (Optional for photos, mandatory for video/carousel) -->
+  <g transform="translate(475, 75)" filter="url(#cardShadow)">
+    <rect width="180" height="160" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <rect width="180" height="4" rx="2" fill="#8B5CF6"/>
+    <circle cx="26" cy="26" r="11" fill="#EDE9FE"/>
+    <text x="26" y="30" font-size="10" font-weight="bold" fill="#8B5CF6" text-anchor="middle">3</text>
+    <text x="45" y="29" font-size="11" font-weight="bold" fill="#0F172A">Status Check</text>
+    <text x="15" y="52" font-size="9" font-weight="600" fill="#334155">GET /{creation_id}</text>
+    <text x="15" y="68" font-size="8.5" fill="#64748B">&bull; Immediate for single images</text>
+    <text x="15" y="82" font-size="8.5" fill="#64748B">&bull; Poll loop for video/reels</text>
+    <text x="15" y="96" font-size="8.5" fill="#64748B">&bull; status_code == FINISHED</text>
+    <text x="15" y="110" font-size="8.5" fill="#EF4444">&bull; Error if EXPIRED or ERROR</text>
+    <rect x="15" y="125" width="150" height="22" rx="4" fill="#F3E8FF"/>
+    <text x="90" y="139" font-size="8.5" font-weight="bold" fill="#6D28D9" text-anchor="middle">Container Ready</text>
+  </g>
+
+  <!-- Arrow 3 -> 4 -->
+  <path d="M 660 155 L 685 155" stroke="#059669" stroke-width="2" marker-end="url(#arrowEmerald)"/>
+
+  <!-- Step 4: Media Publish -->
+  <g transform="translate(690, 75)" filter="url(#cardShadow)">
+    <rect width="160" height="160" rx="8" fill="#FFFFFF" stroke="#059669" stroke-width="1.5"/>
+    <rect width="160" height="4" rx="2" fill="#059669"/>
+    <circle cx="26" cy="26" r="11" fill="#D1FAE5"/>
+    <text x="26" y="30" font-size="10" font-weight="bold" fill="#059669" text-anchor="middle">4</text>
+    <text x="45" y="29" font-size="11" font-weight="bold" fill="#0F172A">Publish Container</text>
+    <text x="15" y="52" font-size="8.5" font-weight="600" fill="#334155">POST /{id}/media_publish</text>
+    <rect x="12" y="60" width="136" height="58" rx="4" fill="#F8FAFC" stroke="#E2E8F0"/>
+    <text x="18" y="74" font-size="7.5" font-family="monospace" fill="#0F172A">{</text>
+    <text x="24" y="86" font-size="7.5" font-family="monospace" fill="#0F172A">  creation_id: "...",</text>
+    <text x="24" y="98" font-size="7.5" font-family="monospace" fill="#0F172A">  access_token: "..."</text>
+    <text x="18" y="110" font-size="7.5" font-family="monospace" fill="#0F172A">}</text>
+    <rect x="15" y="125" width="130" height="22" rx="4" fill="#ECFDF5"/>
+    <text x="80" y="139" font-size="8.5" font-weight="bold" fill="#059669" text-anchor="middle">Live on Instagram</text>
+  </g>
+
+  <!-- Step 5: Bottom Persistence & Audit Loop -->
+  <g transform="translate(30, 260)" filter="url(#cardShadow)">
+    <rect width="820" height="160" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <rect width="820" height="4" rx="2" fill="url(#igGrad)"/>
+    <text x="25" y="26" font-size="12" font-weight="700" fill="#0F172A">STEP 5: RESULT RECONCILIATION &amp; AUDIT TRAIL LOGGING</text>
+
+    <!-- Sub-Box A: Prisma Update -->
+    <g transform="translate(25, 42)">
+      <rect width="250" height="100" rx="6" fill="#FFFFFF" stroke="#E2E8F0"/>
+      <text x="15" y="20" font-size="10.5" font-weight="bold" fill="#059669">1. Update ScheduledPostTarget</text>
+      <text x="15" y="38" font-size="8.5" fill="#334155">&bull; status: PUBLISHED</text>
+      <text x="15" y="52" font-size="8.5" fill="#334155">&bull; externalPostId: "18029384756..."</text>
+      <text x="15" y="66" font-size="8.5" fill="#334155">&bull; externalPostUrl: https://instagram.com/p/...</text>
+      <text x="15" y="80" font-size="8.5" fill="#059669" font-weight="600">&bull; executedAt: NOW()</text>
+    </g>
+
+    <!-- Sub-Box B: Audit Logging -->
+    <g transform="translate(295, 42)">
+      <rect width="250" height="100" rx="6" fill="#FFFFFF" stroke="#E2E8F0"/>
+      <text x="15" y="20" font-size="10.5" font-weight="bold" fill="#0284C7">2. Create PublishingLog</text>
+      <text x="15" y="38" font-size="8.5" fill="#334155">&bull; outcome: SUCCESS</text>
+      <text x="15" y="52" font-size="8.5" fill="#334155">&bull; rawResponse: { id, creation_id }</text>
+      <text x="15" y="66" font-size="8.5" fill="#334155">&bull; latencyMs: 840ms</text>
+      <text x="15" y="80" font-size="8.5" fill="#0284C7" font-weight="600">&bull; Immutable security audit record</text>
+    </g>
+
+    <!-- Sub-Box C: UI Notification -->
+    <g transform="translate(565, 42)">
+      <rect width="230" height="100" rx="6" fill="#FFFFFF" stroke="#E2E8F0"/>
+      <text x="15" y="20" font-size="10.5" font-weight="bold" fill="#E1306C">3. Broadcast to Next.js UI</text>
+      <text x="15" y="38" font-size="8.5" fill="#334155">&bull; SSE / Polling updates Calendar badge</text>
+      <text x="15" y="52" font-size="8.5" fill="#334155">&bull; "Published" green badge rendered</text>
+      <text x="15" y="66" font-size="8.5" fill="#334155">&bull; Direct link to view live on IG</text>
+      <text x="15" y="80" font-size="8.5" fill="#E1306C" font-weight="600">&bull; Immediate user feedback</text>
+    </g>
+  </g>
+</svg>
+    </div>
+
+    <h2 class="section-heading">Technical Deep Dive: The 2-Step Container Lifecycle</h2>
+    <div class="grid-2">
+      <div class="card-box">
+        <h4>Step 1: Create Media Container</h4>
+        <p><strong>Endpoint:</strong> <code>POST /{ig-user-id}/media</code></p>
+        <p><strong>Payload:</strong></p>
+        <pre class="code-block" style="margin:2px 0;">
+{
+  "image_url": "https://s3.../photo.jpg",
+  "caption": "Launch announcement! #ai",
+  "access_token": "EAA..."
+}
+        </pre>
+        <p>Meta downloads the image from your public HTTPS URL, validates dimensions, and allocates a temporary container ID (e.g. <code>17982038475</code>).</p>
+      </div>
+      <div class="card-box">
+        <h4>Step 2: Publish Media Container</h4>
+        <p><strong>Endpoint:</strong> <code>POST /{ig-user-id}/media_publish</code></p>
+        <p><strong>Payload:</strong></p>
+        <pre class="code-block" style="margin:2px 0;">
+{
+  "creation_id": "17982038475",
+  "access_token": "EAA..."
+}
+        </pre>
+        <p>Meta publishes the container to the live profile feed and returns the permanent Instagram Media ID (e.g. <code>18029384918</code>).</p>
+      </div>
+    </div>
+
+    <div class="callout callout-warning">
+      <strong>CRITICAL PUBLISHING INVARIANTS:</strong><br>
+      1. <strong>Image URL Accessibility:</strong> The image must be hosted on a public HTTPS endpoint accessible by Meta's crawler (User-Agent: <code>facebookexternalhit</code>). Localhost URLs fail.<br>
+      2. <strong>No Premature Status Updates:</strong> Never mark a post as <code>PUBLISHED</code> in OmniSocial AI until Step 2 returns HTTP 200 with a valid media ID.<br>
+      3. <strong>Aspect Ratio Rules:</strong> Supported aspect ratios are strictly <strong>4:5 (vertical 0.8) to 1.91:1 (horizontal)</strong>. Images outside this ratio must be cropped before container creation.
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="confidential">CONFIDENTIAL &bull; OMNISOCIAL AI ARCHITECTURAL SPECIFICATION</div>
+    <div class="page-number">Page 11 of 23</div>
+  </div>
+</div>
+
+<!-- =======================================================================
+     PAGE 12: CHAPTER 10 — ADVANCED CONTENT FORMATS
+     ======================================================================= -->
+</body>
+</html>

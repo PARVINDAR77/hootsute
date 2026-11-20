@@ -1,20 +1,27 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useWorkspace } from '@/lib/workspace-context';
-import { apiClient } from '@/lib/api-client';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Alert } from '@/components/ui/Alert';
-import { Badge } from '@/components/ui/Badge';
+import { apiClient, unwrapData, unwrapList } from '@/lib/api-client';
+import {
+  Button,
+  Input,
+  Alert,
+  Badge,
+  Tabs,
+  PlatformBadge,
+  ORDERED_PLATFORMS,
+  SupportedPlatformKey,
+} from '@/components/ui';
+import { AIBrainVisual } from '@/components/marketing/FuturisticVisuals';
+import { ROUTES } from '@/lib/constants';
 import {
   CampaignObjective,
   SocialPlatform,
   BrandTone,
   FestivalOccasionDto,
-  ContentDraftDto,
 } from '@packages/shared';
 import {
   Sparkles,
@@ -22,42 +29,46 @@ import {
   Layers,
   Send,
   MessageSquare,
-  Instagram,
-  Facebook,
-  Linkedin,
-  Twitter,
-  Check,
-  Loader2,
   HelpCircle,
-  Hash,
-  ChevronRight,
   Flame,
   ArrowRight,
+  Image as ImageIcon,
+  Lightbulb,
+  Palette,
+  FileText,
+  Check,
+  Info,
 } from 'lucide-react';
 
+type StudioTab = 'generator' | 'image-brief' | 'ideas';
+
 const OBJECTIVES = [
-  { value: CampaignObjective.FESTIVAL_WISHES, label: 'Festival Wishes & Cultural', icon: Sparkles, desc: 'Festive greetings & seasonal cultural posts' },
-  { value: CampaignObjective.ENGAGEMENT, label: 'Audience Engagement', icon: MessageSquare, desc: 'Questions, community conversations & polls' },
-  { value: CampaignObjective.SALES_LEADS, label: 'Promotions & Sales Leads', icon: Flame, desc: 'Special offers, discount codes & product launches' },
-  { value: CampaignObjective.BRAND_AWARENESS, label: 'Brand Story & Awareness', icon: Layers, desc: 'Founding heritage, crafts & quality values' },
-  { value: CampaignObjective.ANNOUNCEMENT, label: 'Company Announcement', icon: Send, desc: 'Milestones, new store openings & updates' },
-  { value: CampaignObjective.EDUCATIONAL, label: 'Educational & Value', icon: HelpCircle, desc: 'Styling tips, industry insights & guides' },
+  { value: CampaignObjective.ENGAGEMENT, label: 'Audience Engagement', icon: MessageSquare },
+  { value: CampaignObjective.SALES_LEADS, label: 'Promotions & Leads', icon: Flame },
+  { value: CampaignObjective.BRAND_AWARENESS, label: 'Brand Awareness', icon: Layers },
+  { value: CampaignObjective.ANNOUNCEMENT, label: 'Announcement', icon: Send },
+  { value: CampaignObjective.FESTIVAL_WISHES, label: 'Festival & Seasonal', icon: Sparkles },
+  { value: CampaignObjective.EDUCATIONAL, label: 'Educational Value', icon: HelpCircle },
 ];
 
-const PLATFORMS = [
-  { value: SocialPlatform.INSTAGRAM, label: 'Instagram', icon: Instagram, color: 'text-pink-600 bg-pink-50 border-pink-200' },
-  { value: SocialPlatform.FACEBOOK, label: 'Facebook', icon: Facebook, color: 'text-blue-600 bg-blue-50 border-blue-200' },
-  { value: SocialPlatform.LINKEDIN, label: 'LinkedIn', icon: Linkedin, color: 'text-sky-700 bg-sky-50 border-sky-200' },
-  { value: SocialPlatform.TWITTER_X, label: 'Twitter / X', icon: Twitter, color: 'text-slate-900 bg-slate-100 border-slate-300' },
+const PLATFORM_MAP: { key: SupportedPlatformKey; value: SocialPlatform; limit: string }[] = [
+  { key: 'INSTAGRAM', value: SocialPlatform.INSTAGRAM, limit: '2,200 chars' },
+  { key: 'FACEBOOK', value: SocialPlatform.FACEBOOK, limit: 'Long-form' },
+  { key: 'TWITTER_X', value: SocialPlatform.TWITTER_X, limit: '280 chars' },
+  { key: 'LINKEDIN', value: SocialPlatform.LINKEDIN, limit: '3,000 chars' },
+  { key: 'PINTEREST', value: SocialPlatform.PINTEREST, limit: 'Pin + URL' },
+  { key: 'YOUTUBE', value: SocialPlatform.YOUTUBE, limit: 'Title + Tags' },
+  { key: 'TIKTOK', value: SocialPlatform.TIKTOK, limit: 'Hook + Tags' },
+  { key: 'THREADS', value: SocialPlatform.THREADS, limit: '500 chars' },
 ];
 
 const TONES = [
-  { value: BrandTone.FESTIVE_WARM, label: 'Festive & Warm (ઉત્સવમય / उत्सवी)' },
-  { value: BrandTone.PROFESSIONAL, label: 'Professional & Authoritative' },
+  { value: BrandTone.PROFESSIONAL, label: 'Professional' },
   { value: BrandTone.CASUAL_FRIENDLY, label: 'Casual & Friendly' },
-  { value: BrandTone.INSPIRATIONAL, label: 'Inspirational & Elegant' },
-  { value: BrandTone.URGENT_PROMOTIONAL, label: 'Urgent Promotional (Offer ending)' },
-  { value: BrandTone.PLAYFUL, label: 'Playful & Witty' },
+  { value: BrandTone.URGENT_PROMOTIONAL, label: 'Bold / Promo' },
+  { value: BrandTone.INSPIRATIONAL, label: 'Inspirational' },
+  { value: BrandTone.FESTIVE_WARM, label: 'Festive & Warm' },
+  { value: BrandTone.PLAYFUL, label: 'Playful' },
 ];
 
 const LANGUAGES = [
@@ -68,10 +79,38 @@ const LANGUAGES = [
   { code: 'es', name: 'Spanish' },
 ];
 
+const STARTER_IDEAS = [
+  {
+    title: 'Product Launch Teaser Campaign',
+    objective: CampaignObjective.ANNOUNCEMENT,
+    tone: BrandTone.URGENT_PROMOTIONAL,
+    prompt: 'Announce our newest release with a punchy hook, key benefits, and a clear waitlist CTA.',
+  },
+  {
+    title: 'Behind-the-Scenes Brand Story',
+    objective: CampaignObjective.BRAND_AWARENESS,
+    tone: BrandTone.INSPIRATIONAL,
+    prompt: 'Share the craft, team values, and mission behind our product to build audience trust.',
+  },
+  {
+    title: 'Weekly Educational Carousel & Tips',
+    objective: CampaignObjective.EDUCATIONAL,
+    tone: BrandTone.PROFESSIONAL,
+    prompt: 'Create a 5-point actionable checklist our customers can save and share with peers.',
+  },
+  {
+    title: 'Community Question & Engagement Poll',
+    objective: CampaignObjective.ENGAGEMENT,
+    tone: BrandTone.CASUAL_FRIENDLY,
+    prompt: 'Spark a friendly conversation asking followers how they solve their biggest daily challenge.',
+  },
+];
+
 export default function ContentStudioPage() {
   const router = useRouter();
   const { currentWorkspace } = useWorkspace();
 
+  const [activeTab, setActiveTab] = useState<StudioTab>('generator');
   const [occasions, setOccasions] = useState<FestivalOccasionDto[]>([]);
   const [selectedOccasion, setSelectedOccasion] = useState<FestivalOccasionDto | null>(null);
 
@@ -80,41 +119,46 @@ export default function ContentStudioPage() {
   const [selectedPlatforms, setSelectedPlatforms] = useState<SocialPlatform[]>([
     SocialPlatform.INSTAGRAM,
     SocialPlatform.FACEBOOK,
+    SocialPlatform.LINKEDIN,
+    SocialPlatform.TWITTER_X,
   ]);
   const [tone, setTone] = useState<BrandTone>(BrandTone.PROFESSIONAL);
   const [language, setLanguage] = useState('en');
   const [userInstructions, setUserInstructions] = useState('');
+  const [visualStyle, setVisualStyle] = useState('Futuristic 3D studio product photography');
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    loadOccasions();
+    apiClient<any>('/occasions')
+      .then((res) => setOccasions(unwrapList<FestivalOccasionDto>(res)))
+      .catch(() => {
+        // Non-blocking
+      });
   }, []);
-
-  const loadOccasions = async () => {
-    try {
-      const res = await apiClient<{ success: boolean; data: FestivalOccasionDto[] }>('/occasions');
-      if (res.data) {
-        setOccasions(res.data);
-      }
-    } catch (e) {
-      console.error('Failed to load occasions catalog', e);
-    }
-  };
 
   const handleSelectOccasion = (occ: FestivalOccasionDto) => {
     if (selectedOccasion?.id === occ.id) {
       setSelectedOccasion(null);
-    } else {
-      setSelectedOccasion(occ);
-      setObjective(CampaignObjective.FESTIVAL_WISHES);
-      setTone(BrandTone.FESTIVE_WARM);
-      setTitle(`${occ.name} Festive Campaign`);
-      if (!userInstructions) {
-        setUserInstructions(`Celebrate ${occ.name}. Highlight our heritage collection with festive blessings.`);
-      }
+      return;
     }
+    setSelectedOccasion(occ);
+    setObjective(CampaignObjective.FESTIVAL_WISHES);
+    setTone(BrandTone.FESTIVE_WARM);
+    setTitle(`${occ.name} Campaign`);
+    setUserInstructions(
+      `Celebrate ${occ.name} with authentic brand warmth, tailored messaging, and a compelling CTA.`,
+    );
+    setActiveTab('generator');
+  };
+
+  const applyIdea = (idea: (typeof STARTER_IDEAS)[number]) => {
+    setTitle(idea.title);
+    setObjective(idea.objective);
+    setTone(idea.tone);
+    setUserInstructions(idea.prompt);
+    setActiveTab('generator');
   };
 
   const togglePlatform = (p: SocialPlatform) => {
@@ -123,245 +167,331 @@ export default function ContentStudioPage() {
         setSelectedPlatforms(selectedPlatforms.filter((item) => item !== p));
       }
     } else {
-      if (selectedPlatforms.length < 4) {
-        setSelectedPlatforms([...selectedPlatforms, p]);
-      }
+      setSelectedPlatforms([...selectedPlatforms, p]);
     }
+  };
+
+  const selectAllPlatforms = () => {
+    setSelectedPlatforms(PLATFORM_MAP.map((p) => p.value));
   };
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentWorkspace) return;
 
-    if (!title.trim()) {
-      setErrorMsg('Please enter a campaign draft title');
+    const resolvedTitle =
+      title.trim() ||
+      (activeTab === 'image-brief' ? 'AI Visual Creative Brief Campaign' : '');
+
+    if (!resolvedTitle) {
+      setErrorMsg('Please enter a campaign title so your draft can be saved cleanly.');
       return;
     }
 
     if (selectedPlatforms.length === 0) {
-      setErrorMsg('Please select at least one social media platform');
+      setErrorMsg('Please select at least one social media platform.');
       return;
     }
 
     setIsGenerating(true);
     setErrorMsg(null);
 
+    const combinedInstructions =
+      activeTab === 'image-brief'
+        ? `Visual art direction style: ${visualStyle}. ${userInstructions.trim()}`
+        : userInstructions.trim() || undefined;
+
     try {
-      const res = await apiClient<{ success: boolean; data: ContentDraftDto }>(
+      const res = await apiClient<any>(
         `/workspaces/${currentWorkspace.id}/content-generation/generate`,
         {
           method: 'POST',
           body: JSON.stringify({
-            title: title.trim(),
+            title: resolvedTitle,
             objective,
             platforms: selectedPlatforms,
             occasionSlug: selectedOccasion?.slug || undefined,
             tone,
             language,
-            userInstructions: userInstructions.trim() || undefined,
+            userInstructions: combinedInstructions,
           }),
         },
       );
 
-      if (res.data?.id) {
-        router.push(`/content/drafts/${res.data.id}`);
+      const created = unwrapData<any>(res);
+      if (created?.id) {
+        router.push(`/content/drafts/${created.id}`);
+      } else {
+        setIsGenerating(false);
       }
     } catch (err: any) {
-      setErrorMsg(err.message || 'Generation failed. Please check AI provider configuration or rate limits.');
+      setErrorMsg(
+        err.message ||
+          'Generation failed. Please check AI provider configuration or workspace limits.',
+      );
       setIsGenerating(false);
     }
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
+    <div className="max-w-[1400px] mx-auto space-y-6">
       {/* Studio Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 bg-gradient-to-r from-indigo-900 via-indigo-950 to-slate-900 text-white rounded-2xl shadow-xl border border-indigo-900/40">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="p-2 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-              <Sparkles className="w-5 h-5" />
-            </span>
-            <h1 className="text-xl font-bold tracking-tight">AI Content Generation Studio</h1>
-          </div>
-          <p className="text-xs text-slate-300 max-w-xl">
-            Generate native marketing copy tailored to each social network. Choose a festival occasion, define your objective, and let our multi-platform AI engine craft compliant variations with hashtags and visual briefs.
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#111827] dark:text-white">
+            AI Content Studio
+          </h1>
+          <p className="text-sm text-[#64748B] dark:text-slate-400 mt-1">
+            Generate platform-calibrated copy, hashtags, and creative briefs across all 8 networks.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => router.push('/content/drafts')}
-            className="text-white border-white/20 bg-white/5 hover:bg-white/10 text-xs"
-          >
-            <span>View Drafts Hub</span>
-            <ChevronRight className="w-3.5 h-3.5 ml-1" />
-          </Button>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <Link href={ROUTES.BRAND_KIT}>
+            <Button variant="outline" size="sm" leftIcon={<Palette className="w-3.5 h-3.5" />}>
+              Brand Kit
+            </Button>
+          </Link>
+          <Link href={ROUTES.CONTENT_DRAFTS}>
+            <Button variant="outline" size="sm" leftIcon={<FileText className="w-3.5 h-3.5" />}>
+              Drafts &amp; Approvals
+            </Button>
+          </Link>
         </div>
       </div>
+
+      {/* Mode Tabs matching Reference Image */}
+      <Tabs<StudioTab>
+        value={activeTab}
+        onChange={setActiveTab}
+        options={[
+          { id: 'generator', label: 'Post Generator', icon: <Sparkles className="w-3.5 h-3.5" /> },
+          {
+            id: 'image-brief',
+            label: 'Image Brief Creator',
+            icon: <ImageIcon className="w-3.5 h-3.5" />,
+          },
+          {
+            id: 'ideas',
+            label: 'Ideas & Occasions',
+            icon: <Lightbulb className="w-3.5 h-3.5" />,
+            badge: occasions.length || undefined,
+          },
+        ]}
+      />
 
       {errorMsg && (
         <Alert
           type="error"
           title="Generation Error"
           message={errorMsg}
+          onClose={() => setErrorMsg(null)}
         />
       )}
 
-      {/* Festival & Occasion Catalog */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-indigo-600" />
-            <h2 className="text-sm font-bold text-slate-900">Upcoming Festival &amp; Holiday Catalog</h2>
+      {activeTab === 'ideas' ? (
+        <div className="space-y-6">
+          {/* Starter Playbooks */}
+          <div>
+            <h2 className="text-base font-bold text-[#111827] dark:text-white mb-3">
+              Campaign Starter Prompts
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {STARTER_IDEAS.map((idea) => (
+                <button
+                  key={idea.title}
+                  type="button"
+                  onClick={() => applyIdea(idea)}
+                  className="text-left p-5 rounded-2xl bg-white dark:bg-[#0F142B]/90 border border-[#E7EAF2] dark:border-[#1E2749] hover:border-[#7138F5] shadow-soft dark:shadow-none transition-all group"
+                >
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <h3 className="text-sm font-extrabold text-[#111827] dark:text-white group-hover:text-[#7138F5] dark:group-hover:text-[#20C8E8]">
+                      {idea.title}
+                    </h3>
+                    <Badge variant="purple">Use Prompt</Badge>
+                  </div>
+                  <p className="text-xs text-[#64748B] dark:text-slate-400 leading-relaxed">
+                    {idea.prompt}
+                  </p>
+                </button>
+              ))}
+            </div>
           </div>
-          <span className="text-xs text-slate-400">Click to auto-apply cultural context</span>
-        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {occasions.map((occ) => {
-            const isSelected = selectedOccasion?.id === occ.id;
-            return (
-              <div
-                key={occ.id}
-                onClick={() => handleSelectOccasion(occ)}
-                className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
-                  isSelected
-                    ? 'border-indigo-600 bg-indigo-50/70 shadow-sm ring-2 ring-indigo-500/30'
-                    : 'border-slate-200 bg-white hover:border-indigo-200 hover:shadow-xs'
-                }`}
-              >
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="font-bold text-xs text-slate-900">{occ.name}</span>
-                  {isSelected && <Badge variant="default" className="text-[10px]">Selected</Badge>}
-                </div>
-                <p className="text-[11px] text-slate-500 line-clamp-2 mb-2">{occ.description}</p>
-                <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-medium">
-                  <Calendar className="w-3 h-3 text-indigo-500" />
-                  <span>{occ.typicalPeriod}</span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+          {/* Upcoming Festivals & Cultural Occasions from API */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-base font-bold text-[#111827] dark:text-white flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-[#7138F5] dark:text-[#20C8E8]" />
+                Upcoming Festival &amp; Holiday Catalog
+              </h2>
+              <span className="text-xs text-[#64748B] dark:text-slate-400">
+                Click any occasion to prefill Post Generator
+              </span>
+            </div>
 
-      {/* Main Campaign Form */}
-      <form onSubmit={handleGenerate} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left 2 Cols: Configuration Inputs */}
-        <div className="lg:col-span-2 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-semibold">1. Campaign Blueprint</CardTitle>
-              <CardDescription className="text-xs">
-                Draft name, target platforms, and high-level campaign intent
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {occasions.map((occ) => {
+                const isSelected = selectedOccasion?.id === occ.id;
+                return (
+                  <button
+                    key={occ.id}
+                    type="button"
+                    onClick={() => handleSelectOccasion(occ)}
+                    className={`text-left p-4 rounded-2xl border transition-all ${
+                      isSelected
+                        ? 'bg-[#F1EBFF] dark:bg-[#7138F5]/25 border-[#7138F5] shadow-glow-purple'
+                        : 'bg-white dark:bg-[#0F142B]/90 border-[#E7EAF2] dark:border-[#1E2749] hover:border-[#7138F5]/45'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <h3 className="text-sm font-bold text-[#111827] dark:text-white truncate">
+                        {occ.name}
+                      </h3>
+                      {isSelected && <Badge variant="purple">Selected</Badge>}
+                    </div>
+                    <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1.5 line-clamp-2">
+                      {occ.description}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <form onSubmit={handleGenerate} className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+          {/* Left Composer Card (8 cols) */}
+          <div className="xl:col-span-8 space-y-5">
+            {activeTab === 'image-brief' && (
+              <Alert
+                type="info"
+                title="Creative Visual Brief Pipeline"
+                message="Generates structured image art direction, aspect ratios, and visual prompts saved alongside your campaign variants. Configure an external image-generation provider to enable direct raster rendering."
+              />
+            )}
+
+            <div className="rounded-3xl p-6 bg-white dark:bg-[#0F142B]/95 border border-[#E7EAF2] dark:border-[#7138F5]/30 shadow-soft dark:shadow-glow-card space-y-5">
               <Input
-                label="Campaign Title / Internal Topic"
-                required
+                label="Campaign Draft Title *"
+                placeholder="e.g. Q4 Product Launch — 8-Channel Rollout"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g. Navratri Garba Festive Launch or Winter Weekend Sale"
+                required
               />
 
-              {/* Target Platforms */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-2">
-                  Target Platforms (Select 1 to 4)
+              {activeTab === 'image-brief' && (
+                <Input
+                  label="Visual Art Direction Style"
+                  placeholder="e.g. Minimalist 3D glass product lighting, pastel studio"
+                  value={visualStyle}
+                  onChange={(e) => setVisualStyle(e.target.value)}
+                />
+              )}
+
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="studio-prompt"
+                  className="block text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-300"
+                >
+                  What do you want to create?
                 </label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                  {PLATFORMS.map((plat) => {
-                    const isSelected = selectedPlatforms.includes(plat.value);
-                    const Icon = plat.icon;
-                    return (
-                      <div
-                        key={plat.value}
-                        onClick={() => togglePlatform(plat.value)}
-                        className={`flex items-center gap-2.5 p-2.5 rounded-xl border cursor-pointer transition-all ${
-                          isSelected
-                            ? `${plat.color} font-semibold shadow-xs ring-1 ring-current`
-                            : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                        }`}
-                      >
-                        <Icon className="w-4 h-4 shrink-0" />
-                        <span className="text-xs">{plat.label}</span>
-                      </div>
-                    );
-                  })}
-                </div>
+                <textarea
+                  id="studio-prompt"
+                  rows={4}
+                  value={userInstructions}
+                  onChange={(e) => setUserInstructions(e.target.value)}
+                  placeholder="Describe your offer, story, product highlights, CTA, or target audience..."
+                  className="w-full rounded-2xl border border-[#E7EAF2] dark:border-[#1E2749] bg-[#F7F8FC] dark:bg-[#0B1024] px-4 py-3 text-sm text-[#111827] dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#7138F5] focus:ring-2 focus:ring-[#7138F5]/20 transition-all"
+                />
               </div>
 
-              {/* Campaign Objective */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-2">
-                  Campaign Objective
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {OBJECTIVES.map((obj) => {
-                    const isSelected = objective === obj.value;
-                    const Icon = obj.icon;
-                    return (
-                      <div
-                        key={obj.value}
-                        onClick={() => setObjective(obj.value)}
-                        className={`p-3 rounded-xl border cursor-pointer transition-all ${
-                          isSelected
-                            ? 'border-indigo-600 bg-indigo-50/70 shadow-xs'
-                            : 'border-slate-200 bg-white hover:border-slate-300'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 mb-1">
-                          <Icon className={`w-3.5 h-3.5 ${isSelected ? 'text-indigo-600' : 'text-slate-400'}`} />
-                          <span className={`text-xs font-semibold ${isSelected ? 'text-indigo-900' : 'text-slate-800'}`}>
-                            {obj.label}
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-slate-500">{obj.desc}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-semibold">2. Tone &amp; Instructions</CardTitle>
-              <CardDescription className="text-xs">
-                Refine the brand personality, language, and specific offers
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Brand Tone &amp; Style
-                  </label>
-                  <select
-                    value={tone}
-                    onChange={(e) => setTone(e.target.value as BrandTone)}
-                    className="w-full text-xs rounded-lg border border-slate-300 p-2.5 bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              {/* Target Platforms (All 8 Networks) */}
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-300">
+                    Target Social Networks ({selectedPlatforms.length} / 8)
+                  </span>
+                  <button
+                    type="button"
+                    onClick={selectAllPlatforms}
+                    className="text-xs font-bold text-[#7138F5] dark:text-[#20C8E8] hover:underline"
                   >
-                    {TONES.map((t) => (
-                      <option key={t.value} value={t.value}>
-                        {t.label}
-                      </option>
-                    ))}
-                  </select>
+                    Select All 8
+                  </button>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Target Primary Language
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  {PLATFORM_MAP.map((p) => {
+                    const active = selectedPlatforms.includes(p.value);
+                    return (
+                      <button
+                        key={p.key}
+                        type="button"
+                        onClick={() => togglePlatform(p.value)}
+                        className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl border text-left transition-all ${
+                          active
+                            ? 'bg-[#F1EBFF] dark:bg-[#7138F5]/25 border-[#7138F5] text-[#111827] dark:text-white shadow-xs'
+                            : 'bg-[#F7F8FC] dark:bg-[#0B1024] border-[#E7EAF2] dark:border-[#1E2749] text-[#64748B] dark:text-slate-400 hover:border-[#7138F5]/40'
+                        }`}
+                      >
+                        <PlatformBadge platform={p.key} variant="icon" size="sm" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold truncate">
+                            {p.key === 'TWITTER_X'
+                              ? 'X / Twitter'
+                              : p.key.charAt(0) + p.key.slice(1).toLowerCase()}
+                          </p>
+                          <p className="text-[10px] opacity-75 truncate">{p.limit}</p>
+                        </div>
+                        {active && (
+                          <Check className="w-3.5 h-3.5 text-[#7138F5] dark:text-[#20C8E8] shrink-0" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Brand Tone Pills + Language & Objective */}
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-4 pt-2">
+                <div className="md:col-span-8 space-y-2">
+                  <span className="block text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-300">
+                    Brand Tone
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {TONES.map((t) => {
+                      const active = tone === t.value;
+                      return (
+                        <button
+                          key={t.value}
+                          type="button"
+                          onClick={() => setTone(t.value)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                            active
+                              ? 'bg-gradient-to-r from-[#7138F5] to-[#2878FF] text-white border-transparent shadow-glow-purple'
+                              : 'bg-[#F7F8FC] dark:bg-[#0B1024] border-[#E7EAF2] dark:border-[#1E2749] text-[#64748B] dark:text-slate-300 hover:border-[#7138F5]/40'
+                          }`}
+                        >
+                          {t.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="md:col-span-4 space-y-2">
+                  <label
+                    htmlFor="studio-language"
+                    className="block text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-300"
+                  >
+                    Output Language
                   </label>
                   <select
+                    id="studio-language"
                     value={language}
                     onChange={(e) => setLanguage(e.target.value)}
-                    className="w-full text-xs rounded-lg border border-slate-300 p-2.5 bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    className="w-full rounded-xl border border-[#E7EAF2] dark:border-[#1E2749] bg-[#F7F8FC] dark:bg-[#0B1024] px-3 py-2 text-xs font-semibold text-[#111827] dark:text-white focus:outline-none focus:border-[#7138F5]"
                   >
                     {LANGUAGES.map((l) => (
                       <option key={l.code} value={l.code}>
@@ -372,101 +502,98 @@ export default function ContentStudioPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
-                  <span>Custom User Instructions &amp; Promotional Details</span>
-                  <span className="text-[10px] text-slate-400 font-normal">
-                    {userInstructions.length} / 1000 chars
-                  </span>
-                </label>
-                <textarea
-                  rows={4}
-                  maxLength={1000}
-                  className="w-full text-xs rounded-lg border border-slate-300 p-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                  value={userInstructions}
-                  onChange={(e) => setUserInstructions(e.target.value)}
-                  placeholder="e.g. Announce 20% off on all double Ikkat sarees using code GARBA26. Valid through Sunday. Encourage WhatsApp DM for expedited delivery."
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Right Col: Live Summary & Action Box */}
-        <div className="space-y-6">
-          <Card className="sticky top-6">
-            <CardHeader className="bg-slate-50/70 border-b border-slate-100">
-              <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                Generation Matrix
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 pt-4 text-xs">
-              <div className="flex justify-between items-center py-1 border-b border-slate-100">
-                <span className="text-slate-500">Workspace</span>
-                <span className="font-semibold text-slate-800">{currentWorkspace?.name}</span>
-              </div>
-
-              <div className="flex justify-between items-center py-1 border-b border-slate-100">
-                <span className="text-slate-500">Occasion</span>
-                <span className="font-semibold text-indigo-600">
-                  {selectedOccasion ? selectedOccasion.name : 'General Campaign'}
+              {/* Objective Pills */}
+              <div className="space-y-2">
+                <span className="block text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-300">
+                  Campaign Objective
                 </span>
-              </div>
-
-              <div className="flex justify-between items-center py-1 border-b border-slate-100">
-                <span className="text-slate-500">Variants</span>
-                <span className="font-semibold text-slate-800">{selectedPlatforms.length} Native Copies</span>
-              </div>
-
-              <div className="space-y-1.5 pt-2">
-                <span className="text-slate-500 block">Active Output Channels:</span>
-                <div className="flex flex-wrap gap-1.5">
-                  {selectedPlatforms.map((p) => (
-                    <Badge key={p} variant="outline" className="text-[10px] uppercase font-bold">
-                      {p}
-                    </Badge>
-                  ))}
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {OBJECTIVES.map((obj) => {
+                    const Icon = obj.icon;
+                    const active = objective === obj.value;
+                    return (
+                      <button
+                        key={obj.value}
+                        type="button"
+                        onClick={() => setObjective(obj.value)}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${
+                          active
+                            ? 'bg-[#F1EBFF] dark:bg-[#7138F5]/20 border-[#7138F5] text-[#7138F5] dark:text-white'
+                            : 'bg-[#F7F8FC] dark:bg-[#0B1024] border-[#E7EAF2] dark:border-[#1E2749] text-[#64748B] dark:text-slate-300'
+                        }`}
+                      >
+                        <Icon className="w-3.5 h-3.5 shrink-0" />
+                        <span className="truncate">{obj.label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
-              {selectedOccasion?.suggestedHashtags && selectedOccasion.suggestedHashtags.length > 0 && (
-                <div className="space-y-1.5 pt-2">
-                  <span className="text-slate-500 block">Occasion Hashtags:</span>
-                  <div className="flex flex-wrap gap-1">
-                    {selectedOccasion.suggestedHashtags.map((h) => (
-                      <span key={h} className="text-[10px] text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded font-mono">
-                        {h}
-                      </span>
-                    ))}
-                  </div>
+              {/* Submit Button */}
+              <div className="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-[#E7EAF2] dark:border-white/10">
+                <div className="flex items-center gap-2 text-xs text-[#64748B] dark:text-slate-400">
+                  <Info className="w-4 h-4 text-[#7138F5] dark:text-[#20C8E8]" />
+                  <span>
+                    Generates {selectedPlatforms.length} platform variant
+                    {selectedPlatforms.length === 1 ? '' : 's'} &amp; saves directly to Drafts
+                  </span>
                 </div>
-              )}
-            </CardContent>
-            <CardFooter className="pt-2 border-t border-slate-100 flex flex-col gap-2">
-              <Button
-                type="submit"
-                disabled={isGenerating}
-                className="w-full gap-2 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white shadow-md shadow-indigo-200"
-              >
-                {isGenerating ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Synthesizing Copy...</span>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4" />
-                    <span>Generate &amp; Review Draft</span>
-                  </>
-                )}
-              </Button>
-              <p className="text-[10px] text-slate-400 text-center">
-                Generates immutable revision #1 with platform-specific character limits and hashtags.
+
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="lg"
+                  isLoading={isGenerating}
+                  rightIcon={<ArrowRight className="w-4 h-4" />}
+                >
+                  Generate Content
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Glowing 3D AI Brain + Calibration Tips (4 cols) */}
+          <div className="xl:col-span-4 space-y-5">
+            <AIBrainVisual />
+
+            {selectedOccasion && (
+              <div className="rounded-2xl p-4 bg-[#F1EBFF] dark:bg-[#7138F5]/20 border border-[#7138F5]/30 flex items-center justify-between gap-2">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-[#7138F5] dark:text-[#C4A5FF]">
+                    Active Occasion Context
+                  </p>
+                  <p className="text-sm font-bold text-[#111827] dark:text-white">
+                    {selectedOccasion.name}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedOccasion(null)}
+                  className="text-xs font-bold text-[#7138F5] dark:text-[#20C8E8] hover:underline"
+                >
+                  Clear
+                </button>
+              </div>
+            )}
+
+            <div className="rounded-2xl p-5 bg-white dark:bg-[#0F142B]/90 border border-[#E7EAF2] dark:border-[#1E2749] space-y-3">
+              <h3 className="text-sm font-extrabold text-[#111827] dark:text-white">
+                Platform-Native Calibration
+              </h3>
+              <p className="text-xs text-[#64748B] dark:text-slate-400 leading-relaxed">
+                After generation, open your draft editor to customize per-channel copy, attach
+                Media Library assets, run approval workflows, or send straight to Bulk Publish.
               </p>
-            </CardFooter>
-          </Card>
-        </div>
-      </form>
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {ORDERED_PLATFORMS.map((p) => (
+                  <PlatformBadge key={p} platform={p} variant="icon" size="sm" />
+                ))}
+              </div>
+            </div>
+          </div>
+        </form>
+      )}
     </div>
   );
 }

@@ -1,0 +1,150 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 440" width="100%" height="100%" style="background:#ffffff; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  
+    <defs>
+      <!-- Instagram Gradient -->
+      <linearGradient id="igGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#833AB4"/>
+        <stop offset="35%" stop-color="#C13584"/>
+        <stop offset="70%" stop-color="#E1306C"/>
+        <stop offset="90%" stop-color="#FD1D1D"/>
+        <stop offset="100%" stop-color="#FCAF45"/>
+      </linearGradient>
+
+      <!-- Primary Brand Gradient -->
+      <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#0F172A"/>
+        <stop offset="100%" stop-color="#1E293B"/>
+      </linearGradient>
+
+      <!-- Tech Cyan Gradient -->
+      <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#0284C7"/>
+        <stop offset="100%" stop-color="#0EA5E9"/>
+      </linearGradient>
+
+      <!-- Success Emerald Gradient -->
+      <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#059669"/>
+        <stop offset="100%" stop-color="#10B981"/>
+      </linearGradient>
+
+      <!-- Warning Amber Gradient -->
+      <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#D97706"/>
+        <stop offset="100%" stop-color="#F59E0B"/>
+      </linearGradient>
+
+      <!-- Purple Accent Gradient -->
+      <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#6D28D9"/>
+        <stop offset="100%" stop-color="#8B5CF6"/>
+      </linearGradient>
+
+      <!-- Card Subtle Drop Shadow -->
+      <filter id="cardShadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+        <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.06"/>
+      </filter>
+
+      <!-- Elevated Drop Shadow -->
+      <filter id="elevatedShadow" x="-8%" y="-8%" width="116%" height="120%" filterUnits="userSpaceOnUse">
+        <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0F172A" flood-opacity="0.10"/>
+      </filter>
+
+      <!-- Arrow Markers -->
+      <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748B"/>
+      </marker>
+      <marker id="arrowPrimary" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284C7"/>
+      </marker>
+      <marker id="arrowEmerald" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#059669"/>
+      </marker>
+      <marker id="arrowIg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#E1306C"/>
+      </marker>
+    </defs>
+  
+
+  <!-- Top Title -->
+  <rect x="20" y="10" width="840" height="42" rx="8" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <rect x="20" y="10" width="6" height="42" rx="3" fill="url(#igGrad)"/>
+  <text x="40" y="32" font-size="14" font-weight="700" fill="#0F172A">INSTAGRAM ACCOUNT ELIGIBILITY &amp; LOGIN PATH DECISION TREE</text>
+  <text x="40" y="46" font-size="10.5" fill="#64748B">Determine user account type, prerequisites, and route between Instagram Login vs Page-Linked Login</text>
+
+  <!-- Start Node -->
+  <g transform="translate(40, 75)" filter="url(#cardShadow)">
+    <rect width="180" height="70" rx="8" fill="#FFFFFF" stroke="#0F172A" stroke-width="1.5"/>
+    <rect width="180" height="4" rx="2" fill="#0F172A"/>
+    <text x="90" y="25" font-size="11" font-weight="bold" fill="#0F172A" text-anchor="middle">Customer Initiates</text>
+    <text x="90" y="40" font-size="9" fill="#475569" text-anchor="middle">Clicks "Connect Instagram"</text>
+    <rect x="25" y="46" width="130" height="18" rx="4" fill="#F1F5F9"/>
+    <text x="90" y="58" font-size="8.5" font-weight="bold" fill="#0F172A" text-anchor="middle">Account Type Check</text>
+  </g>
+
+  <!-- Arrow to Diamond 1 -->
+  <path d="M 225 110 L 265 110" stroke="#0F172A" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Diamond 1: Personal Account? -->
+  <g transform="translate(270, 70)">
+    <polygon points="80,0 160,40 80,80 0,40" fill="#FEF2F2" stroke="#EF4444" stroke-width="1.5"/>
+    <text x="80" y="36" font-size="10" font-weight="bold" fill="#991B1B" text-anchor="middle">Is it Personal</text>
+    <text x="80" y="50" font-size="9" fill="#991B1B" text-anchor="middle">Instagram?</text>
+  </g>
+
+  <!-- Branch YES: Error Box (Personal Account Unsupported) -->
+  <path d="M 350 70 L 350 45 L 470 45" stroke="#EF4444" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="365" y="40" font-size="9" font-weight="bold" fill="#EF4444">YES (Blocked)</text>
+
+  <g transform="translate(475, 20)" filter="url(#cardShadow)">
+    <rect width="365" height="52" rx="6" fill="#FEF2F2" stroke="#F87171"/>
+    <text x="15" y="20" font-size="10" font-weight="bold" fill="#B91C1C">UNSUPPORTED ACCOUNT TYPE</text>
+    <text x="15" y="34" font-size="8.5" fill="#7F1D1D">Meta Graph API strictly prohibits publishing to personal accounts.</text>
+    <text x="15" y="45" font-size="8.5" font-weight="bold" fill="#991B1B">Action: In Instagram app &gt; Settings &gt; Switch to Professional Account (Free)</text>
+  </g>
+
+  <!-- Branch NO: Professional Account (Proceeds to Diamond 2) -->
+  <path d="M 350 150 L 350 200 L 270 200" stroke="#059669" stroke-width="2" marker-end="url(#arrowEmerald)"/>
+  <text x="360" y="180" font-size="9" font-weight="bold" fill="#059669">NO (Professional)</text>
+
+  <!-- Diamond 2: Login Route Preference -->
+  <g transform="translate(110, 160)">
+    <polygon points="80,0 160,40 80,80 0,40" fill="#F0FDF4" stroke="#059669" stroke-width="1.5"/>
+    <text x="80" y="36" font-size="10" font-weight="bold" fill="#166534" text-anchor="middle">Select Login Path</text>
+    <text x="80" y="50" font-size="8.5" fill="#166534" text-anchor="middle">Route A or B?</text>
+  </g>
+
+  <!-- Route A: Instagram Login (Recommended) -->
+  <path d="M 190 240 L 190 280 L 110 280 L 110 300" stroke="#E1306C" stroke-width="2" marker-end="url(#arrowIg)"/>
+  <text x="120" y="270" font-size="9" font-weight="bold" fill="#E1306C">Route A (Instagram-First)</text>
+
+  <g transform="translate(30, 305)" filter="url(#cardShadow)">
+    <rect width="380" height="120" rx="8" fill="#FFFFFF" stroke="#E1306C" stroke-width="1.5"/>
+    <rect width="380" height="4" rx="2" fill="url(#igGrad)"/>
+    <text x="15" y="22" font-size="11" font-weight="bold" fill="#E1306C">ROUTE A: INSTAGRAM LOGIN (RECOMMENDED)</text>
+    <text x="15" y="38" font-size="9" font-weight="600" fill="#0F172A">Direct Instagram User Authentication</text>
+    <text x="15" y="52" font-size="8.5" fill="#475569">&bull; Facebook Page Connection: <tspan font-weight="bold" fill="#059669">NOT required</tspan></text>
+    <text x="15" y="66" font-size="8.5" fill="#475569">&bull; Host: api.instagram.com / graph.instagram.com</text>
+    <text x="15" y="80" font-size="8.5" fill="#475569">&bull; Scopes: instagram_business_basic, instagram_business_content_publish</text>
+    <text x="15" y="94" font-size="8.5" fill="#475569">&bull; Account Types: Professional (Creator or Business)</text>
+    <rect x="15" y="100" width="350" height="14" rx="3" fill="#FDF2F8"/>
+    <text x="190" y="110" font-size="8" font-weight="bold" fill="#BE185D" text-anchor="middle">Fastest frictionless setup for Instagram-only customers</text>
+  </g>
+
+  <!-- Route B: Facebook Login (Page-Linked) -->
+  <path d="M 270 200 L 460 200 L 460 300" stroke="#0284C7" stroke-width="2" marker-end="url(#arrowPrimary)"/>
+  <text x="330" y="192" font-size="9" font-weight="bold" fill="#0284C7">Route B (Facebook Page-Linked)</text>
+
+  <g transform="translate(450, 305)" filter="url(#cardShadow)">
+    <rect width="400" height="120" rx="8" fill="#FFFFFF" stroke="#0284C7" stroke-width="1.5"/>
+    <rect width="400" height="4" rx="2" fill="#0284C7"/>
+    <text x="15" y="22" font-size="11" font-weight="bold" fill="#0284C7">ROUTE B: FACEBOOK LOGIN (PAGE-LINKED)</text>
+    <text x="15" y="38" font-size="9" font-weight="600" fill="#0F172A">Enterprise Meta Graph API Path</text>
+    <text x="15" y="52" font-size="8.5" fill="#475569">&bull; Facebook Page Connection: <tspan font-weight="bold" fill="#DC2626">MANDATORY</tspan> (IG linked to Page)</text>
+    <text x="15" y="66" font-size="8.5" fill="#475569">&bull; Host: graph.facebook.com/v21.0</text>
+    <text x="15" y="80" font-size="8.5" fill="#475569">&bull; Scopes: instagram_basic, instagram_content_publish, pages_show_list</text>
+    <text x="15" y="94" font-size="8.5" fill="#475569">&bull; Token: Long-lived Page Access Token inherits Instagram permissions</text>
+    <rect x="15" y="100" width="370" height="14" rx="3" fill="#F0F9FF"/>
+    <text x="200" y="110" font-size="8" font-weight="bold" fill="#0369A1" text-anchor="middle">Ideal when user also manages Facebook Page within same workspace</text>
+  </g>
+</svg>

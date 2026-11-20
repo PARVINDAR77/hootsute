@@ -159,14 +159,16 @@ npm run build:web
 
 ---
 
-## 5. Multi-Tenant Workspaces & Social Accounts Pages
+## 5. Multi-Tenant Workspaces & Social Accounts Hub
 
+* **Public Marketing Website**: `/`, `/features`, `/platforms`, `/pricing`, `/about`, `/contact`, `/blog`, `/faq`, `/help`, `/privacy`, `/terms`, `/security`.
+* **Split-Screen Authentication**: `/login`, `/signup`, `/forgot-password`, `/reset-password`, `/verify-email`.
 * **Workspace Onboarding**: `/onboarding/workspace` — wizard to initialize business workspace with custom slug and timezone.
-* **Workspace Selector**: Interactive header dropdown to switch between authorized workspaces.
-* **Workspace Settings**: `/settings/workspace` — configure business name, industry, timezone, website, and description (read-only for non-admins).
-* **Team Members**: `/settings/members` — member roster with role update dropdowns, member removal, and atomic ownership transfer.
-* **Invitations**: `/settings/invitations` — issue single-use hashed invitations, view pending invites, copy direct link (development mode), and revoke tokens.
-* **Invitation Acceptance**: `/invitations/accept?token=...` — public token inspection and authenticated acceptance flow with auto-redirection to dashboard.
-* **Social Accounts**: `/settings/social-accounts` — connect Facebook Pages and Instagram Professional accounts, view connection status, granted permissions, and disconnect channels.
-* **Channel Selection**: `/settings/social-accounts/connect?session=...` — review discovered accounts returned by Meta OAuth, select desired channels to connect, and save with AES-256-GCM token encryption.
-* **Swagger API Documentation**: `http://localhost:4000/api/docs` — complete OpenAPI specification for all auth, health, workspace, invitation, and social account endpoints.
+* **Futuristic Dual-Theme Engine**: Default crisp Light theme (`#F7F8FC`) and user-selectable Cosmic Dark theme (`#070A18`).
+* **8-Platform Social Accounts Hub**: `/settings/social-accounts` — connect and manage Instagram, Facebook, X (Twitter), LinkedIn, Pinterest, YouTube, TikTok, and Threads with AES-256-GCM encrypted TokenVault.
+* **AI Content Studio**: `/content/studio` — generate tailored cross-network variants, brand tones, and festival occasions.
+* **Content Calendar & Bulk Publishing**: `/calendar` & `/bulk-publish` — 3-step bulk campaign publisher with staggered rollout and delivery calculator.
+* **Telemetry & Growth Insights**: `/analytics` & `/analytics/insights` — real cross-platform timeseries, 4 KPI cards, Top Platforms donut chart, and autonomous growth recommendation engine.
+* **Unified Social Inbox**: `/inbox` — community hub for comments, replies, mentions, and sentiment-driven auto-replies across all channels.
+* **Workspace Settings**: `/settings/workspace`, `/settings/members`, `/settings/billing`, `/settings/brand-kit`, `/settings/white-label`, `/settings/webhooks`.
+* **Swagger API Documentation**: `http://localhost:4000/api/docs` — complete OpenAPI 3.0 specification for all REST endpoints.

@@ -106,7 +106,7 @@ export function PostInspectorModal({
 
     try {
       await apiClient(
-        `publishing/workspaces/${workspaceId}/scheduled-posts/${post.id}/reschedule`,
+        `/workspaces/${workspaceId}/scheduled-posts/${post.id}/reschedule`,
         {
           method: 'PATCH',
           body: JSON.stringify({
@@ -135,7 +135,7 @@ export function PostInspectorModal({
 
     try {
       await apiClient(
-        `publishing/workspaces/${workspaceId}/scheduled-posts/${post.id}/cancel`,
+        `/workspaces/${workspaceId}/scheduled-posts/${post.id}/cancel`,
         {
           method: 'POST',
           body: JSON.stringify({
@@ -163,7 +163,7 @@ export function PostInspectorModal({
 
     try {
       await apiClient(
-        `publishing/workspaces/${workspaceId}/scheduled-posts/${post.id}/targets/${targetId}/retry`,
+        `/workspaces/${workspaceId}/scheduled-posts/${post.id}/targets/${targetId}/retry`,
         {
           method: 'POST',
         },
@@ -187,7 +187,7 @@ export function PostInspectorModal({
 
     try {
       const res = await apiClient<any>(
-        `publishing/workspaces/${workspaceId}/scheduled-posts/${post.id}/targets/${targetId}/retry`,
+        `/workspaces/${workspaceId}/scheduled-posts/${post.id}/targets/${targetId}/retry`,
         {
           method: 'POST',
         },

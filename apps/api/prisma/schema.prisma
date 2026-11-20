@@ -43,6 +43,10 @@ enum SocialProvider {
   META_INSTAGRAM
   LINKEDIN
   TWITTER_X
+  PINTEREST
+  YOUTUBE
+  TIKTOK
+  THREADS
 }
 
 enum SocialAccountType {
@@ -52,6 +56,11 @@ enum SocialAccountType {
   LINKEDIN_PAGE
   LINKEDIN_PROFILE
   TWITTER_PROFILE
+  PINTEREST_BUSINESS
+  YOUTUBE_CHANNEL
+  TIKTOK_BUSINESS
+  TIKTOK_CREATOR
+  THREADS_PROFILE
 }
 
 enum SocialConnectionStatus {
@@ -99,6 +108,10 @@ enum SocialPlatform {
   INSTAGRAM
   LINKEDIN
   TWITTER_X
+  PINTEREST
+  YOUTUBE
+  TIKTOK
+  THREADS
 }
 
 enum ListeningSentiment {
@@ -115,20 +128,6 @@ enum BrandTone {
   URGENT_PROMOTIONAL
   AUTHORITATIVE
   PLAYFUL
-}
-
-enum WhatsAppMessageStatus {
-  QUEUED
-  SENT
-  DELIVERED
-  READ
-  FAILED
-}
-
-enum RecipientConsentStatus {
-  OPTED_IN
-  OPTED_OUT
-  PENDING_VERIFICATION
 }
 
 enum MediaType {
@@ -197,11 +196,13 @@ model User {
   passwordHash    String
   role            Role             @default(BUSINESS_OWNER)
   status          UserStatus       @default(ACTIVE)
+  themePreference String           @default("light")
   emailVerifiedAt DateTime?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 
   refreshSessions          RefreshSession[]
+  authTokens               AuthToken[]
   auditLogs                AuditLog[]
   createdWorkspaces        Workspace[]           @relation("WorkspaceCreatedBy")
   workspaceMemberships     WorkspaceMember[]
@@ -214,7 +215,6 @@ model User {
   approvalRequestedDrafts  ContentDraft[]        @relation("DraftApprovalRequestedBy")
   approvedDrafts           ContentDraft[]        @relation("DraftApprovedBy")
   contentRevisions         ContentRevision[]     @relation("RevisionCreatedBy")
-  whatsAppRecipientConsents WhatsAppRecipientConsent[]
   createdScheduledPosts    ScheduledPost[]       @relation("ScheduledPostCreatedBy")
   cancelledScheduledPosts  ScheduledPost[]       @relation("ScheduledPostCancelledBy")
   dismissedGrowthInsights  GrowthInsight[]       @relation("GrowthInsightDismissedBy")
@@ -284,9 +284,6 @@ model Workspace {
   oauthSessions  OAuthSession[]
   brandProfile              WorkspaceBrandProfile?
   contentDrafts             ContentDraft[]
-  whatsAppConfig            WorkspaceWhatsAppConfig?
-  whatsAppRecipients        WhatsAppRecipientConsent[]
-  whatsAppMessages          WhatsAppNotificationMessage[]
   scheduledPosts            ScheduledPost[]
   accountAnalyticsSnapshots AccountAnalyticsSnapshot[]
   postAnalyticsSnapshots    PostAnalyticsSnapshot[]
@@ -497,7 +494,6 @@ model ContentDraft {
   comments            DraftComment[]
   variants            ContentVariant[]
   revisions           ContentRevision[]
-  whatsAppMessages    WhatsAppNotificationMessage[]
   scheduledPosts      ScheduledPost[]
 
   @@index([workspaceId])
@@ -596,83 +592,6 @@ model AuditLog {
   @@index([action])
   @@index([createdAt])
   @@map("audit_logs")
-}
-
-model WorkspaceWhatsAppConfig {
-  id                   String   @id @default(uuid())
-  workspaceId          String   @unique
-  wabaId               String
-  phoneNumberId        String
-  encryptedAccessToken String
-  businessPhoneNumber  String?
-  isActive             Boolean  @default(true)
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-
-  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-
-  @@index([workspaceId])
-  @@map("workspace_whatsapp_configs")
-}
-
-model WhatsAppRecipientConsent {
-  id            String                 @id @default(uuid())
-  workspaceId   String
-  userId        String?
-  phoneNumber   String
-  displayName   String
-  status        RecipientConsentStatus @default(OPTED_IN)
-  consentSource String                 @default("WORKSPACE_ADMIN_REGISTRATION")
-  optedInAt     DateTime               @default(now())
-  optedOutAt    DateTime?
-  createdAt     DateTime               @default(now())
-  updatedAt     DateTime               @updatedAt
-
-  workspace Workspace                     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  user      User?                         @relation(fields: [userId], references: [id], onDelete: SetNull)
-  messages  WhatsAppNotificationMessage[]
-
-  @@unique([workspaceId, phoneNumber])
-  @@index([workspaceId, status])
-  @@map("whatsapp_recipient_consents")
-}
-
-model WhatsAppNotificationMessage {
-  id                 String                @id @default(uuid())
-  workspaceId        String
-  draftId            String?
-  recipientConsentId String
-  providerMessageId  String?               @unique
-  templateName       String                @default("content_draft_approval_request")
-  language           String                @default("en")
-  parameters         Json?
-  status             WhatsAppMessageStatus @default(QUEUED)
-  errorMessage       String?
-  sentAt             DateTime?
-  deliveredAt        DateTime?
-  readAt             DateTime?
-  createdAt          DateTime              @default(now())
-  updatedAt          DateTime              @updatedAt
-
-  workspace Workspace                @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  draft     ContentDraft?            @relation(fields: [draftId], references: [id], onDelete: SetNull)
-  recipient WhatsAppRecipientConsent @relation(fields: [recipientConsentId], references: [id], onDelete: Cascade)
-
-  @@index([workspaceId, createdAt])
-  @@index([draftId])
-  @@index([providerMessageId])
-  @@map("whatsapp_notification_messages")
-}
-
-model WhatsAppWebhookEvent {
-  id          String   @id @default(uuid())
-  eventId     String   @unique
-  eventType   String
-  payload     Json
-  processedAt DateTime @default(now())
-
-  @@index([eventId])
-  @@map("whatsapp_webhook_events")
 }
 
 enum ScheduledPostStatus {
@@ -1692,5 +1611,40 @@ model WebhookDeliveryLog {
   @@index([workspaceId, status])
   @@map("webhook_delivery_logs")
 }
+
+model ContactInquiry {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  company   String?
+  subject   String
+  message   String   @db.Text
+  ipAddress String?
+  userAgent String?
+  status    String   @default("RECEIVED")
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([createdAt])
+  @@map("contact_inquiries")
+}
+
+model AuthToken {
+  id        String    @id @default(uuid())
+  userId    String
+  type      String    // PASSWORD_RESET | EMAIL_VERIFICATION
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@index([expiresAt])
+  @@map("auth_tokens")
+}
+
+
 
 

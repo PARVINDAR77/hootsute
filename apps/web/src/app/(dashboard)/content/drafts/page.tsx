@@ -31,6 +31,11 @@ import {
   Facebook,
   Linkedin,
   Twitter,
+  Pin,
+  Youtube,
+  Video,
+  AtSign,
+  Send,
   AlertTriangle,
   Loader2,
   Plus,
@@ -54,7 +59,49 @@ export default function ContentDraftsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [actionInProgress, setActionInProgress] = useState<string | null>(null);
+  const [selectedDraftIds, setSelectedDraftIds] = useState<string[]>([]);
+  const [isBulkApproving, setIsBulkApproving] = useState(false);
   const [alertMsg, setAlertMsg] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  const canBulkApprove = userRole === WorkspaceRole.OWNER || userRole === WorkspaceRole.ADMIN;
+
+  const toggleSelectDraft = (draftId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedDraftIds((prev) =>
+      prev.includes(draftId) ? prev.filter((id) => id !== draftId) : [...prev, draftId],
+    );
+  };
+
+  const handleBulkApprove = async () => {
+    if (!currentWorkspace || selectedDraftIds.length === 0 || !canBulkApprove) return;
+    setIsBulkApproving(true);
+    setAlertMsg(null);
+    try {
+      const res = await apiClient<any>(`/workspaces/${currentWorkspace.id}/content-drafts/bulk-approve`, {
+        method: 'POST',
+        body: JSON.stringify({ draftIds: selectedDraftIds }),
+      });
+      const payload = res?.data ?? res;
+      setAlertMsg({
+        type: 'success',
+        message: `Approved ${payload?.approvedIds?.length || selectedDraftIds.length} campaign draft(s). Ready for bulk publishing!`,
+      });
+      setSelectedDraftIds([]);
+      await loadDrafts();
+    } catch (err: any) {
+      setAlertMsg({ type: 'error', message: err.message || 'Bulk approval failed' });
+    } finally {
+      setIsBulkApproving(false);
+    }
+  };
+
+  const handleBulkPublishSelected = () => {
+    const approvedSelected = drafts
+      .filter((d) => selectedDraftIds.includes(d.id) && d.status === DraftStatus.APPROVED)
+      .map((d) => d.id);
+    const targetIds = approvedSelected.length > 0 ? approvedSelected : selectedDraftIds;
+    router.push(`/bulk-publish?draftIds=${encodeURIComponent(targetIds.join(','))}`);
+  };
 
   useEffect(() => {
     if (!currentWorkspace?.id) return;
@@ -66,12 +113,11 @@ export default function ContentDraftsPage() {
     setIsLoading(true);
     try {
       const statusParam = selectedStatus !== 'ALL' ? `?status=${selectedStatus}` : '';
-      const res = await apiClient<{ success: boolean; data: ContentDraftDto[] }>(
+      const res = await apiClient<any>(
         `/workspaces/${currentWorkspace.id}/content-drafts${statusParam}`,
       );
-      if (res.data) {
-        setDrafts(res.data);
-      }
+      const list = Array.isArray(res) ? res : (res?.data || []);
+      setDrafts(list);
     } catch (err: any) {
       console.error('Failed to load drafts', err);
     } finally {
@@ -179,6 +225,30 @@ export default function ContentDraftsPage() {
             <Twitter className="w-3.5 h-3.5 text-slate-800" />
           </span>
         );
+      case SocialPlatform.PINTEREST:
+        return (
+          <span key={platform} title="Pinterest">
+            <Pin className="w-3.5 h-3.5 text-red-600" />
+          </span>
+        );
+      case SocialPlatform.YOUTUBE:
+        return (
+          <span key={platform} title="YouTube">
+            <Youtube className="w-3.5 h-3.5 text-rose-600" />
+          </span>
+        );
+      case SocialPlatform.TIKTOK:
+        return (
+          <span key={platform} title="TikTok">
+            <Video className="w-3.5 h-3.5 text-slate-900" />
+          </span>
+        );
+      case SocialPlatform.THREADS:
+        return (
+          <span key={platform} title="Threads">
+            <AtSign className="w-3.5 h-3.5 text-neutral-900" />
+          </span>
+        );
       default:
         return null;
     }
@@ -187,29 +257,75 @@ export default function ContentDraftsPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 bg-white dark:bg-[#0F142B]/90 rounded-2xl border border-[#E7EAF2] dark:border-[#7138F5]/25 shadow-soft dark:shadow-none">
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="p-2 rounded-xl bg-indigo-50 text-indigo-600">
+          <div className="flex items-center gap-2.5">
+            <span className="p-2.5 rounded-xl bg-[#F1EBFF] dark:bg-[#7138F5]/20 text-[#7138F5] dark:text-[#C4A5FF]">
               <FileText className="w-5 h-5" />
             </span>
-            <h1 className="text-xl font-bold tracking-tight text-slate-900">
+            <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#111827] dark:text-white">
               Content Drafts &amp; Approval Hub
             </h1>
           </div>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs sm:text-sm text-[#64748B] dark:text-slate-400">
             Review, edit, translate, and approve multi-platform social media posts before publishing.
           </p>
         </div>
 
-        <Button
-          onClick={() => router.push('/content/studio')}
-          className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
-        >
-          <Sparkles className="w-4 h-4" />
-          <span>New AI Campaign</span>
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => router.push('/bulk-publish')}
+            className="gap-2"
+          >
+            <Send className="w-4 h-4" />
+            <span>Bulk Publish</span>
+          </Button>
+          <Button
+            onClick={() => router.push('/content/studio')}
+            className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>New AI Campaign</span>
+          </Button>
+        </div>
       </div>
+
+      {/* Bulk Action Bar */}
+      {selectedDraftIds.length > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 rounded-xl bg-indigo-50 border border-indigo-200">
+          <span className="text-xs font-semibold text-indigo-900">
+            {selectedDraftIds.length} campaign draft(s) selected
+          </span>
+          <div className="flex items-center gap-2">
+            {canBulkApprove && (
+              <Button
+                size="sm"
+                onClick={handleBulkApprove}
+                isLoading={isBulkApproving}
+                leftIcon={<CheckCircle2 className="w-3.5 h-3.5" />}
+              >
+                Bulk Approve
+              </Button>
+            )}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleBulkPublishSelected}
+              leftIcon={<Send className="w-3.5 h-3.5" />}
+            >
+              Bulk Publish Selected
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setSelectedDraftIds([])}
+            >
+              Clear
+            </Button>
+          </div>
+        </div>
+      )}
 
       {alertMsg && (
         <Alert
@@ -291,6 +407,14 @@ export default function ContentDraftsPage() {
               >
                 <div className="space-y-1.5 flex-1 min-w-0">
                   <div className="flex items-center gap-2.5 flex-wrap">
+                    <input
+                      type="checkbox"
+                      checked={selectedDraftIds.includes(draft.id)}
+                      onClick={(e) => toggleSelectDraft(draft.id, e)}
+                      onChange={() => {}}
+                      className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                      aria-label={`Select ${draft.title}`}
+                    />
                     <span className="font-bold text-sm text-slate-900 group-hover:text-indigo-600 transition-colors">
                       {draft.title}
                     </span>

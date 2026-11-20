@@ -99,7 +99,7 @@ export function CreateQueryModal({
         sentimentFilter,
       };
 
-      const res = await apiClient<{ success: boolean; data: ListeningQueryDto }>(
+      const res = await apiClient<any>(
         `/workspaces/${workspaceId}/listening/queries`,
         {
           method: 'POST',
@@ -107,8 +107,9 @@ export function CreateQueryModal({
         },
       );
 
-      if (res.data) {
-        onCreated(res.data);
+      const created = res?.data ?? res;
+      if (created) {
+        onCreated(created);
         onClose();
       }
     } catch (err: any) {

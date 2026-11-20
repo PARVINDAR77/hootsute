@@ -33,6 +33,7 @@ import { QueryDraftsDto } from './dto/query-drafts.dto';
 import { RegenerateVariantDto } from './dto/regenerate-variant.dto';
 import { TranslateVariantDto } from './dto/translate-variant.dto';
 import { AdaptVariantDto } from './dto/adapt-variant.dto';
+import { BulkApproveDraftsDto } from './dto/bulk-approve.dto';
 import { RejectDraftDto } from './dto/approval-action.dto';
 import { GenerateCreativeBriefDto } from './dto/creative-brief.dto';
 
@@ -74,6 +75,30 @@ export class ContentDraftsController {
       success: true,
       data: result.items,
       pagination: result.pagination,
+    };
+  }
+
+  @Post('bulk-approve')
+  @RequireWorkspaceRoles(WorkspaceRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Bulk approve multiple campaign drafts (ADMIN or OWNER only)' })
+  async bulkApproveDrafts(
+    @Param('workspaceId') workspaceId: string,
+    @Req() req: any,
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: BulkApproveDraftsDto,
+  ) {
+    const memberRole = req.workspaceMember?.role || WorkspaceRole.ADMIN;
+    const result = await this.draftsService.bulkApproveDrafts(
+      workspaceId,
+      dto.draftIds,
+      memberRole,
+      user.id,
+    );
+    return {
+      success: true,
+      message: `Approved ${result.approvedIds.length} campaign draft(s)`,
+      data: result,
     };
   }
 

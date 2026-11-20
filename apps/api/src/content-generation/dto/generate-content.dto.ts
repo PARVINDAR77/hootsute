@@ -24,7 +24,7 @@ export class GenerateContentDto {
   })
   @IsArray()
   @ArrayMinSize(1, { message: 'At least one social platform must be selected' })
-  @ArrayMaxSize(4, { message: 'Cannot generate for more than 4 platforms simultaneously' })
+  @ArrayMaxSize(8, { message: 'Cannot generate for more than 8 platforms simultaneously' })
   @IsEnum(SocialPlatform, { each: true })
   platforms: SocialPlatform[];
 

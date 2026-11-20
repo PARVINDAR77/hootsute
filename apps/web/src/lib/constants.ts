@@ -2,11 +2,29 @@ export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost
 export const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || 'OmniSocial AI';
 
 export const ROUTES = {
+  // Public Marketing & Legal Routes
   HOME: '/',
+  FEATURES: '/features',
+  PLATFORMS: '/platforms',
+  PRICING: '/pricing',
+  ABOUT: '/about',
+  CONTACT: '/contact',
+  BLOG: '/blog',
+  FAQ: '/faq',
+  HELP: '/help',
+  PRIVACY: '/privacy',
+  TERMS: '/terms',
+  SECURITY: '/security',
+
+  // Authentication Routes
   LOGIN: '/login',
+  SIGNUP: '/signup',
   REGISTER: '/register',
   FORGOT_PASSWORD: '/forgot-password',
   RESET_PASSWORD: '/reset-password',
+  VERIFY_EMAIL: '/verify-email',
+
+  // Authenticated SaaS Routes
   DASHBOARD: '/dashboard',
   SETTINGS: '/settings',
   SETTINGS_WORKSPACE: '/settings/workspace',
@@ -15,13 +33,14 @@ export const ROUTES = {
   SETTINGS_SOCIAL_ACCOUNTS: '/settings/social-accounts',
   SETTINGS_SOCIAL_ACCOUNTS_CONNECT: '/settings/social-accounts/connect',
   BRAND_KIT: '/settings/brand-kit',
-  SETTINGS_WHATSAPP: '/settings/whatsapp',
+  BULK_PUBLISH: '/bulk-publish',
   SETTINGS_BILLING: '/settings/billing',
   CONTENT_STUDIO: '/content/studio',
   CONTENT_DRAFTS: '/content/drafts',
   MEDIA: '/media',
   CALENDAR: '/calendar',
   ANALYTICS: '/analytics',
+  ANALYTICS_INSIGHTS: '/analytics/insights',
   INBOX: '/inbox',
   AUTOMATIONS: '/automations',
   LINKS: '/links',

@@ -13,6 +13,7 @@ import { CancelScheduledPostDto } from '../dto/cancel-scheduled-post.dto';
 import { QueryScheduledPostsDto } from '../dto/query-scheduled-posts.dto';
 import { QueryCalendarDto } from '../dto/query-calendar.dto';
 import { RecordPublishingAttemptDto } from '../dto/record-attempt.dto';
+import { BulkPublishCampaignDto } from '../dto/bulk-publish.dto';
 import {
   WorkspaceRole,
   DraftStatus,
@@ -20,7 +21,9 @@ import {
   ScheduledPostStatus,
   PublishTargetStatus,
   AttemptOutcome,
+  SocialPlatform,
 } from '@prisma/client';
+import { BulkPublishItemResultDto, BulkPublishResponseDto } from '@packages/shared';
 import * as crypto from 'crypto';
 import { computeSnapshotHash } from '../utils/canonical-json';
 
@@ -416,5 +419,280 @@ export class ScheduledPostsService {
     const parentStatus = await this.repository.recalculateParentStatus(target.scheduledPostId);
 
     return { attempt, targetStatus: nextTargetStatus, parentStatus };
+  }
+
+  async bulkPublishCampaigns(
+    workspaceId: string,
+    userId: string,
+    userRole: WorkspaceRole,
+    dto: BulkPublishCampaignDto,
+    dispatchNowFn?: (targetId: string) => Promise<{ success: boolean }>,
+  ): Promise<BulkPublishResponseDto> {
+    if (userRole === WorkspaceRole.VIEWER) {
+      throw new ForbiddenException('Viewers do not have permission to bulk publish campaigns');
+    }
+
+    const uniqueAccountIds = Array.from(new Set(dto.socialAccountIds));
+    const uniqueDraftIds = Array.from(new Set(dto.draftIds));
+
+    const accounts = await this.prisma.socialAccount.findMany({
+      where: {
+        id: { in: uniqueAccountIds },
+        workspaceId,
+        connectionStatus: SocialConnectionStatus.CONNECTED,
+      },
+    });
+
+    if (accounts.length === 0) {
+      throw new BadRequestException('No active connected social accounts matched the selection');
+    }
+
+    const baseStart =
+      dto.dispatchMode === 'IMMEDIATE'
+        ? new Date()
+        : dto.scheduledAt
+          ? new Date(dto.scheduledAt)
+          : new Date(Date.now() + 5 * 60 * 1000);
+
+    if (isNaN(baseStart.getTime())) {
+      throw new BadRequestException('Invalid scheduledAt timestamp');
+    }
+
+    const staggerMs = (dto.staggerMinutes || 10) * 60 * 1000;
+    const autoAdapt = dto.autoAdaptMissingPlatform !== false;
+
+    const results: BulkPublishItemResultDto[] = [];
+    let totalTargetsQueued = 0;
+    let publishedImmediately = 0;
+    let scheduledCount = 0;
+    let failedCount = 0;
+
+    for (let index = 0; index < uniqueDraftIds.length; index++) {
+      const draftId = uniqueDraftIds[index];
+      const draft = await this.prisma.contentDraft.findFirst({
+        where: { id: draftId, workspaceId },
+        include: {
+          variants: true,
+          revisions: { orderBy: { revisionNumber: 'desc' }, take: 5 },
+        },
+      });
+
+      if (!draft) {
+        failedCount++;
+        results.push({
+          draftId,
+          draftTitle: 'Unknown Draft',
+          status: 'FAILED',
+          targetCount: 0,
+          publishedTargets: 0,
+          failedTargets: 0,
+          error: 'Draft not found in this workspace',
+        });
+        continue;
+      }
+
+      if (draft.status !== DraftStatus.APPROVED) {
+        failedCount++;
+        results.push({
+          draftId: draft.id,
+          draftTitle: draft.title,
+          status: 'FAILED',
+          targetCount: 0,
+          publishedTargets: 0,
+          failedTargets: 0,
+          error: `Draft must be APPROVED before publishing (current: ${draft.status})`,
+        });
+        continue;
+      }
+
+      if (!draft.variants || draft.variants.length === 0) {
+        failedCount++;
+        results.push({
+          draftId: draft.id,
+          draftTitle: draft.title,
+          status: 'FAILED',
+          targetCount: 0,
+          publishedTargets: 0,
+          failedTargets: 0,
+          error: 'Draft has no content variants',
+        });
+        continue;
+      }
+
+      const targetsInput: Array<{
+        socialAccountId: string;
+        platform: SocialPlatform;
+        variantId?: string;
+      }> = [];
+
+      for (const acc of accounts) {
+        const platform = this.providerToPlatform(acc.provider);
+        const matchedVariant = draft.variants.find((v) => v.platform === platform);
+        if (matchedVariant) {
+          targetsInput.push({
+            socialAccountId: acc.id,
+            platform,
+            variantId: matchedVariant.id,
+          });
+        } else if (autoAdapt) {
+          targetsInput.push({
+            socialAccountId: acc.id,
+            platform,
+            variantId: draft.variants[0].id,
+          });
+        }
+      }
+
+      if (targetsInput.length === 0) {
+        failedCount++;
+        results.push({
+          draftId: draft.id,
+          draftTitle: draft.title,
+          status: 'FAILED',
+          targetCount: 0,
+          publishedTargets: 0,
+          failedTargets: 0,
+          error: 'No selected accounts matched the draft platforms',
+        });
+        continue;
+      }
+
+      const postScheduledAt =
+        dto.dispatchMode === 'STAGGERED'
+          ? new Date(baseStart.getTime() + index * staggerMs)
+          : baseStart;
+
+      const approvedRevision =
+        draft.revisions.find((r) => r.action === 'APPROVE') || draft.revisions[0];
+      const approvedRevisionNumber = approvedRevision ? approvedRevision.revisionNumber : 1;
+
+      const canonicalVariants = draft.variants.map((v) => ({
+        id: v.id,
+        platform: v.platform,
+        headline: v.headline || null,
+        body: v.body,
+        callToAction: v.callToAction || null,
+        hashtags: v.hashtags || [],
+        linkUrl: v.linkUrl || null,
+        mediaAssetUrl: v.mediaAssetUrl || null,
+        mediaAssetId: v.mediaAssetId || null,
+      }));
+
+      const contentSnapshot = {
+        draftId: draft.id,
+        approvedRevisionNumber,
+        title: draft.title,
+        objective: draft.objective,
+        contentType: draft.contentType,
+        language: draft.language,
+        variants: canonicalVariants,
+        approvedAt: draft.approvedAt ? draft.approvedAt.toISOString() : null,
+        approvedByUserId: draft.approvedByUserId,
+      };
+
+      const snapshotHash = computeSnapshotHash(contentSnapshot);
+
+      const scheduledPost = await this.repository.createScheduledPost({
+        workspaceId,
+        draftId: draft.id,
+        createdById: userId,
+        scheduledAt: postScheduledAt,
+        timezone: dto.timezone || 'UTC',
+        approvedRevisionNumber,
+        contentSnapshot,
+        snapshotHash,
+        targets: targetsInput,
+      });
+
+      totalTargetsQueued += targetsInput.length;
+
+      let pubCount = 0;
+      let failTargetCount = 0;
+      let itemStatus: BulkPublishItemResultDto['status'] = 'SCHEDULED';
+
+      if (dto.dispatchMode === 'IMMEDIATE' && dispatchNowFn && scheduledPost.targets) {
+        for (const t of scheduledPost.targets) {
+          try {
+            const res = await dispatchNowFn(t.id);
+            if (res.success) pubCount++;
+            else failTargetCount++;
+          } catch {
+            failTargetCount++;
+          }
+        }
+        if (pubCount === scheduledPost.targets.length) {
+          itemStatus = 'PUBLISHED';
+          publishedImmediately++;
+        } else if (pubCount > 0) {
+          itemStatus = 'PARTIALLY_PUBLISHED';
+          publishedImmediately++;
+        } else {
+          itemStatus = 'FAILED';
+          failedCount++;
+        }
+      } else {
+        scheduledCount++;
+      }
+
+      results.push({
+        draftId: draft.id,
+        draftTitle: draft.title,
+        scheduledPostId: scheduledPost.id,
+        scheduledAt: postScheduledAt.toISOString(),
+        status: itemStatus,
+        targetCount: targetsInput.length,
+        publishedTargets: pubCount,
+        failedTargets: failTargetCount,
+      });
+    }
+
+    await this.prisma.auditLog.create({
+      data: {
+        workspaceId,
+        actorUserId: userId,
+        action: 'BULK_CAMPAIGN_PUBLISH',
+        entityType: 'ScheduledPost',
+        metadata: {
+          dispatchMode: dto.dispatchMode,
+          totalDraftsProcessed: uniqueDraftIds.length,
+          totalTargetsQueued,
+          publishedImmediately,
+          scheduledCount,
+          failedCount,
+        },
+      },
+    });
+
+    return {
+      totalDraftsProcessed: uniqueDraftIds.length,
+      totalTargetsQueued,
+      publishedImmediately,
+      scheduledCount,
+      failedCount,
+      results,
+    };
+  }
+
+  private providerToPlatform(provider: string): SocialPlatform {
+    switch (provider) {
+      case 'META_FACEBOOK':
+        return SocialPlatform.FACEBOOK;
+      case 'META_INSTAGRAM':
+        return SocialPlatform.INSTAGRAM;
+      case 'LINKEDIN':
+        return SocialPlatform.LINKEDIN;
+      case 'TWITTER_X':
+        return SocialPlatform.TWITTER_X;
+      case 'PINTEREST':
+        return SocialPlatform.PINTEREST;
+      case 'YOUTUBE':
+        return SocialPlatform.YOUTUBE;
+      case 'TIKTOK':
+        return SocialPlatform.TIKTOK;
+      case 'THREADS':
+        return SocialPlatform.THREADS;
+      default:
+        return SocialPlatform.FACEBOOK;
+    }
   }
 }

@@ -1,0 +1,191 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 460" width="100%" height="100%" style="background:#ffffff; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  
+    <defs>
+      <!-- Instagram Gradient -->
+      <linearGradient id="igGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#833AB4"/>
+        <stop offset="35%" stop-color="#C13584"/>
+        <stop offset="70%" stop-color="#E1306C"/>
+        <stop offset="90%" stop-color="#FD1D1D"/>
+        <stop offset="100%" stop-color="#FCAF45"/>
+      </linearGradient>
+
+      <!-- Primary Brand Gradient -->
+      <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#0F172A"/>
+        <stop offset="100%" stop-color="#1E293B"/>
+      </linearGradient>
+
+      <!-- Tech Cyan Gradient -->
+      <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#0284C7"/>
+        <stop offset="100%" stop-color="#0EA5E9"/>
+      </linearGradient>
+
+      <!-- Success Emerald Gradient -->
+      <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#059669"/>
+        <stop offset="100%" stop-color="#10B981"/>
+      </linearGradient>
+
+      <!-- Warning Amber Gradient -->
+      <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#D97706"/>
+        <stop offset="100%" stop-color="#F59E0B"/>
+      </linearGradient>
+
+      <!-- Purple Accent Gradient -->
+      <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#6D28D9"/>
+        <stop offset="100%" stop-color="#8B5CF6"/>
+      </linearGradient>
+
+      <!-- Card Subtle Drop Shadow -->
+      <filter id="cardShadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+        <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.06"/>
+      </filter>
+
+      <!-- Elevated Drop Shadow -->
+      <filter id="elevatedShadow" x="-8%" y="-8%" width="116%" height="120%" filterUnits="userSpaceOnUse">
+        <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0F172A" flood-opacity="0.10"/>
+      </filter>
+
+      <!-- Arrow Markers -->
+      <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748B"/>
+      </marker>
+      <marker id="arrowPrimary" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284C7"/>
+      </marker>
+      <marker id="arrowEmerald" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#059669"/>
+      </marker>
+      <marker id="arrowIg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#E1306C"/>
+      </marker>
+    </defs>
+  
+
+  <!-- Top Title -->
+  <rect x="20" y="10" width="840" height="42" rx="8" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <rect x="20" y="10" width="6" height="42" rx="3" fill="#0F172A"/>
+  <text x="40" y="32" font-size="14" font-weight="700" fill="#0F172A">OMNISOCIAL AI &bull; MULTI-TIER INSTAGRAM INTEGRATION ARCHITECTURE</text>
+  <text x="40" y="45" font-size="10.5" fill="#64748B">Strict unidirectional data flow: Browser &gt; Next.js &gt; NestJS Gateway &gt; PostgreSQL / Redis &gt; Meta API</text>
+
+  <!-- Tier 1: Next.js Frontend -->
+  <g transform="translate(30, 65)" filter="url(#cardShadow)">
+    <rect width="820" height="70" rx="8" fill="#F8FAFC" stroke="#E2E8F0"/>
+    <rect width="820" height="4" rx="2" fill="#0284C7"/>
+    <text x="20" y="24" font-size="11" font-weight="bold" fill="#0284C7">TIER 1: NEXT.JS 14 APP ROUTER FRONTEND (CLIENT &amp; SERVER COMPONENTS)</text>
+    
+    <!-- Pills -->
+    <g transform="translate(20, 34)">
+      <rect x="0" y="0" width="150" height="26" rx="4" fill="#FFFFFF" stroke="#CBD5E1"/>
+      <text x="75" y="17" font-size="9.5" font-weight="600" fill="#0F172A" text-anchor="middle">Social Accounts View</text>
+
+      <rect x="160" y="0" width="150" height="26" rx="4" fill="#FFFFFF" stroke="#CBD5E1"/>
+      <text x="235" y="17" font-size="9.5" font-weight="600" fill="#0F172A" text-anchor="middle">Instagram Connect Modal</text>
+
+      <rect x="320" y="0" width="150" height="26" rx="4" fill="#FFFFFF" stroke="#CBD5E1"/>
+      <text x="395" y="17" font-size="9.5" font-weight="600" fill="#0F172A" text-anchor="middle">Post Composer &amp; Media</text>
+
+      <rect x="480" y="0" width="140" height="26" rx="4" fill="#FFFFFF" stroke="#CBD5E1"/>
+      <text x="550" y="17" font-size="9.5" font-weight="600" fill="#0F172A" text-anchor="middle">Content Calendar</text>
+
+      <rect x="630" y="0" width="150" height="26" rx="4" fill="#FFFFFF" stroke="#CBD5E1"/>
+      <text x="705" y="17" font-size="9.5" font-weight="600" fill="#0F172A" text-anchor="middle">Analytics Dashboard</text>
+    </g>
+  </g>
+
+  <!-- Downward Flow Arrow 1 -> 2 -->
+  <path d="M 440 140 L 440 160" stroke="#0284C7" stroke-width="2" marker-end="url(#arrowPrimary)"/>
+  <text x="450" y="152" font-size="8.5" font-weight="bold" fill="#0284C7">REST API (JWT Bearer + Workspace-Id)</text>
+
+  <!-- Tier 2: NestJS Backend API -->
+  <g transform="translate(30, 165)" filter="url(#cardShadow)">
+    <rect width="820" height="95" rx="8" fill="#F8FAFC" stroke="#E2E8F0"/>
+    <rect width="820" height="4" rx="2" fill="#6D28D9"/>
+    <text x="20" y="22" font-size="11" font-weight="bold" fill="#6D28D9">TIER 2: NESTJS BACKEND API &amp; MODULAR PROVIDER ADAPTERS</text>
+    
+    <!-- Sub-modules -->
+    <g transform="translate(20, 32)">
+      <rect x="0" y="0" width="145" height="50" rx="4" fill="#FFFFFF" stroke="#CBD5E1"/>
+      <text x="72" y="18" font-size="9.5" font-weight="bold" fill="#0F172A" text-anchor="middle">Auth &amp; RBAC Guard</text>
+      <text x="72" y="34" font-size="8.5" fill="#64748B" text-anchor="middle">JWT, Workspace, IDOR check</text>
+
+      <rect x="155" y="0" width="155" height="50" rx="4" fill="#FFFFFF" stroke="#CBD5E1"/>
+      <text x="232" y="18" font-size="9.5" font-weight="bold" fill="#0F172A" text-anchor="middle">MetaOAuthService</text>
+      <text x="232" y="34" font-size="8.5" fill="#64748B" text-anchor="middle">State, PKCE, 60d exchange</text>
+
+      <rect x="320" y="0" width="165" height="50" rx="4" fill="#FFFFFF" stroke="#CBD5E1"/>
+      <text x="402" y="18" font-size="9.5" font-weight="bold" fill="#0F172A" text-anchor="middle">TokenVaultService</text>
+      <text x="402" y="34" font-size="8.5" fill="#64748B" text-anchor="middle">AES-256-GCM Dual-Key Vault</text>
+
+      <rect x="495" y="0" width="155" height="50" rx="4" fill="#FFFFFF" stroke="#CBD5E1"/>
+      <text x="572" y="18" font-size="9.5" font-weight="bold" fill="#0F172A" text-anchor="middle">Instagram Publisher</text>
+      <text x="572" y="34" font-size="8.5" fill="#64748B" text-anchor="middle">2-Step Media Containers</text>
+
+      <rect x="660" y="0" width="140" height="50" rx="4" fill="#FFFFFF" stroke="#CBD5E1"/>
+      <text x="730" y="18" font-size="9.5" font-weight="bold" fill="#0F172A" text-anchor="middle">Scheduling Service</text>
+      <text x="730" y="34" font-size="8.5" fill="#64748B" text-anchor="middle">Timezones &amp; Snapshots</text>
+    </g>
+  </g>
+
+  <!-- Split Downward Arrows 2 -> 3A & 3B -->
+  <path d="M 240 265 L 240 285" stroke="#6D28D9" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M 640 265 L 640 285" stroke="#6D28D9" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Tier 3: Data Layer (PostgreSQL on Left, Redis on Right) -->
+  <g transform="translate(30, 290)">
+    <!-- PostgreSQL Box -->
+    <g transform="translate(0, 0)" filter="url(#cardShadow)">
+      <rect width="395" height="85" rx="8" fill="#F8FAFC" stroke="#E2E8F0"/>
+      <rect width="395" height="4" rx="2" fill="#059669"/>
+      <text x="20" y="22" font-size="11" font-weight="bold" fill="#059669">TIER 3A: POSTGRESQL 18 + PRISMA ORM</text>
+      <g transform="translate(15, 32)">
+        <rect x="0" y="0" width="115" height="42" rx="4" fill="#FFFFFF" stroke="#CBD5E1"/>
+        <text x="57" y="16" font-size="9" font-weight="bold" fill="#0F172A" text-anchor="middle">SocialAccount</text>
+        <text x="57" y="30" font-size="7.5" fill="#64748B" text-anchor="middle">Encrypted Token, ID</text>
+
+        <rect x="125" y="0" width="115" height="42" rx="4" fill="#FFFFFF" stroke="#CBD5E1"/>
+        <text x="182" y="16" font-size="9" font-weight="bold" fill="#0F172A" text-anchor="middle">ScheduledPost</text>
+        <text x="182" y="30" font-size="7.5" fill="#64748B" text-anchor="middle">Targets, Timezone</text>
+
+        <rect x="250" y="0" width="115" height="42" rx="4" fill="#FFFFFF" stroke="#CBD5E1"/>
+        <text x="307" y="16" font-size="9" font-weight="bold" fill="#0F172A" text-anchor="middle">PublishingLog</text>
+        <text x="307" y="30" font-size="7.5" fill="#64748B" text-anchor="middle">Audit trail &amp; errors</text>
+      </g>
+    </g>
+
+    <!-- Redis Workers Box -->
+    <g transform="translate(425, 0)" filter="url(#cardShadow)">
+      <rect width="395" height="85" rx="8" fill="#F8FAFC" stroke="#E2E8F0"/>
+      <rect width="395" height="4" rx="2" fill="#DC2626"/>
+      <text x="20" y="22" font-size="11" font-weight="bold" fill="#DC2626">TIER 3B: REDIS &amp; BULLMQ PUBLISHING WORKERS</text>
+      <g transform="translate(15, 32)">
+        <rect x="0" y="0" width="115" height="42" rx="4" fill="#FFFFFF" stroke="#CBD5E1"/>
+        <text x="57" y="16" font-size="9" font-weight="bold" fill="#0F172A" text-anchor="middle">Sweeper Engine</text>
+        <text x="57" y="30" font-size="7.5" fill="#64748B" text-anchor="middle">Dispatches due posts</text>
+
+        <rect x="125" y="0" width="115" height="42" rx="4" fill="#FFFFFF" stroke="#CBD5E1"/>
+        <text x="182" y="16" font-size="9" font-weight="bold" fill="#0F172A" text-anchor="middle">Publish Worker</text>
+        <text x="182" y="30" font-size="7.5" fill="#64748B" text-anchor="middle">Rate limit throttle</text>
+
+        <rect x="250" y="0" width="115" height="42" rx="4" fill="#FFFFFF" stroke="#CBD5E1"/>
+        <text x="307" y="16" font-size="9" font-weight="bold" fill="#0F172A" text-anchor="middle">Reconciler</text>
+        <text x="307" y="30" font-size="7.5" fill="#64748B" text-anchor="middle">Ambiguous timeout check</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Downward Flow Arrow 3 -> 4 -->
+  <path d="M 440 380 L 440 400" stroke="#E1306C" stroke-width="2" marker-end="url(#arrowIg)"/>
+
+  <!-- Tier 4: External Meta Instagram Graph API -->
+  <g transform="translate(30, 405)" filter="url(#cardShadow)">
+    <rect width="820" height="45" rx="8" fill="#FFF1F2" stroke="#FDA4AF"/>
+    <rect width="820" height="3" rx="1.5" fill="url(#igGrad)"/>
+    <text x="20" y="27" font-size="11.5" font-weight="bold" fill="#9F1239">EXTERNAL TIER: OFFICIAL META INSTAGRAM GRAPH API v21.0</text>
+    <text x="470" y="27" font-size="9.5" fill="#BE123C">POST /{ig-user-id}/media &bull; POST /{ig-user-id}/media_publish &bull; GET /{ig-user-id}/insights</text>
+  </g>
+</svg>

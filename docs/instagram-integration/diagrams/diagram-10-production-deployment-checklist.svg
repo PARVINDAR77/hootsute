@@ -1,0 +1,300 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 440" width="100%" height="100%" style="background:#ffffff; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  
+    <defs>
+      <!-- Instagram Gradient -->
+      <linearGradient id="igGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#833AB4"/>
+        <stop offset="35%" stop-color="#C13584"/>
+        <stop offset="70%" stop-color="#E1306C"/>
+        <stop offset="90%" stop-color="#FD1D1D"/>
+        <stop offset="100%" stop-color="#FCAF45"/>
+      </linearGradient>
+
+      <!-- Primary Brand Gradient -->
+      <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#0F172A"/>
+        <stop offset="100%" stop-color="#1E293B"/>
+      </linearGradient>
+
+      <!-- Tech Cyan Gradient -->
+      <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#0284C7"/>
+        <stop offset="100%" stop-color="#0EA5E9"/>
+      </linearGradient>
+
+      <!-- Success Emerald Gradient -->
+      <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#059669"/>
+        <stop offset="100%" stop-color="#10B981"/>
+      </linearGradient>
+
+      <!-- Warning Amber Gradient -->
+      <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#D97706"/>
+        <stop offset="100%" stop-color="#F59E0B"/>
+      </linearGradient>
+
+      <!-- Purple Accent Gradient -->
+      <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#6D28D9"/>
+        <stop offset="100%" stop-color="#8B5CF6"/>
+      </linearGradient>
+
+      <!-- Card Subtle Drop Shadow -->
+      <filter id="cardShadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+        <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.06"/>
+      </filter>
+
+      <!-- Elevated Drop Shadow -->
+      <filter id="elevatedShadow" x="-8%" y="-8%" width="116%" height="120%" filterUnits="userSpaceOnUse">
+        <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0F172A" flood-opacity="0.10"/>
+      </filter>
+
+      <!-- Arrow Markers -->
+      <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748B"/>
+      </marker>
+      <marker id="arrowPrimary" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284C7"/>
+      </marker>
+      <marker id="arrowEmerald" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#059669"/>
+      </marker>
+      <marker id="arrowIg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#E1306C"/>
+      </marker>
+    </defs>
+  
+
+  <!-- Top Title -->
+  <rect x="20" y="10" width="840" height="42" rx="8" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <rect x="20" y="10" width="6" height="42" rx="3" fill="#059669"/>
+  <text x="40" y="32" font-size="14" font-weight="700" fill="#0F172A">PRODUCTION DEPLOYMENT &amp; META APP REVIEW READINESS INFOGRAPHIC</text>
+  <text x="40" y="46" font-size="10.5" fill="#64748B">Comprehensive 5-stage gating criteria required before launching public Instagram publishing in live mode</text>
+
+  <!-- 5 Horizontal Check Columns -->
+  <!-- Col 1: Meta App Settings -->
+  <g transform="translate(30, 75)" filter="url(#cardShadow)">
+    <rect width="150" height="340" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <rect width="150" height="4" rx="2" fill="#0284C7"/>
+    <text x="15" y="24" font-size="10.5" font-weight="bold" fill="#0284C7">1. APP SETTINGS</text>
+    <text x="15" y="38" font-size="8.5" fill="#64748B">Dashboard Essentials</text>
+
+    <g transform="translate(10, 50)">
+      <rect width="130" height="50" rx="4" fill="#F8FAFC" stroke="#E2E8F0"/>
+      <circle cx="16" cy="18" r="6" fill="#059669"/>
+      <text x="28" y="21" font-size="8.5" font-weight="bold" fill="#0F172A">Privacy Policy</text>
+      <text x="12" y="36" font-size="7.5" fill="#64748B">Live HTTPS URL with</text>
+      <text x="12" y="46" font-size="7.5" fill="#64748B">data processing rules</text>
+    </g>
+
+    <g transform="translate(10, 110)">
+      <rect width="130" height="50" rx="4" fill="#F8FAFC" stroke="#E2E8F0"/>
+      <circle cx="16" cy="18" r="6" fill="#059669"/>
+      <text x="28" y="21" font-size="8.5" font-weight="bold" fill="#0F172A">Data Deletion</text>
+      <text x="12" y="36" font-size="7.5" fill="#64748B">User deletion callback</text>
+      <text x="12" y="46" font-size="7.5" fill="#64748B">with status tracking</text>
+    </g>
+
+    <g transform="translate(10, 170)">
+      <rect width="130" height="50" rx="4" fill="#F8FAFC" stroke="#E2E8F0"/>
+      <circle cx="16" cy="18" r="6" fill="#059669"/>
+      <text x="28" y="21" font-size="8.5" font-weight="bold" fill="#0F172A">App Icon</text>
+      <text x="12" y="36" font-size="7.5" fill="#64748B">1024x1024 transparent</text>
+      <text x="12" y="46" font-size="7.5" fill="#64748B">PNG SaaS logo</text>
+    </g>
+
+    <g transform="translate(10, 230)">
+      <rect width="130" height="50" rx="4" fill="#F8FAFC" stroke="#E2E8F0"/>
+      <circle cx="16" cy="18" r="6" fill="#059669"/>
+      <text x="28" y="21" font-size="8.5" font-weight="bold" fill="#0F172A">App Domains</text>
+      <text x="12" y="36" font-size="7.5" fill="#64748B">omnisocial.ai</text>
+      <text x="12" y="46" font-size="7.5" fill="#64748B">api.omnisocial.ai</text>
+    </g>
+
+    <g transform="translate(10, 290)">
+      <rect width="130" height="38" rx="4" fill="#F0FDF4" stroke="#BBF7D0"/>
+      <text x="65" y="22" font-size="8.5" font-weight="bold" fill="#166534" text-anchor="middle">Pass Checklist</text>
+    </g>
+  </g>
+
+  <!-- Col 2: Business Verification -->
+  <g transform="translate(195, 75)" filter="url(#cardShadow)">
+    <rect width="155" height="340" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <rect width="155" height="4" rx="2" fill="#8B5CF6"/>
+    <text x="15" y="24" font-size="10.5" font-weight="bold" fill="#8B5CF6">2. VERIFICATION</text>
+    <text x="15" y="38" font-size="8.5" fill="#64748B">Meta Business Manager</text>
+
+    <g transform="translate(10, 50)">
+      <rect width="135" height="50" rx="4" fill="#F8FAFC" stroke="#E2E8F0"/>
+      <circle cx="16" cy="18" r="6" fill="#059669"/>
+      <text x="28" y="21" font-size="8.5" font-weight="bold" fill="#0F172A">Legal Business</text>
+      <text x="12" y="36" font-size="7.5" fill="#64748B">Certificate of inc.</text>
+      <text x="12" y="46" font-size="7.5" fill="#64748B">or tax registration</text>
+    </g>
+
+    <g transform="translate(10, 110)">
+      <rect width="135" height="50" rx="4" fill="#F8FAFC" stroke="#E2E8F0"/>
+      <circle cx="16" cy="18" r="6" fill="#059669"/>
+      <text x="28" y="21" font-size="8.5" font-weight="bold" fill="#0F172A">Phone / Domain</text>
+      <text x="12" y="36" font-size="7.5" fill="#64748B">DNS TXT record</text>
+      <text x="12" y="46" font-size="7.5" fill="#64748B">or SMS verification</text>
+    </g>
+
+    <g transform="translate(10, 170)">
+      <rect width="135" height="50" rx="4" fill="#F8FAFC" stroke="#E2E8F0"/>
+      <circle cx="16" cy="18" r="6" fill="#059669"/>
+      <text x="28" y="21" font-size="8.5" font-weight="bold" fill="#0F172A">Tech Provider</text>
+      <text x="12" y="36" font-size="7.5" fill="#64748B">Sign Tech Provider</text>
+      <text x="12" y="46" font-size="7.5" fill="#64748B">Amendment in Meta</text>
+    </g>
+
+    <g transform="translate(10, 230)">
+      <rect width="135" height="50" rx="4" fill="#F8FAFC" stroke="#E2E8F0"/>
+      <circle cx="16" cy="18" r="6" fill="#059669"/>
+      <text x="28" y="21" font-size="8.5" font-weight="bold" fill="#0F172A">App Ownership</text>
+      <text x="12" y="36" font-size="7.5" fill="#64748B">App assigned to verified</text>
+      <text x="12" y="46" font-size="7.5" fill="#64748B">Business Portfolio</text>
+    </g>
+
+    <g transform="translate(10, 290)">
+      <rect width="135" height="38" rx="4" fill="#F0FDF4" stroke="#BBF7D0"/>
+      <text x="67" y="22" font-size="8.5" font-weight="bold" fill="#166534" text-anchor="middle">Pass Verification</text>
+    </g>
+  </g>
+
+  <!-- Col 3: App Review Screencast -->
+  <g transform="translate(365, 75)" filter="url(#cardShadow)">
+    <rect width="160" height="340" rx="8" fill="#FFFFFF" stroke="#E1306C" stroke-width="1.5"/>
+    <rect width="160" height="4" rx="2" fill="#E1306C"/>
+    <text x="15" y="24" font-size="10.5" font-weight="bold" fill="#E1306C">3. APP REVIEW</text>
+    <text x="15" y="38" font-size="8.5" fill="#64748B">Scope Justifications</text>
+
+    <g transform="translate(10, 50)">
+      <rect width="140" height="50" rx="4" fill="#F8FAFC" stroke="#E2E8F0"/>
+      <circle cx="16" cy="18" r="6" fill="#059669"/>
+      <text x="28" y="21" font-size="8.5" font-weight="bold" fill="#0F172A">Screencast Video</text>
+      <text x="12" y="36" font-size="7.5" fill="#64748B">Show login &gt; approve</text>
+      <text x="12" y="46" font-size="7.5" fill="#64748B">&gt; publish live post</text>
+    </g>
+
+    <g transform="translate(10, 110)">
+      <rect width="140" height="50" rx="4" fill="#F8FAFC" stroke="#E2E8F0"/>
+      <circle cx="16" cy="18" r="6" fill="#059669"/>
+      <text x="28" y="21" font-size="8.5" font-weight="bold" fill="#0F172A">Demo Credentials</text>
+      <text x="12" y="36" font-size="7.5" fill="#64748B">Working test user credentials</text>
+      <text x="12" y="46" font-size="7.5" fill="#64748B">for Meta reviewers</text>
+    </g>
+
+    <g transform="translate(10, 170)">
+      <rect width="140" height="50" rx="4" fill="#F8FAFC" stroke="#E2E8F0"/>
+      <circle cx="16" cy="18" r="6" fill="#059669"/>
+      <text x="28" y="21" font-size="8.5" font-weight="bold" fill="#0F172A">Permission Justify</text>
+      <text x="12" y="36" font-size="7.5" fill="#64748B">Written explanation of</text>
+      <text x="12" y="46" font-size="7.5" fill="#64748B">why each scope is needed</text>
+    </g>
+
+    <g transform="translate(10, 230)">
+      <rect width="140" height="50" rx="4" fill="#F8FAFC" stroke="#E2E8F0"/>
+      <circle cx="16" cy="18" r="6" fill="#059669"/>
+      <text x="28" y="21" font-size="8.5" font-weight="bold" fill="#0F172A">Advanced Access</text>
+      <text x="12" y="36" font-size="7.5" fill="#64748B">Request Level 2 Access</text>
+      <text x="12" y="46" font-size="7.5" fill="#64748B">for public users</text>
+    </g>
+
+    <g transform="translate(10, 290)">
+      <rect width="140" height="38" rx="4" fill="#F0FDF4" stroke="#BBF7D0"/>
+      <text x="70" y="22" font-size="8.5" font-weight="bold" fill="#166534" text-anchor="middle">Pass App Review</text>
+    </g>
+  </g>
+
+  <!-- Col 4: Cloud Infrastructure -->
+  <g transform="translate(540, 75)" filter="url(#cardShadow)">
+    <rect width="155" height="340" rx="8" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <rect width="155" height="4" rx="2" fill="#D97706"/>
+    <text x="15" y="24" font-size="10.5" font-weight="bold" fill="#D97706">4. INFRASTRUCTURE</text>
+    <text x="15" y="38" font-size="8.5" fill="#64748B">Production Hardening</text>
+
+    <g transform="translate(10, 50)">
+      <rect width="135" height="50" rx="4" fill="#F8FAFC" stroke="#E2E8F0"/>
+      <circle cx="16" cy="18" r="6" fill="#059669"/>
+      <text x="28" y="21" font-size="8.5" font-weight="bold" fill="#0F172A">Postgres SSL</text>
+      <text x="12" y="36" font-size="7.5" fill="#64748B">TLS encrypted DB</text>
+      <text x="12" y="46" font-size="7.5" fill="#64748B">Connection pool limits</text>
+    </g>
+
+    <g transform="translate(10, 110)">
+      <rect width="135" height="50" rx="4" fill="#F8FAFC" stroke="#E2E8F0"/>
+      <circle cx="16" cy="18" r="6" fill="#059669"/>
+      <text x="28" y="21" font-size="8.5" font-weight="bold" fill="#0F172A">Redis Cluster</text>
+      <text x="12" y="36" font-size="7.5" fill="#64748B">Persistent BullMQ queues</text>
+      <text x="12" y="46" font-size="7.5" fill="#64748B">High availability</text>
+    </g>
+
+    <g transform="translate(10, 170)">
+      <rect width="135" height="50" rx="4" fill="#F8FAFC" stroke="#E2E8F0"/>
+      <circle cx="16" cy="18" r="6" fill="#059669"/>
+      <text x="28" y="21" font-size="8.5" font-weight="bold" fill="#0F172A">S3 CORS &amp; CDN</text>
+      <text x="12" y="36" font-size="7.5" fill="#64748B">Public HTTPS read</text>
+      <text x="12" y="46" font-size="7.5" fill="#64748B">for Meta crawler</text>
+    </g>
+
+    <g transform="translate(10, 230)">
+      <rect width="135" height="50" rx="4" fill="#F8FAFC" stroke="#E2E8F0"/>
+      <circle cx="16" cy="18" r="6" fill="#059669"/>
+      <text x="28" y="21" font-size="8.5" font-weight="bold" fill="#0F172A">Secrets Vault</text>
+      <text x="12" y="36" font-size="7.5" fill="#64748B">AWS KMS or</text>
+      <text x="12" y="46" font-size="7.5" fill="#64748B">Doppler injected env</text>
+    </g>
+
+    <g transform="translate(10, 290)">
+      <rect width="135" height="38" rx="4" fill="#F0FDF4" stroke="#BBF7D0"/>
+      <text x="67" y="22" font-size="8.5" font-weight="bold" fill="#166534" text-anchor="middle">Pass Infra Audit</text>
+    </g>
+  </g>
+
+  <!-- Col 5: Go Live Switch -->
+  <g transform="translate(710, 75)" filter="url(#cardShadow)">
+    <rect width="140" height="340" rx="8" fill="#FFFFFF" stroke="#059669" stroke-width="1.5"/>
+    <rect width="140" height="4" rx="2" fill="#059669"/>
+    <text x="15" y="24" font-size="10.5" font-weight="bold" fill="#059669">5. GO LIVE</text>
+    <text x="15" y="38" font-size="8.5" fill="#64748B">Live Mode Activated</text>
+
+    <g transform="translate(10, 50)">
+      <rect width="120" height="50" rx="4" fill="#F8FAFC" stroke="#E2E8F0"/>
+      <circle cx="16" cy="18" r="6" fill="#059669"/>
+      <text x="28" y="21" font-size="8.5" font-weight="bold" fill="#0F172A">Toggle Live</text>
+      <text x="12" y="36" font-size="7.5" fill="#64748B">App Mode switch in</text>
+      <text x="12" y="46" font-size="7.5" fill="#64748B">Meta Header</text>
+    </g>
+
+    <g transform="translate(10, 110)">
+      <rect width="120" height="50" rx="4" fill="#F8FAFC" stroke="#E2E8F0"/>
+      <circle cx="16" cy="18" r="6" fill="#059669"/>
+      <text x="28" y="21" font-size="8.5" font-weight="bold" fill="#0F172A">Rate Alerting</text>
+      <text x="12" y="36" font-size="7.5" fill="#64748B">PagerDuty / Slack</text>
+      <text x="12" y="46" font-size="7.5" fill="#64748B">alerts on 4xx/5xx</text>
+    </g>
+
+    <g transform="translate(10, 170)">
+      <rect width="120" height="50" rx="4" fill="#F8FAFC" stroke="#E2E8F0"/>
+      <circle cx="16" cy="18" r="6" fill="#059669"/>
+      <text x="28" y="21" font-size="8.5" font-weight="bold" fill="#0F172A">Health Checks</text>
+      <text x="12" y="36" font-size="7.5" fill="#64748B">/health endpoint</text>
+      <text x="12" y="46" font-size="7.5" fill="#64748B">polling Meta Graph</text>
+    </g>
+
+    <g transform="translate(10, 230)">
+      <rect width="120" height="50" rx="4" fill="#F8FAFC" stroke="#E2E8F0"/>
+      <circle cx="16" cy="18" r="6" fill="#059669"/>
+      <text x="28" y="21" font-size="8.5" font-weight="bold" fill="#0F172A">Public Ready</text>
+      <text x="12" y="36" font-size="7.5" fill="#64748B">Any customer can</text>
+      <text x="12" y="46" font-size="7.5" fill="#64748B">now connect &amp; post</text>
+    </g>
+
+    <g transform="translate(10, 290)">
+      <rect width="120" height="38" rx="4" fill="#ECFDF5" stroke="#6EE7B7"/>
+      <text x="60" y="22" font-size="8.5" font-weight="bold" fill="#047857" text-anchor="middle">LIVE IN PROD</text>
+    </g>
+  </g>
+</svg>

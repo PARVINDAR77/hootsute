@@ -45,10 +45,10 @@ export function DraftCommentsDrawer({
     if (!workspaceId || !draftId) return;
     setIsLoading(true);
     try {
-      const res = await apiClient<{ success: boolean; data: DraftCommentDto[] }>(
+      const res = await apiClient<any>(
         `/workspaces/${workspaceId}/drafts/${draftId}/comments`,
       );
-      setComments(res.data || []);
+      setComments(Array.isArray(res) ? res : (res?.data || []));
     } catch (err) {
       console.error('Failed to load comments:', err);
     } finally {
@@ -167,11 +167,10 @@ export function DraftCommentsDrawer({
           comments.map((comment) => (
             <div
               key={comment.id}
-              className={`p-3.5 rounded-xl border transition-all space-y-2.5 ${
-                comment.isResolved
+              className={`p-3.5 rounded-xl border transition-all space-y-2.5 ${comment.isResolved
                   ? 'bg-slate-50/80 border-slate-200 opacity-75'
                   : 'bg-white border-slate-200 shadow-2xs'
-              }`}
+                }`}
             >
               {/* Comment Header */}
               <div className="flex items-center justify-between text-xs">
@@ -191,11 +190,10 @@ export function DraftCommentsDrawer({
                   <button
                     onClick={() => handleToggleResolve(comment.id)}
                     title={comment.isResolved ? 'Mark as unresolved' : 'Resolve thread'}
-                    className={`p-1 rounded-md transition-colors ${
-                      comment.isResolved
+                    className={`p-1 rounded-md transition-colors ${comment.isResolved
                         ? 'text-emerald-600 bg-emerald-50'
                         : 'text-slate-400 hover:text-emerald-600'
-                    }`}
+                      }`}
                   >
                     <CheckCircle2 className="w-3.5 h-3.5" />
                   </button>

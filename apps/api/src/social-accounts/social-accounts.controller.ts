@@ -28,6 +28,7 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AuthenticatedUser } from '../common/interfaces/jwt-payload.interface';
 import { RequireWorkspaceRole } from '../common/decorators/workspace-roles.decorator';
 import { WorkspaceRole } from '@prisma/client';
+import { SocialProvider } from '@packages/shared';
 
 @ApiTags('Social Accounts')
 @ApiBearerAuth('JWT-auth')
@@ -82,6 +83,70 @@ export class SocialAccountsController {
     @Body() dto: InitiateOAuthDto,
   ) {
     return this.socialAccountsService.initiateTwitterOAuth(workspaceId, user.id, dto?.redirectUri);
+  }
+
+  @Post('pinterest/connect')
+  @RequireWorkspaceRole(WorkspaceRole.ADMIN)
+  @ApiOperation({ summary: 'Initiate Pinterest OAuth 2.0 flow (ADMIN or OWNER only)' })
+  async initiatePinterest(
+    @Param('workspaceId') workspaceId: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: InitiateOAuthDto,
+  ) {
+    return this.socialAccountsService.initiateProviderOAuth(
+      workspaceId,
+      user.id,
+      SocialProvider.PINTEREST,
+      dto?.redirectUri,
+    );
+  }
+
+  @Post('youtube/connect')
+  @RequireWorkspaceRole(WorkspaceRole.ADMIN)
+  @ApiOperation({ summary: 'Initiate YouTube OAuth 2.0 flow (ADMIN or OWNER only)' })
+  async initiateYouTube(
+    @Param('workspaceId') workspaceId: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: InitiateOAuthDto,
+  ) {
+    return this.socialAccountsService.initiateProviderOAuth(
+      workspaceId,
+      user.id,
+      SocialProvider.YOUTUBE,
+      dto?.redirectUri,
+    );
+  }
+
+  @Post('tiktok/connect')
+  @RequireWorkspaceRole(WorkspaceRole.ADMIN)
+  @ApiOperation({ summary: 'Initiate TikTok OAuth 2.0 flow (ADMIN or OWNER only)' })
+  async initiateTikTok(
+    @Param('workspaceId') workspaceId: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: InitiateOAuthDto,
+  ) {
+    return this.socialAccountsService.initiateProviderOAuth(
+      workspaceId,
+      user.id,
+      SocialProvider.TIKTOK,
+      dto?.redirectUri,
+    );
+  }
+
+  @Post('threads/connect')
+  @RequireWorkspaceRole(WorkspaceRole.ADMIN)
+  @ApiOperation({ summary: 'Initiate Threads OAuth 2.0 flow (ADMIN or OWNER only)' })
+  async initiateThreads(
+    @Param('workspaceId') workspaceId: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: InitiateOAuthDto,
+  ) {
+    return this.socialAccountsService.initiateProviderOAuth(
+      workspaceId,
+      user.id,
+      SocialProvider.THREADS,
+      dto?.redirectUri,
+    );
   }
 
   @Get('candidates')

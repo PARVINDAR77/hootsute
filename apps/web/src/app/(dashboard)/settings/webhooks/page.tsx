@@ -279,7 +279,7 @@ export default function WebhooksPage() {
               <Webhook className="w-6 h-6" />
             </span>
             <h1 className="text-xl font-bold text-slate-900">Outbound Webhooks &amp; Developer Integrations</h1>
-            <Badge variant="purple">Phase 22 Active</Badge>
+            <Badge variant="purple">Developer API</Badge>
           </div>
           <p className="text-sm text-slate-500 mt-1">
             Dispatch real-time cryptographic webhook events to your HTTP endpoints, Slack bots, and internal systems.

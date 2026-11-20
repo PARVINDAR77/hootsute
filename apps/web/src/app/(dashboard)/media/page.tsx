@@ -82,17 +82,21 @@ export default function MediaLibraryPage() {
       if (statusFilter !== 'ALL') queryUrl += `&status=${statusFilter}`;
       if (search.trim()) queryUrl += `&search=${encodeURIComponent(search.trim())}`;
 
-      const mediaRes = await apiClient<{ success: boolean; data: MediaAssetDto[] }>(queryUrl);
-      setAssets(mediaRes.data || []);
+      const mediaRes = await apiClient<any>(queryUrl);
+      const fetchedAssets: MediaAssetDto[] = Array.isArray(mediaRes)
+        ? mediaRes
+        : (mediaRes?.data || []);
+      setAssets(fetchedAssets);
 
       try {
-        const usagePromise = apiClient<{ success: boolean; data: WorkspaceStorageUsageDto }>(
+        const usagePromise = apiClient<any>(
           `/workspaces/${currentWorkspace.id}/media/storage-usage`,
         );
         if (usagePromise && typeof usagePromise.then === 'function') {
           const usageRes = await usagePromise;
-          if (usageRes?.data) {
-            setStorageUsage(usageRes.data);
+          const usageData = usageRes?.data ?? usageRes;
+          if (usageData && typeof usageData === 'object' && 'usedBytes' in usageData) {
+            setStorageUsage(usageData);
           }
         }
       } catch {
@@ -167,7 +171,7 @@ export default function MediaLibraryPage() {
           continue;
         }
 
-        const session = sessionRes.data;
+        const session: UploadSessionResponseDto = (sessionRes as any)?.data ?? sessionRes;
 
         // Step 2: Upload file bytes directly to the signed URL
         setActiveUploads((prev) =>

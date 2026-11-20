@@ -4,6 +4,18 @@ import { Prisma, User, Role, UserStatus } from '@prisma/client';
 
 export type UserWithoutPassword = Omit<User, 'passwordHash'>;
 
+const SAFE_USER_SELECT = {
+  id: true,
+  email: true,
+  name: true,
+  role: true,
+  status: true,
+  themePreference: true,
+  emailVerifiedAt: true,
+  createdAt: true,
+  updatedAt: true,
+} as const;
+
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
@@ -17,16 +29,7 @@ export class UsersService {
   async findById(id: string): Promise<UserWithoutPassword | null> {
     return this.prisma.user.findUnique({
       where: { id },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        status: true,
-        emailVerifiedAt: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+      select: SAFE_USER_SELECT,
     });
   }
 
@@ -45,16 +48,7 @@ export class UsersService {
         role: data.role || Role.BUSINESS_OWNER,
         status: data.status || UserStatus.ACTIVE,
       },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        status: true,
-        emailVerifiedAt: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+      select: SAFE_USER_SELECT,
     });
   }
 
@@ -62,16 +56,20 @@ export class UsersService {
     return this.prisma.user.update({
       where: { id },
       data: { status },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        status: true,
-        emailVerifiedAt: true,
-        createdAt: true,
-        updatedAt: true,
+      select: SAFE_USER_SELECT,
+    });
+  }
+
+  async updatePreferences(
+    id: string,
+    prefs: { themePreference?: 'light' | 'dark' },
+  ): Promise<UserWithoutPassword> {
+    return this.prisma.user.update({
+      where: { id },
+      data: {
+        ...(prefs.themePreference ? { themePreference: prefs.themePreference } : {}),
       },
+      select: SAFE_USER_SELECT,
     });
   }
 }

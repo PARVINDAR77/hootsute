@@ -30,6 +30,7 @@ import { ReschedulePostDto } from '../dto/reschedule-post.dto';
 import { CancelScheduledPostDto } from '../dto/cancel-scheduled-post.dto';
 import { QueryScheduledPostsDto } from '../dto/query-scheduled-posts.dto';
 import { QueryCalendarDto } from '../dto/query-calendar.dto';
+import { BulkPublishCampaignDto } from '../dto/bulk-publish.dto';
 
 @ApiTags('Scheduled Posts & Publishing')
 @ApiBearerAuth('JWT-auth')
@@ -65,6 +66,34 @@ export class ScheduledPostsController {
       success: true,
       message: 'Post scheduled successfully',
       data: post,
+    };
+  }
+
+  @Post('bulk-publish')
+  @RequireWorkspaceRoles(WorkspaceRole.EDITOR)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Bulk publish or schedule one or more approved campaign drafts across multiple social accounts',
+  })
+  @ApiParam({ name: 'workspaceId', description: 'Workspace ID' })
+  async bulkPublish(
+    @Param('workspaceId') workspaceId: string,
+    @Req() req: any,
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: BulkPublishCampaignDto,
+  ) {
+    const memberRole = req.workspaceMember?.role || WorkspaceRole.EDITOR;
+    const result = await this.scheduledPostsService.bulkPublishCampaigns(
+      workspaceId,
+      user.id,
+      memberRole,
+      dto,
+      (targetId) => this.dispatcher.dispatchTarget(targetId),
+    );
+    return {
+      success: true,
+      message: `Bulk campaign processed (${result.totalTargetsQueued} channel target(s))`,
+      data: result,
     };
   }
 

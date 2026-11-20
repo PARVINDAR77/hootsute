@@ -2,6 +2,7 @@ import {
   Injectable,
   ConflictException,
   UnauthorizedException,
+  BadRequestException,
   Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -55,6 +56,7 @@ export class AuthService {
           name: true,
           role: true,
           status: true,
+          themePreference: true,
           emailVerifiedAt: true,
           createdAt: true,
           updatedAt: true,
@@ -163,6 +165,7 @@ export class AuthService {
       name: user.name,
       role: user.role,
       status: user.status,
+      themePreference: user.themePreference,
       emailVerifiedAt: user.emailVerifiedAt,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
@@ -265,6 +268,7 @@ export class AuthService {
       name: session.user.name,
       role: session.user.role,
       status: session.user.status,
+      themePreference: session.user.themePreference,
       emailVerifiedAt: session.user.emailVerifiedAt,
       createdAt: session.user.createdAt,
       updatedAt: session.user.updatedAt,
@@ -336,5 +340,198 @@ export class AuthService {
       throw new UnauthorizedException('User not found');
     }
     return user;
+  }
+
+  async forgotPassword(email: string): Promise<{
+    success: boolean;
+    message: string;
+    devResetUrl?: string;
+  }> {
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = await this.usersService.findByEmail(normalizedEmail);
+    const genericMessage =
+      'If an account exists with that email address, a password reset link has been issued.';
+
+    if (!user || user.status !== UserStatus.ACTIVE) {
+      return { success: true, message: genericMessage };
+    }
+
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const tokenHash = this.hashToken(rawToken);
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+
+    await this.prisma.$transaction(async (tx) => {
+      // Invalidate previous unused password reset tokens for this user
+      await tx.authToken.updateMany({
+        where: { userId: user.id, type: 'PASSWORD_RESET', usedAt: null },
+        data: { usedAt: new Date() },
+      });
+
+      await tx.authToken.create({
+        data: {
+          userId: user.id,
+          type: 'PASSWORD_RESET',
+          tokenHash,
+          expiresAt,
+        },
+      });
+
+      await tx.auditLog.create({
+        data: {
+          actorUserId: user.id,
+          action: 'AUTH_PASSWORD_RESET_REQUESTED',
+          entityType: 'User',
+          entityId: user.id,
+        },
+      });
+    });
+
+    const appUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
+    const resetUrl = `${appUrl}/reset-password?token=${rawToken}`;
+    const isProduction = this.configService.get<string>('nodeEnv') === 'production';
+
+    this.logger.log(`Password reset token issued for user [${user.id}] (expires in 30m)`);
+
+    return {
+      success: true,
+      message: genericMessage,
+      ...(!isProduction ? { devResetUrl: resetUrl } : {}),
+    };
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<{
+    success: boolean;
+    message: string;
+  }> {
+    const tokenHash = this.hashToken(token.trim());
+    const record = await this.prisma.authToken.findUnique({
+      where: { tokenHash },
+      include: { user: true },
+    });
+
+    if (
+      !record ||
+      record.type !== 'PASSWORD_RESET' ||
+      record.usedAt ||
+      record.expiresAt < new Date()
+    ) {
+      throw new BadRequestException('Invalid or expired password reset token');
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, this.saltRounds);
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: record.userId },
+        data: { passwordHash },
+      });
+
+      await tx.authToken.update({
+        where: { id: record.id },
+        data: { usedAt: new Date() },
+      });
+
+      // Security: revoke all existing refresh sessions after password change
+      await tx.refreshSession.updateMany({
+        where: { userId: record.userId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
+
+      await tx.auditLog.create({
+        data: {
+          actorUserId: record.userId,
+          action: 'AUTH_PASSWORD_RESET_COMPLETED',
+          entityType: 'User',
+          entityId: record.userId,
+        },
+      });
+    });
+
+    return {
+      success: true,
+      message: 'Your password has been updated. Please sign in with your new password.',
+    };
+  }
+
+  async requestEmailVerification(userId: string): Promise<{
+    success: boolean;
+    message: string;
+    devVerifyUrl?: string;
+  }> {
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    if (user.emailVerifiedAt) {
+      return { success: true, message: 'Your email address is already verified.' };
+    }
+
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const tokenHash = this.hashToken(rawToken);
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    await this.prisma.authToken.create({
+      data: {
+        userId: user.id,
+        type: 'EMAIL_VERIFICATION',
+        tokenHash,
+        expiresAt,
+      },
+    });
+
+    const appUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
+    const verifyUrl = `${appUrl}/verify-email?token=${rawToken}`;
+    const isProduction = this.configService.get<string>('nodeEnv') === 'production';
+
+    return {
+      success: true,
+      message: 'Verification link generated.',
+      ...(!isProduction ? { devVerifyUrl: verifyUrl } : {}),
+    };
+  }
+
+  async verifyEmail(token: string): Promise<{
+    success: boolean;
+    message: string;
+  }> {
+    const tokenHash = this.hashToken(token.trim());
+    const record = await this.prisma.authToken.findUnique({
+      where: { tokenHash },
+    });
+
+    if (
+      !record ||
+      record.type !== 'EMAIL_VERIFICATION' ||
+      record.usedAt ||
+      record.expiresAt < new Date()
+    ) {
+      throw new BadRequestException('Invalid or expired email verification token');
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: record.userId },
+        data: { emailVerifiedAt: new Date() },
+      });
+
+      await tx.authToken.update({
+        where: { id: record.id },
+        data: { usedAt: new Date() },
+      });
+
+      await tx.auditLog.create({
+        data: {
+          actorUserId: record.userId,
+          action: 'AUTH_EMAIL_VERIFIED',
+          entityType: 'User',
+          entityId: record.userId,
+        },
+      });
+    });
+
+    return {
+      success: true,
+      message: 'Your email address has been verified successfully.',
+    };
   }
 }

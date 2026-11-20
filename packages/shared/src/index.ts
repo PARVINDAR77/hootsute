@@ -35,6 +35,7 @@ export interface SafeUser {
   name: string;
   role: UserRole;
   status: UserStatus;
+  themePreference?: 'light' | 'dark' | string;
   emailVerifiedAt: string | null;
   createdAt: string;
   updatedAt: string;
@@ -117,6 +118,10 @@ export enum SocialProvider {
   META_INSTAGRAM = 'META_INSTAGRAM',
   LINKEDIN = 'LINKEDIN',
   TWITTER_X = 'TWITTER_X',
+  PINTEREST = 'PINTEREST',
+  YOUTUBE = 'YOUTUBE',
+  TIKTOK = 'TIKTOK',
+  THREADS = 'THREADS',
 }
 
 export enum SocialAccountType {
@@ -126,6 +131,11 @@ export enum SocialAccountType {
   LINKEDIN_PAGE = 'LINKEDIN_PAGE',
   LINKEDIN_PROFILE = 'LINKEDIN_PROFILE',
   TWITTER_PROFILE = 'TWITTER_PROFILE',
+  PINTEREST_BUSINESS = 'PINTEREST_BUSINESS',
+  YOUTUBE_CHANNEL = 'YOUTUBE_CHANNEL',
+  TIKTOK_BUSINESS = 'TIKTOK_BUSINESS',
+  TIKTOK_CREATOR = 'TIKTOK_CREATOR',
+  THREADS_PROFILE = 'THREADS_PROFILE',
 }
 
 export enum SocialConnectionStatus {
@@ -210,6 +220,10 @@ export enum SocialPlatform {
   INSTAGRAM = 'INSTAGRAM',
   LINKEDIN = 'LINKEDIN',
   TWITTER_X = 'TWITTER_X',
+  PINTEREST = 'PINTEREST',
+  YOUTUBE = 'YOUTUBE',
+  TIKTOK = 'TIKTOK',
+  THREADS = 'THREADS',
 }
 
 export enum BrandTone {
@@ -328,81 +342,46 @@ export interface ContentDraftDto {
   } | null;
 }
 
-export enum WhatsAppMessageStatus {
-  QUEUED = 'QUEUED',
-  SENT = 'SENT',
-  DELIVERED = 'DELIVERED',
-  READ = 'READ',
-  FAILED = 'FAILED',
+export type BulkPublishDispatchMode = 'IMMEDIATE' | 'SCHEDULED' | 'STAGGERED';
+
+export interface BulkPublishCampaignDto {
+  draftIds: string[];
+  socialAccountIds: string[];
+  dispatchMode: BulkPublishDispatchMode;
+  scheduledAt?: string;
+  timezone?: string;
+  staggerMinutes?: number;
+  autoAdaptMissingPlatform?: boolean;
 }
 
-export enum RecipientConsentStatus {
-  OPTED_IN = 'OPTED_IN',
-  OPTED_OUT = 'OPTED_OUT',
-  PENDING_VERIFICATION = 'PENDING_VERIFICATION',
+export interface BulkPublishItemResultDto {
+  draftId: string;
+  draftTitle: string;
+  scheduledPostId?: string;
+  scheduledAt?: string;
+  status: 'PUBLISHED' | 'SCHEDULED' | 'PARTIALLY_PUBLISHED' | 'FAILED';
+  targetCount: number;
+  publishedTargets: number;
+  failedTargets: number;
+  error?: string;
 }
 
-export interface WorkspaceWhatsAppConfigDto {
-  id: string;
-  workspaceId: string;
-  wabaId: string;
-  phoneNumberId: string;
-  businessPhoneNumber?: string | null;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+export interface BulkPublishResponseDto {
+  totalDraftsProcessed: number;
+  totalTargetsQueued: number;
+  publishedImmediately: number;
+  scheduledCount: number;
+  failedCount: number;
+  results: BulkPublishItemResultDto[];
 }
 
-export interface WhatsAppRecipientConsentDto {
-  id: string;
-  workspaceId: string;
-  userId?: string | null;
-  phoneNumber: string;
-  displayName: string;
-  status: RecipientConsentStatus;
-  consentSource: string;
-  optedInAt: string;
-  optedOutAt?: string | null;
-  createdAt: string;
-  updatedAt: string;
+export interface BulkApproveDraftsDto {
+  draftIds: string[];
 }
 
-export interface WhatsAppNotificationMessageDto {
-  id: string;
-  workspaceId: string;
-  draftId?: string | null;
-  recipientConsentId: string;
-  providerMessageId?: string | null;
-  templateName: string;
-  language: string;
-  parameters?: Record<string, any> | null;
-  status: WhatsAppMessageStatus;
-  errorMessage?: string | null;
-  sentAt?: string | null;
-  deliveredAt?: string | null;
-  readAt?: string | null;
-  createdAt: string;
-  updatedAt: string;
-  recipient?: WhatsAppRecipientConsentDto;
-}
-
-export interface SendWhatsAppPreviewDto {
-  recipientConsentIds: string[];
-  platform?: SocialPlatform;
-}
-
-export interface UpsertWhatsAppConfigDto {
-  wabaId: string;
-  phoneNumberId: string;
-  systemUserAccessToken: string;
-  businessPhoneNumber?: string;
-}
-
-export interface CreateWhatsAppRecipientDto {
-  phoneNumber: string;
-  displayName: string;
-  userId?: string;
-  consentAcknowledged: boolean;
+export interface BulkApproveDraftsResponseDto {
+  approvedIds: string[];
+  skipped: Array<{ draftId: string; reason: string }>;
 }
 
 // Stage 6: Social Media Scheduling & Automated Publishing Engine

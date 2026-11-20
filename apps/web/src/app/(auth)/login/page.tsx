@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/Alert';
 import { ROUTES } from '@/lib/constants';
-import { Mail, Lock, LogIn } from 'lucide-react';
+import { Mail, Lock, ArrowRight } from 'lucide-react';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -22,6 +22,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const { login } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [rememberMe, setRememberMe] = useState(true);
 
   const {
     register,
@@ -47,9 +48,11 @@ export default function LoginPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-bold text-slate-900">Sign in to your account</h3>
-        <p className="text-xs text-slate-500 mt-1">
-          Access your workspaces and social media management dashboard.
+        <h1 className="text-2xl font-extrabold tracking-tight text-[#111827] dark:text-white">
+          Welcome Back
+        </h1>
+        <p className="text-sm text-[#64748B] dark:text-slate-400 mt-1">
+          Sign in to continue your AI social media journey.
         </p>
       </div>
 
@@ -66,43 +69,53 @@ export default function LoginPage() {
           {...register('email')}
         />
 
-        <div>
-          <Input
-            label="Password"
-            type="password"
-            autoComplete="current-password"
-            placeholder="••••••••"
-            leftIcon={<Lock className="w-4 h-4" />}
-            error={errors.password?.message}
-            {...register('password')}
-          />
-          <div className="flex justify-end mt-1.5">
-            <Link
-              href={ROUTES.FORGOT_PASSWORD}
-              className="text-xs font-medium text-indigo-600 hover:text-indigo-500"
-            >
-              Forgot your password?
-            </Link>
-          </div>
+        <Input
+          label="Password"
+          type="password"
+          autoComplete="current-password"
+          placeholder="Enter your password"
+          leftIcon={<Lock className="w-4 h-4" />}
+          error={errors.password?.message}
+          {...register('password')}
+        />
+
+        <div className="flex items-center justify-between text-xs pt-0.5">
+          <label className="inline-flex items-center gap-2 text-[#64748B] dark:text-slate-300 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="rounded border-[#E7EAF2] dark:border-white/20 text-[#7138F5] focus:ring-[#7138F5]"
+            />
+            <span>Remember me</span>
+          </label>
+
+          <Link
+            href={ROUTES.FORGOT_PASSWORD}
+            className="font-semibold text-[#7138F5] dark:text-[#20C8E8] hover:underline"
+          >
+            Forgot password?
+          </Link>
         </div>
 
         <Button
           type="submit"
-          className="w-full mt-2"
+          size="lg"
+          className="w-full mt-2 btn-gradient shadow-glow-purple hover:scale-[1.01] active:scale-[0.99] transition-all font-bold"
           isLoading={isSubmitting}
-          leftIcon={<LogIn className="w-4 h-4" />}
+          rightIcon={<ArrowRight className="w-4 h-4" />}
         >
           Sign In
         </Button>
       </form>
 
-      <div className="pt-4 border-t border-slate-100 text-center text-xs text-slate-500">
+      <div className="pt-4 border-t border-[#E7EAF2] dark:border-white/10 text-center text-xs text-[#64748B] dark:text-slate-400">
         Don&apos;t have an account?{' '}
         <Link
-          href={ROUTES.REGISTER}
-          className="font-semibold text-indigo-600 hover:text-indigo-500"
+          href={ROUTES.SIGNUP}
+          className="font-bold text-[#7138F5] dark:text-[#20C8E8] hover:underline"
         >
-          Register workspace
+          Create your account
         </Link>
       </div>
     </div>

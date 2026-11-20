@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>OmniSocial AI — Complete Official Instagram API Integration Guide</title>
+<style>
+  /* -------------------------------------------------------------
+     CSS PRINT & TYPOGRAPHY FOUNDATIONS
+     ------------------------------------------------------------- */
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  @media print {
+    body {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    .page-break {
+      page-break-after: always;
+      break-after: page;
+    }
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #1E293B;
+    background: #E2E8F0;
+    font-size: 9.5pt;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Each page container */
+  .doc-page {
+    width: 210mm;
+    min-height: 297mm;
+    height: 297mm;
+    max-height: 297mm;
+    padding: 16mm 18mm 16mm 18mm;
+    position: relative;
+    background: #FFFFFF;
+    margin: 0 auto 10px auto;
+    page-break-after: always;
+    break-after: page;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* Running Header */
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 3mm;
+    border-bottom: 1.5px solid #E2E8F0;
+    margin-bottom: 4mm;
+    font-size: 8pt;
+    color: #64748B;
+  }
+  .page-header .brand {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+    color: #0F172A;
+  }
+  .page-header .brand-badge {
+    background: linear-gradient(135deg, #833AB4, #FD1D1D, #FCAF45);
+    color: #FFFFFF;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 7pt;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+  .page-header .chapter-tag {
+    font-weight: 600;
+    color: #0284C7;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 7.5pt;
+  }
+
+  /* Running Footer */
+  .page-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 3mm;
+    border-top: 1.5px solid #E2E8F0;
+    margin-top: 4mm;
+    font-size: 7.5pt;
+    color: #94A3B8;
+  }
+  .page-footer .confidential {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .page-footer .page-number {
+    font-weight: 700;
+    color: #0F172A;
+  }
+
+  /* Page Content Area */
+  .page-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Headings */
+  h1.chapter-title {
+    font-size: 17pt;
+    font-weight: 800;
+    color: #0F172A;
+    letter-spacing: -0.5px;
+    margin-bottom: 2mm;
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  h1.chapter-title .num-pill {
+    background: #0F172A;
+    color: #FFFFFF;
+    font-size: 10pt;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 800;
+  }
+  h2.section-heading {
+    font-size: 11pt;
+    font-weight: 700;
+    color: #0F172A;
+    margin-top: 3mm;
+    margin-bottom: 1.5mm;
+    padding-bottom: 1mm;
+    border-bottom: 1px solid #F1F5F9;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  h3.sub-heading {
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: #1E293B;
+    margin-top: 2.5mm;
+    margin-bottom: 1mm;
+  }
+
+  p {
+    margin-bottom: 2mm;
+    color: #334155;
+    text-align: justify;
+  }
+  p.lead {
+    font-size: 10pt;
+    color: #1E293B;
+    font-weight: 500;
+    line-height: 1.4;
+    margin-bottom: 2.5mm;
+  }
+
+  /* Callout Boxes */
+  .callout {
+    padding: 3mm 4mm;
+    border-radius: 6px;
+    margin: 2mm 0;
+    font-size: 8.5pt;
+    line-height: 1.35;
+  }
+  .callout-info {
+    background: #F0F9FF;
+    border-left: 3.5px solid #0284C7;
+    color: #0369A1;
+  }
+  .callout-success {
+    background: #F0FDF4;
+    border-left: 3.5px solid #059669;
+    color: #065F46;
+  }
+  .callout-warning {
+    background: #FFFBEB;
+    border-left: 3.5px solid #D97706;
+    color: #92400E;
+  }
+  .callout-danger {
+    background: #FEF2F2;
+    border-left: 3.5px solid #DC2626;
+    color: #991B1B;
+  }
+  .callout-ig {
+    background: #FDF2F8;
+    border-left: 3.5px solid #E1306C;
+    color: #9D174D;
+  }
+  .callout strong {
+    font-weight: 700;
+  }
+
+  /* Tables */
+  table.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2mm 0 3mm 0;
+    font-size: 8pt;
+  }
+  table.data-table th {
+    background: #0F172A;
+    color: #FFFFFF;
+    text-align: left;
+    padding: 6px 8px;
+    font-weight: 700;
+    font-size: 7.5pt;
+    letter-spacing: 0.3px;
+  }
+  table.data-table td {
+    padding: 5px 8px;
+    border-bottom: 1px solid #E2E8F0;
+    color: #334155;
+    vertical-align: top;
+  }
+  table.data-table tr:nth-child(even) td {
+    background: #F8FAFC;
+  }
+  table.data-table tr:hover td {
+    background: #F1F5F9;
+  }
+  table.data-table code {
+    background: #F1F5F9;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 7.5pt;
+    color: #BE185D;
+  }
+
+  /* Code Blocks */
+  pre.code-block {
+    background: #0F172A;
+    color: #E2E8F0;
+    padding: 3mm 4mm;
+    border-radius: 6px;
+    font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 7.5pt;
+    line-height: 1.35;
+    margin: 2mm 0;
+    overflow: hidden;
+    border-left: 3.5px solid #8B5CF6;
+  }
+  pre.code-block .keyword { color: #F472B6; font-weight: bold; }
+  pre.code-block .string { color: #A7F3D0; }
+  pre.code-block .function { color: #60A5FA; }
+  pre.code-block .comment { color: #64748B; font-style: italic; }
+
+  /* Diagram Embedding */
+  .diagram-container {
+    width: 100%;
+    margin: 2.5mm 0;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  }
+  .diagram-container svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  /* Grid Layouts */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3mm;
+    margin: 2mm 0;
+  }
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2.5mm;
+    margin: 2mm 0;
+  }
+  .card-box {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
+    padding: 3mm;
+  }
+  .card-box h4 {
+    font-size: 9pt;
+    font-weight: 700;
+    color: #0F172A;
+    margin-bottom: 1.5mm;
+  }
+  .card-box p {
+    font-size: 8pt;
+    color: #475569;
+    margin-bottom: 1mm;
+  }
+
+  /* Badges & Tags */
+  .badge {
+    display: inline-block;
+    padding: 1.5px 6px;
+    border-radius: 3px;
+    font-size: 7pt;
+    font-weight: 700;
+  }
+  .badge-emerald { background: #D1FAE5; color: #065F46; }
+  .badge-blue { background: #DBEAFE; color: #1E40AF; }
+  .badge-purple { background: #EDE9FE; color: #5B21B6; }
+  .badge-rose { background: #FFE4E6; color: #9F1239; }
+  .badge-amber { background: #FEF3C7; color: #92400E; }
+
+  /* Lists */
+  ul.check-list {
+    list-style: none;
+    margin: 1.5mm 0 2mm 0;
+  }
+  ul.check-list li {
+    position: relative;
+    padding-left: 14px;
+    margin-bottom: 1.5mm;
+    font-size: 8.5pt;
+    color: #334155;
+  }
+  ul.check-list li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #059669;
+    font-weight: bold;
+    font-size: 9pt;
+  }
+
+  /* Cover Page Specific */
+  .cover-page {
+    width: 210mm;
+    height: 297mm;
+    padding: 0;
+    position: relative;
+    background: #0F172A;
+    color: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+  }
+  .cover-top-bar {
+    height: 8mm;
+    background: linear-gradient(90deg, #833AB4, #C13584, #E1306C, #FD1D1D, #FCAF45);
+  }
+  .cover-body {
+    padding: 24mm 22mm;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .cover-logo-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    font-size: 9pt;
+    font-weight: 700;
+    color: #38BDF8;
+    margin-bottom: 10mm;
+    width: fit-content;
+  }
+  .cover-title {
+    font-size: 32pt;
+    font-weight: 900;
+    line-height: 1.12;
+    letter-spacing: -1px;
+    color: #FFFFFF;
+    margin-bottom: 5mm;
+  }
+  .cover-title span {
+    background: linear-gradient(135deg, #E1306C, #FD1D1D, #FCAF45);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .cover-subtitle {
+    font-size: 13pt;
+    font-weight: 400;
+    color: #94A3B8;
+    max-width: 160mm;
+    line-height: 1.45;
+    margin-bottom: 10mm;
+  }
+  .cover-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4mm;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 5mm 6mm;
+    margin-top: 6mm;
+  }
+  .cover-meta-item .label {
+    font-size: 7.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748B;
+    font-weight: 600;
+    margin-bottom: 1mm;
+  }
+  .cover-meta-item .val {
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: #F8FAFC;
+  }
+  .cover-footer {
+    padding: 8mm 22mm;
+    background: rgba(15, 23, 42, 0.95);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: space-between;
+    font-size: 8pt;
+    color: #64748B;
+  }
+</style>
+</head>
+<body style="background:#ffffff; margin:0; padding:0;">
+<div class="doc-page">
+  <div class="page-header">
+    <div class="brand">
+      <span class="brand-badge">OMNISOCIAL AI</span>
+      <span>Official Instagram API Integration Master Guide</span>
+    </div>
+    <div class="chapter-tag">CHAPTER 12 &bull; MULTI-ACCOUNT PUBLISHING</div>
+  </div>
+
+  <div class="page-content">
+    <h1 class="chapter-title"><span class="num-pill">12</span> Multi-Account &amp; Bulk Publishing</h1>
+    <p class="lead">
+      Enterprise brands and agencies routinely manage multiple Instagram handles (e.g., regional accounts like @brand_us, @brand_uk, @brand_apac). OmniSocial AI decouples content creation from delivery targets to ensure independent execution.
+    </p>
+
+    <div class="diagram-container">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 440" width="100%" height="100%" style="background:#ffffff; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  
+    <defs>
+      <!-- Instagram Gradient -->
+      <linearGradient id="igGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#833AB4"/>
+        <stop offset="35%" stop-color="#C13584"/>
+        <stop offset="70%" stop-color="#E1306C"/>
+        <stop offset="90%" stop-color="#FD1D1D"/>
+        <stop offset="100%" stop-color="#FCAF45"/>
+      </linearGradient>
+
+      <!-- Primary Brand Gradient -->
+      <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#0F172A"/>
+        <stop offset="100%" stop-color="#1E293B"/>
+      </linearGradient>
+
+      <!-- Tech Cyan Gradient -->
+      <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#0284C7"/>
+        <stop offset="100%" stop-color="#0EA5E9"/>
+      </linearGradient>
+
+      <!-- Success Emerald Gradient -->
+      <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#059669"/>
+        <stop offset="100%" stop-color="#10B981"/>
+      </linearGradient>
+
+      <!-- Warning Amber Gradient -->
+      <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#D97706"/>
+        <stop offset="100%" stop-color="#F59E0B"/>
+      </linearGradient>
+
+      <!-- Purple Accent Gradient -->
+      <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#6D28D9"/>
+        <stop offset="100%" stop-color="#8B5CF6"/>
+      </linearGradient>
+
+      <!-- Card Subtle Drop Shadow -->
+      <filter id="cardShadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+        <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.06"/>
+      </filter>
+
+      <!-- Elevated Drop Shadow -->
+      <filter id="elevatedShadow" x="-8%" y="-8%" width="116%" height="120%" filterUnits="userSpaceOnUse">
+        <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0F172A" flood-opacity="0.10"/>
+      </filter>
+
+      <!-- Arrow Markers -->
+      <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748B"/>
+      </marker>
+      <marker id="arrowPrimary" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284C7"/>
+      </marker>
+      <marker id="arrowEmerald" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#059669"/>
+      </marker>
+      <marker id="arrowIg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#E1306C"/>
+      </marker>
+    </defs>
+  
+
+  <!-- Top Title -->
+  <rect x="20" y="10" width="840" height="42" rx="8" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <rect x="20" y="10" width="6" height="42" rx="3" fill="#8B5CF6"/>
+  <text x="40" y="32" font-size="14" font-weight="700" fill="#0F172A">MULTI-ACCOUNT INDEPENDENT TARGET STATE MACHINE ARCHITECTURE</text>
+  <text x="40" y="46" font-size="10.5" fill="#64748B">Single post broadcasted to 3 Instagram accounts with isolated tokens, staggered dispatch, and partial success</text>
+
+  <!-- Left: Content Draft -->
+  <g transform="translate(30, 80)" filter="url(#cardShadow)">
+    <rect width="210" height="240" rx="8" fill="#FFFFFF" stroke="#0F172A" stroke-width="1.5"/>
+    <rect width="210" height="4" rx="2" fill="url(#igGrad)"/>
+    <text x="20" y="28" font-size="12" font-weight="bold" fill="#0F172A">ScheduledPost</text>
+    <text x="20" y="44" font-size="9" fill="#64748B">ID: sp_9831f42 (Workspace Alpha)</text>
+    
+    <rect x="15" y="55" width="180" height="70" rx="6" fill="#F8FAFC" stroke="#E2E8F0"/>
+    <text x="25" y="75" font-size="9.5" font-weight="bold" fill="#0F172A">Post Content Snapshot</text>
+    <text x="25" y="90" font-size="8.5" fill="#475569">&bull; Caption: "Exciting launch #ai"</text>
+    <text x="25" y="104" font-size="8.5" fill="#475569">&bull; Media: https://s3.../hero.jpg</text>
+    <text x="25" y="118" font-size="8.5" fill="#059669">&bull; SHA-256 Hash Verified</text>
+
+    <text x="20" y="145" font-size="10" font-weight="bold" fill="#8B5CF6">Selected Publishing Targets (3):</text>
+    <text x="20" y="162" font-size="9" fill="#334155">&bull; Target 1: @omnisocial_global</text>
+    <text x="20" y="176" font-size="9" fill="#334155">&bull; Target 2: @omnisocial_uk</text>
+    <text x="20" y="190" font-size="9" fill="#334155">&bull; Target 3: @omnisocial_apac</text>
+
+    <rect x="15" y="205" width="180" height="22" rx="4" fill="#F1F5F9"/>
+    <text x="105" y="219" font-size="8" font-weight="bold" fill="#0F172A" text-anchor="middle">Staggered Dispatch Interval: 1.5s</text>
+  </g>
+
+  <!-- Split Connectors -->
+  <path d="M 245 140 L 310 120" stroke="#059669" stroke-width="2" marker-end="url(#arrowEmerald)"/>
+  <path d="M 245 190 L 310 200" stroke="#EF4444" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M 245 240 L 310 280" stroke="#059669" stroke-width="2" marker-end="url(#arrowEmerald)"/>
+
+  <!-- Right: 3 Independent Target Cards -->
+  <!-- Target 1: Success -->
+  <g transform="translate(320, 75)" filter="url(#cardShadow)">
+    <rect width="520" height="75" rx="8" fill="#FFFFFF" stroke="#059669" stroke-width="1.5"/>
+    <rect width="6" height="75" rx="3" fill="#059669"/>
+    <text x="20" y="22" font-size="11" font-weight="bold" fill="#059669">TARGET 1: @omnisocial_global (US Main Account)</text>
+    <rect x="420" y="10" width="85" height="18" rx="4" fill="#D1FAE5"/>
+    <text x="462" y="22" font-size="8.5" font-weight="bold" fill="#059669" text-anchor="middle">PUBLISHED</text>
+    
+    <text x="20" y="42" font-size="9" fill="#475569">&bull; Account ID: 1784140029381 &bull; Token Decrypted: AES-256-GCM (Key v1)</text>
+    <text x="20" y="56" font-size="9" fill="#475569">&bull; Live IG Post ID: 18029384918239 &bull; Latency: 920ms &bull; Attempts: 1/3</text>
+    <text x="20" y="68" font-size="8" font-family="monospace" fill="#059669">https://www.instagram.com/p/DB7xKq19/</text>
+  </g>
+
+  <!-- Target 2: Partial Failure / Transient Retry -->
+  <g transform="translate(320, 160)" filter="url(#cardShadow)">
+    <rect width="520" height="85" rx="8" fill="#FFFFFF" stroke="#F59E0B" stroke-width="1.5"/>
+    <rect width="6" height="85" rx="3" fill="#F59E0B"/>
+    <text x="20" y="22" font-size="11" font-weight="bold" fill="#D97706">TARGET 2: @omnisocial_uk (UK Regional Account)</text>
+    <rect x="390" y="10" width="115" height="18" rx="4" fill="#FEF3C7"/>
+    <text x="447" y="22" font-size="8.5" font-weight="bold" fill="#B45309" text-anchor="middle">RETRY_QUEUED</text>
+    
+    <text x="20" y="42" font-size="9" fill="#475569">&bull; Account ID: 1784140084729 &bull; Token Decrypted: AES-256-GCM (Key v1)</text>
+    <text x="20" y="56" font-size="9" fill="#DC2626">&bull; Meta Error: (#1) An unknown error occurred (503 Service Unavailable)</text>
+    <text x="20" y="70" font-size="8.5" fill="#64748B">&bull; Attempt 1/3 failed &bull; Next retry scheduled in +60 seconds &bull; Does NOT block other accounts</text>
+  </g>
+
+  <!-- Target 3: Success -->
+  <g transform="translate(320, 255)" filter="url(#cardShadow)">
+    <rect width="520" height="75" rx="8" fill="#FFFFFF" stroke="#059669" stroke-width="1.5"/>
+    <rect width="6" height="75" rx="3" fill="#059669"/>
+    <text x="20" y="22" font-size="11" font-weight="bold" fill="#059669">TARGET 3: @omnisocial_apac (Singapore APAC Account)</text>
+    <rect x="420" y="10" width="85" height="18" rx="4" fill="#D1FAE5"/>
+    <text x="462" y="22" font-size="8.5" font-weight="bold" fill="#059669" text-anchor="middle">PUBLISHED</text>
+    
+    <text x="20" y="42" font-size="9" fill="#475569">&bull; Account ID: 1784140092841 &bull; Token Decrypted: AES-256-GCM (Key v1)</text>
+    <text x="20" y="56" font-size="9" fill="#475569">&bull; Live IG Post ID: 18029384918455 &bull; Latency: 1,140ms &bull; Attempts: 1/3</text>
+    <text x="20" y="68" font-size="8" font-family="monospace" fill="#059669">https://www.instagram.com/p/DB7xKq42/</text>
+  </g>
+
+  <!-- Bottom Summary Callout -->
+  <g transform="translate(30, 345)" filter="url(#cardShadow)">
+    <rect width="810" height="75" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="20" y="22" font-size="10.5" font-weight="bold" fill="#0F172A">KEY MULTI-ACCOUNT PUBLISHING ADVANTAGES IN OMNISOCIAL AI</text>
+    <text x="20" y="40" font-size="8.5" fill="#334155">&bull; <tspan font-weight="bold">No Cascade Failure:</tspan> Failure on one regional account never interrupts or cancels publishing to remaining accounts.</text>
+    <text x="20" y="54" font-size="8.5" fill="#334155">&bull; <tspan font-weight="bold">Anti-Burst Delay:</tspan> Staggered 1.5s delay between account dispatches prevents Meta anti-bot rate-limit triggers.</text>
+    <text x="20" y="68" font-size="8.5" fill="#334155">&bull; <tspan font-weight="bold">Granular Audit Records:</tspan> Each target has its own attempt count, error message, latency metric, and external URL.</text>
+  </g>
+</svg>
+    </div>
+
+    <h2 class="section-heading">Architectural Safeguards for Multi-Account Broadcasts</h2>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width:25%;">Architectural Rule</th>
+          <th style="width:40%;">Technical Implementation</th>
+          <th style="width:35%;">Failure Prevention</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Independent State Machine</strong></td>
+          <td>Each selected account receives a separate <code>ScheduledPostTarget</code> record in PostgreSQL with its own status lifecycle.</td>
+          <td>Failure or rate-limit on Account A never cancels or marks Account B as failed.</td>
+        </tr>
+        <tr>
+          <td><strong>Staggered Anti-Burst Delay</strong></td>
+          <td>Dispatcher injects an artificial <strong>1.5-second sleep</strong> between dispatching to consecutive Instagram accounts.</td>
+          <td>Prevents Meta anti-bot behavioral filters from flagging concurrent API bursts.</td>
+        </tr>
+        <tr>
+          <td><strong>Distinct Decryption Contexts</strong></td>
+          <td>Each target retrieves and decrypts its account's specific token via <code>TokenVaultService</code> independently.</td>
+          <td>Token revocation on one brand account does not leak or contaminate other jobs.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="page-footer">
+    <div class="confidential">CONFIDENTIAL &bull; OMNISOCIAL AI ARCHITECTURAL SPECIFICATION</div>
+    <div class="page-number">Page 14 of 23</div>
+  </div>
+</div>
+
+<!-- =======================================================================
+     PAGE 15: CHAPTER 13 — INSTAGRAM ANALYTICS
+     ======================================================================= -->
+</body>
+</html>

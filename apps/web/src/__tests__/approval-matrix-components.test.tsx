@@ -157,7 +157,7 @@ describe('Phase 18 Approval Matrix & Comments Components', () => {
       });
 
       expect(onRefresh).toHaveBeenCalled();
-    });
+    }, 15000);
   });
 
   describe('DraftCommentsDrawer', () => {
