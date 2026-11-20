@@ -23,6 +23,7 @@ import { Public } from '../common/decorators/public.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AuthenticatedUser } from '../common/interfaces/jwt-payload.interface';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { BotProtectionService } from './services/bot-protection.service';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -30,7 +31,16 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
+    private readonly botProtectionService: BotProtectionService,
   ) {}
+
+  @Public()
+  @Get('challenge')
+  @ApiOperation({ summary: 'Generate a human verification challenge token' })
+  @ApiResponse({ status: 200, description: 'Verification challenge issued' })
+  getChallenge() {
+    return this.botProtectionService.createChallenge();
+  }
 
   private getCookieOptions(customPath?: string) {
     const isProduction = this.configService.get<string>('nodeEnv') === 'production';
@@ -77,8 +87,9 @@ export class AuthController {
   @ApiResponse({ status: 201, description: 'Account successfully registered' })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 409, description: 'Email already exists' })
-  async register(@Body() dto: RegisterDto) {
-    const user = await this.authService.register(dto);
+  async register(@Body() dto: RegisterDto, @Req() req: Request) {
+    const ipAddress = req.ip || (req.headers['x-forwarded-for'] as string) || '';
+    const user = await this.authService.register(dto, ipAddress);
     return {
       message: 'Account registered successfully. You may now log in.',
       user,

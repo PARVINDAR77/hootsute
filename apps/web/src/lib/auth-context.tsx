@@ -10,8 +10,8 @@ interface AuthContextType {
   user: SafeUser | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, botVerificationToken?: string) => Promise<void>;
+  register: (name: string, email: string, password: string, botVerificationToken?: string) => Promise<void>;
   logout: () => Promise<void>;
   logoutAll: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -43,10 +43,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     fetchCurrentUser();
   }, [fetchCurrentUser]);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, botVerificationToken?: string) => {
     const res = await apiClient<{ user: SafeUser; accessToken: string }>('/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, botVerificationToken }),
     });
 
     if (res.accessToken) {
@@ -56,13 +56,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push(ROUTES.DASHBOARD);
   };
 
-  const register = async (name: string, email: string, password: string) => {
+  const register = async (name: string, email: string, password: string, botVerificationToken?: string) => {
     await apiClient('/auth/register', {
       method: 'POST',
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ name, email, password, botVerificationToken }),
     });
     // After registration, automatically log the user in
-    await login(email, password);
+    await login(email, password, botVerificationToken);
   };
 
   const logout = async () => {

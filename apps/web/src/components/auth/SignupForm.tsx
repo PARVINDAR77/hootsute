@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/Alert';
 import { ROUTES } from '@/lib/constants';
 import { User, Mail, Lock, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { HumanVerificationWidget } from '@/components/auth/HumanVerificationWidget';
 
 const signupSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(100),
@@ -31,6 +32,7 @@ type SignupFormData = z.infer<typeof signupSchema>;
 export function SignupForm() {
   const { register: registerAuth } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [botToken, setBotToken] = useState<string | null>(null);
 
   const {
     register,
@@ -65,9 +67,14 @@ export function SignupForm() {
   ];
 
   const onSubmit = async (data: SignupFormData) => {
+    if (!botToken) {
+      setServerError('Please verify that you are human before creating an account.');
+      return;
+    }
+
     setServerError(null);
     try {
-      await registerAuth(data.name, data.email, data.password);
+      await registerAuth(data.name, data.email, data.password, botToken);
     } catch (err: any) {
       setServerError(err.message || 'Registration failed. Please check the details entered.');
     }
@@ -206,11 +213,20 @@ export function SignupForm() {
           )}
         </div>
 
+        {/* Anti-Bot Human Verification Widget */}
+        <div className="pt-0.5">
+          <HumanVerificationWidget
+            onVerify={setBotToken}
+            disabled={isSubmitting}
+          />
+        </div>
+
         <Button
           type="submit"
           size="lg"
-          className="w-full mt-2 btn-gradient shadow-glow-purple hover:scale-[1.01] active:scale-[0.99] transition-all font-bold"
+          className="w-full mt-2 btn-gradient shadow-glow-purple hover:scale-[1.01] active:scale-[0.99] transition-all font-bold disabled:opacity-50"
           isLoading={isSubmitting}
+          disabled={!botToken}
           rightIcon={<ArrowRight className="w-4 h-4" />}
         >
           Create Account

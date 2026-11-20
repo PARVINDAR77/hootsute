@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, User, Role, UserStatus } from '@prisma/client';
 
-export type UserWithoutPassword = Omit<User, 'passwordHash'>;
+export type UserWithoutPassword = Omit<
+  User,
+  'passwordHash' | 'failedLoginAttempts' | 'lockedUntil' | 'lastFailedLoginAt'
+>;
 
 const SAFE_USER_SELECT = {
   id: true,

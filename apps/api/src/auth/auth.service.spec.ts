@@ -4,8 +4,9 @@ import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, UnauthorizedException, HttpException, HttpStatus } from '@nestjs/common';
 import { Role, UserStatus } from '@prisma/client';
+import { BotProtectionService } from './services/bot-protection.service';
 import * as bcrypt from 'bcrypt';
 
 describe('AuthService', () => {
@@ -13,9 +14,13 @@ describe('AuthService', () => {
   let usersService: UsersService;
   let prismaService: PrismaService;
   let jwtService: JwtService;
+  let botProtectionService: BotProtectionService;
 
   const mockPrisma = {
     $transaction: jest.fn(),
+    user: {
+      update: jest.fn().mockResolvedValue({ id: 'user-uuid-1' }),
+    },
     refreshSession: {
       create: jest.fn(),
       findUnique: jest.fn(),
@@ -26,6 +31,16 @@ describe('AuthService', () => {
     auditLog: {
       create: jest.fn(),
     },
+  };
+
+  const mockBotProtectionService = {
+    verifyToken: jest.fn().mockResolvedValue({ valid: true }),
+    createChallenge: jest.fn().mockReturnValue({
+      challengeId: 'challenge-1',
+      nonce: 'nonce-1',
+      timestamp: Date.now(),
+      signature: 'sig-1',
+    }),
   };
 
   const mockUsersService = {
@@ -55,6 +70,7 @@ describe('AuthService', () => {
         { provide: UsersService, useValue: mockUsersService },
         { provide: JwtService, useValue: mockJwtService },
         { provide: ConfigService, useValue: mockConfigService },
+        { provide: BotProtectionService, useValue: mockBotProtectionService },
       ],
     }).compile();
 
@@ -62,6 +78,7 @@ describe('AuthService', () => {
     usersService = module.get<UsersService>(UsersService);
     prismaService = module.get<PrismaService>(PrismaService);
     jwtService = module.get<JwtService>(JwtService);
+    botProtectionService = module.get<BotProtectionService>(BotProtectionService);
   });
 
   afterEach(() => {
@@ -150,13 +167,15 @@ describe('AuthService', () => {
       expect(mockPrisma.auditLog.create).toHaveBeenCalled();
     });
 
-    it('should throw UnauthorizedException on invalid password', async () => {
+    it('should throw UnauthorizedException on invalid password with remaining attempts info', async () => {
       const hashedPassword = await bcrypt.hash('CorrectPassword!', 10);
       mockUsersService.findByEmail.mockResolvedValue({
         id: 'user-uuid-1',
         email: 'user@example.com',
         passwordHash: hashedPassword,
         status: UserStatus.ACTIVE,
+        failedLoginAttempts: 0,
+        lockedUntil: null,
       });
 
       await expect(
@@ -165,6 +184,104 @@ describe('AuthService', () => {
           password: 'WrongPassword!',
         }),
       ).rejects.toThrow(UnauthorizedException);
+
+      expect(mockPrisma.user.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'user-uuid-1' },
+          data: expect.objectContaining({ failedLoginAttempts: 1 }),
+        }),
+      );
+    });
+
+    it('should trigger a 3-minute lockout on the 4th consecutive failed password attempt (HTTP 429)', async () => {
+      const hashedPassword = await bcrypt.hash('CorrectPassword!', 10);
+      mockUsersService.findByEmail.mockResolvedValue({
+        id: 'user-uuid-1',
+        email: 'user@example.com',
+        passwordHash: hashedPassword,
+        status: UserStatus.ACTIVE,
+        failedLoginAttempts: 3, // Already failed 3 times
+        lockedUntil: null,
+      });
+
+      try {
+        await service.login({
+          email: 'user@example.com',
+          password: 'WrongPasswordAgain!',
+        });
+        fail('Should have thrown HttpException');
+      } catch (err: any) {
+        expect(err).toBeInstanceOf(HttpException);
+        expect(err.getStatus()).toBe(HttpStatus.TOO_MANY_REQUESTS);
+        const res = err.getResponse();
+        expect(res).toHaveProperty('isLocked', true);
+        expect(res).toHaveProperty('remainingSeconds', 180);
+        expect(res).toHaveProperty('consecutiveFailures', 4);
+      }
+
+      expect(mockPrisma.user.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'user-uuid-1' },
+          data: expect.objectContaining({
+            failedLoginAttempts: 4,
+            lockedUntil: expect.any(Date),
+          }),
+        }),
+      );
+    });
+
+    it('should trigger a 5-minute lockout on the 5th consecutive failed password attempt (HTTP 429)', async () => {
+      const hashedPassword = await bcrypt.hash('CorrectPassword!', 10);
+      mockUsersService.findByEmail.mockResolvedValue({
+        id: 'user-uuid-1',
+        email: 'user@example.com',
+        passwordHash: hashedPassword,
+        status: UserStatus.ACTIVE,
+        failedLoginAttempts: 4, // 4 prior failures, lockout period expired
+        lockedUntil: null,
+      });
+
+      try {
+        await service.login({
+          email: 'user@example.com',
+          password: 'WrongPasswordAgain!',
+        });
+        fail('Should have thrown HttpException');
+      } catch (err: any) {
+        expect(err).toBeInstanceOf(HttpException);
+        expect(err.getStatus()).toBe(HttpStatus.TOO_MANY_REQUESTS);
+        const res = err.getResponse();
+        expect(res).toHaveProperty('isLocked', true);
+        expect(res).toHaveProperty('remainingSeconds', 300);
+        expect(res).toHaveProperty('consecutiveFailures', 5);
+      }
+    });
+
+    it('should immediately block login with HTTP 429 if account is actively locked', async () => {
+      const hashedPassword = await bcrypt.hash('Password123!', 10);
+      const lockedUntilFuture = new Date(Date.now() + 120 * 1000); // 2 minutes remaining
+      mockUsersService.findByEmail.mockResolvedValue({
+        id: 'user-uuid-1',
+        email: 'user@example.com',
+        passwordHash: hashedPassword,
+        status: UserStatus.ACTIVE,
+        failedLoginAttempts: 4,
+        lockedUntil: lockedUntilFuture,
+      });
+
+      try {
+        await service.login({
+          email: 'user@example.com',
+          password: 'AnyPassword!',
+        });
+        fail('Should have thrown HttpException');
+      } catch (err: any) {
+        expect(err).toBeInstanceOf(HttpException);
+        expect(err.getStatus()).toBe(HttpStatus.TOO_MANY_REQUESTS);
+        const res = err.getResponse();
+        expect(res).toHaveProperty('isLocked', true);
+        expect(res.remainingSeconds).toBeGreaterThan(0);
+      }
     });
 
     it('should throw UnauthorizedException if account is suspended', async () => {

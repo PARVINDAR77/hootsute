@@ -12,4 +12,12 @@ export class LoginDto {
   @IsString()
   @IsNotEmpty({ message: 'Password is required' })
   password: string;
+
+  @ApiProperty({
+    example: 'crypto:1732000000:abcd:...',
+    description: 'Anti-bot human verification token (Cloudflare Turnstile or cryptographic challenge)',
+    required: false,
+  })
+  @IsString()
+  botVerificationToken?: string;
 }

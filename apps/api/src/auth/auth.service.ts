@@ -3,6 +3,8 @@ import {
   ConflictException,
   UnauthorizedException,
   BadRequestException,
+  HttpException,
+  HttpStatus,
   Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -12,6 +14,7 @@ import { UsersService, UserWithoutPassword } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { UserRole, UserStatus } from '@packages/shared';
+import { BotProtectionService } from './services/bot-protection.service';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 
@@ -25,13 +28,20 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly botProtectionService: BotProtectionService,
   ) {}
 
   private hashToken(token: string): string {
     return crypto.createHash('sha256').update(token).digest('hex');
   }
 
-  async register(dto: RegisterDto): Promise<UserWithoutPassword> {
+  async register(dto: RegisterDto, ipAddress?: string): Promise<UserWithoutPassword> {
+    // 1. Bot & Human Verification check
+    const botCheck = await this.botProtectionService.verifyToken(dto.botVerificationToken, ipAddress);
+    if (!botCheck.valid) {
+      throw new BadRequestException(botCheck.reason || 'Human verification failed. Please check "I am a human".');
+    }
+
     const normalizedEmail = dto.email.toLowerCase().trim();
 
     const existingUser = await this.usersService.findByEmail(normalizedEmail);
@@ -93,6 +103,12 @@ export class AuthService {
     refreshToken: string;
     expiresIn: number;
   }> {
+    // 1. Bot & Human Verification Check
+    const botCheck = await this.botProtectionService.verifyToken(dto.botVerificationToken, ipAddress);
+    if (!botCheck.valid) {
+      throw new BadRequestException(botCheck.reason || 'Human verification failed. Please check "I am a human".');
+    }
+
     const normalizedEmail = dto.email.toLowerCase().trim();
 
     const user = await this.usersService.findByEmail(normalizedEmail);
@@ -101,13 +117,98 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
+    // 2. Progressive Lockout Check: Has the user been locked out?
+    const now = new Date();
+    if (user.lockedUntil && user.lockedUntil > now) {
+      const remainingSeconds = Math.ceil((user.lockedUntil.getTime() - now.getTime()) / 1000);
+      const remainingMinutes = Math.ceil(remainingSeconds / 60);
+
+      this.logger.warn(
+        `Login blocked for locked user [${user.id}] ${user.email}. Remaining lockout: ${remainingSeconds}s (${remainingMinutes}m)`,
+      );
+
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.TOO_MANY_REQUESTS,
+          message: `Account is temporarily locked due to multiple failed login attempts. Please try again in ${remainingMinutes} minute${remainingMinutes > 1 ? 's' : ''}.`,
+          error: 'Too Many Requests',
+          isLocked: true,
+          lockedUntil: user.lockedUntil.toISOString(),
+          remainingSeconds,
+          consecutiveFailures: user.failedLoginAttempts,
+        },
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+
     if (user.status !== UserStatus.ACTIVE) {
       throw new UnauthorizedException('Your account is suspended or pending verification');
     }
 
+    // 3. Password Verification & Progressive Penalty Tracking
     const isPasswordValid = await bcrypt.compare(dto.password, user.passwordHash);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid email or password');
+      const newFailures = (user.failedLoginAttempts || 0) + 1;
+      let newLockedUntil: Date | null = null;
+      let lockDurationMinutes = 0;
+
+      // Rule: 4 wrong attempts = 3-minute break; 5+ wrong attempts = 5-minute break
+      if (newFailures === 4) {
+        lockDurationMinutes = 3;
+        newLockedUntil = new Date(Date.now() + 3 * 60 * 1000);
+      } else if (newFailures >= 5) {
+        lockDurationMinutes = 5;
+        newLockedUntil = new Date(Date.now() + 5 * 60 * 1000);
+      }
+
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          failedLoginAttempts: newFailures,
+          lockedUntil: newLockedUntil,
+          lastFailedLoginAt: new Date(),
+        },
+      });
+
+      if (newLockedUntil) {
+        const remainingSeconds = lockDurationMinutes * 60;
+        this.logger.warn(
+          `User [${user.id}] ${user.email} triggered temporary ${lockDurationMinutes}-minute lockout on attempt ${newFailures}`,
+        );
+
+        throw new HttpException(
+          {
+            statusCode: HttpStatus.TOO_MANY_REQUESTS,
+            message: `Account temporarily locked for ${lockDurationMinutes} minutes due to multiple failed login attempts. Please try again after the cooldown.`,
+            error: 'Too Many Requests',
+            isLocked: true,
+            lockedUntil: newLockedUntil.toISOString(),
+            remainingSeconds,
+            consecutiveFailures: newFailures,
+          },
+          HttpStatus.TOO_MANY_REQUESTS,
+        );
+      }
+
+      // Attempts 1 to 3: Provide helpful warning with remaining attempts
+      const remainingAttempts = 4 - newFailures;
+      throw new UnauthorizedException({
+        statusCode: HttpStatus.UNAUTHORIZED,
+        message: `Invalid email or password. Attempt ${newFailures} of 4. ${remainingAttempts} attempt${remainingAttempts > 1 ? 's' : ''} remaining before temporary 3-minute lockout.`,
+        remainingAttempts,
+        failedAttempts: newFailures,
+      });
+    }
+
+    // 4. Successful Password Match: Reset failure counter & clear lockout if any
+    if (user.failedLoginAttempts > 0 || user.lockedUntil) {
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          failedLoginAttempts: 0,
+          lockedUntil: null,
+        },
+      });
     }
 
     // Generate refresh token and its hash
@@ -423,7 +524,11 @@ export class AuthService {
     await this.prisma.$transaction(async (tx) => {
       await tx.user.update({
         where: { id: record.userId },
-        data: { passwordHash },
+        data: {
+          passwordHash,
+          failedLoginAttempts: 0,
+          lockedUntil: null,
+        },
       });
 
       await tx.authToken.update({
